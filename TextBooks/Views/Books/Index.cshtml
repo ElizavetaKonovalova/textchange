@@ -1,0 +1,53 @@
+﻿@model IEnumerable<TextBooks.Book>
+
+@{
+    ViewBag.Title = "Index";
+}
+
+<h2>TextBooks</h2>
+<br />
+<h3>Search</h3>
+    @using (Html.BeginForm("Index", "Books", FormMethod.Get))
+    {
+        @Html.TextBox("title")
+        <input type="submit" />
+    }
+<br />
+
+<p>
+    @Html.ActionLink("Create New", "Create")
+</p>
+<table class="table">
+    <tr>
+        <th>
+            @Html.DisplayNameFor(model => model.Title)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Author)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Edition)
+        </th>
+        <th></th>
+    </tr>
+
+@foreach (var item in Model) {
+    <tr>
+        <td>
+            @Html.DisplayFor(modelItem => item.Title)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.Author)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.Edition)
+        </td>
+        <td>
+            @Html.ActionLink("Edit", "Edit", new { id=item.B_ID }) |
+            @Html.ActionLink("Details", "Details", new { id=item.B_ID }) |
+            @Html.ActionLink("Delete", "Delete", new { id=item.B_ID })
+        </td>
+    </tr>
+}
+
+</table>
