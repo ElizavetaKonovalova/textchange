@@ -14,10 +14,15 @@ namespace TextBooks.Controllers
     {
         private IFB299Entities db = new IFB299Entities();
 
-        // GET: Books
+        public ActionResult Index()
+        {
+            return View(db.Books.ToList());
+        }
+
+        [HttpPost]
         public ActionResult Index(string title)
         {
-            if (title != "")
+            if (title != "" && title != null)
             {
                 List<Book> result = (from table in db.Books
                                      where (table.Title.Contains(title) || table.Author.Contains(title))
