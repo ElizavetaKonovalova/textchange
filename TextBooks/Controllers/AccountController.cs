@@ -155,7 +155,17 @@ namespace TextBooks.Controllers
                 var result = await UserManager.CreateAsync(user, model.Password);
                 if (result.Succeeded)
                 {
-                    await SignInManager.SignInAsync(user, isPersistent:false, rememberBrowser:false);
+                    var db = new IFB299Entities();
+                    var dbUser = (from table in db.AspNetUsers
+                                  where table.UserName == model.Email
+                                  select table).FirstOrDefault();
+                    if (dbUser != null)
+                    {
+                        dbUser.FirstName = model.FirstName;
+                        db.SaveChanges();
+                    }
+
+                    await SignInManager.SignInAsync(user, isPersistent: false, rememberBrowser: false);
                     
                     // For more information on how to enable account confirmation and password reset please visit http://go.microsoft.com/fwlink/?LinkID=320771
                     // Send an email with this link
