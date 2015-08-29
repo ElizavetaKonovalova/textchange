@@ -16,10 +16,10 @@ namespace TextBooks.Controllers
 
         public ActionResult Index()
         {
-            test timmy = (from tbl in dbcontext.tests
-                                where tbl.FirstName=="Taylor"
-                               select tbl).FirstOrDefault();
-            timmy.LastName = "Stoneham";
+            //test timmy = (from tbl in dbcontext.tests
+            //                    where tbl.FirstName=="Taylor"
+            //                   select tbl).FirstOrDefault();
+            //timmy.LastName = "Stoneham";
 
             dbcontext.SaveChanges();
 
