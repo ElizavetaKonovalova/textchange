@@ -1,0 +1,42 @@
+﻿@model TextBooks.test
+@{
+    ViewBag.Title = "Search By Name (Index)";
+}
+
+<h2>Search By Name (Index)</h2>
+
+@using (Html.BeginForm("Index", "Tests", FormMethod.Get))
+{
+    @Html.TextBox("name")
+    <input type="submit" />
+}
+<p>
+    @Html.ActionLink("Create New", "Create")
+</p>
+<table class="table">
+    <tr>
+        <th>
+            <!--@Html.DisplayNameFor(model => model.FirstName)-->
+            Title
+        </th>
+        <th>
+            Author
+            <!--@Html.DisplayNameFor(model => model.LastName)-->
+        </th>
+        <th></th>
+    </tr>
+
+
+    <tr>
+        <td>
+            @Html.DisplayFor(Model => Model.FirstName)
+        </td>
+        <td>
+            @Html.DisplayFor(Model => Model.LastName)
+        </td>
+        <td>
+        </td>
+    </tr>
+
+
+</table>
