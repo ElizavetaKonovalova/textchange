@@ -11,6 +11,7 @@ using Microsoft.Owin.Security;
 using TextBooks.Models;
 using System.Net.Mail;
 using System.Net;
+using System.Net.Mime;
 
 namespace TextBooks.Controllers
 {
@@ -75,6 +76,20 @@ namespace TextBooks.Controllers
             {
                 return View(model);
             }
+
+            // Check if user account is verified
+            IFB299Entities db = new IFB299Entities();
+            var user = (from table in db.AspNetUsers
+                        where model.Username == table.UserName
+                        select table).FirstOrDefault();
+            if (user != null)
+            {
+                if (!user.EmailConfirmed)
+                {
+                    return View("ConfirmEmail");
+                }
+            }
+
 
             // This doesn't count login failures towards account lockout
             // To enable password failures to trigger account lockout, change to shouldLockout: true
@@ -178,27 +193,35 @@ namespace TextBooks.Controllers
 
                     if (currentUser != null)
                     {
-                        await SignInManager.SignInAsync(user, isPersistent: false, rememberBrowser: false);
-                        
+                        // Sign in the new user account
+                        //await SignInManager.SignInAsync(user, isPersistent: false, rememberBrowser: false);
+
+                        // Add details to database record
+                        currentUser.FirstName = model.FirstName;
+                        currentUser.LastName = model.LastName;
+                        currentUser.ContactNumber = model.ContactNumber;
+                        db.SaveChanges();
+
+                        // Send an email with this link
+                        string code = await UserManager.GenerateEmailConfirmationTokenAsync(user.Id);
+                        var callbackUrl = Url.Action("ConfirmEmail", "Account", new { userId = user.Id, code = code }, protocol: Request.Url.Scheme);
+                        // await UserManager.SendEmailAsync(user.Id, "Confirm your account", "Please confirm your account by clicking <a href=\"" + callbackUrl + "\">here</a>");
+                        SendVerificationEmail(code, callbackUrl, currentUser.FirstName, currentUser.Email);
+
+                        // Send them on their way
                         if (user.UserName.Equals("ifb299books"))
                         {
                             return RedirectToAction("ViewAccounts", "Account");
-                    }
+                        }
                         else
                         {
-                            return RedirectToAction("Index", "Home");
+                            return RedirectToAction("VerifyEmail", "Account");
                         }
-
-                    // Send an email with this link
-                    string code = await UserManager.GenerateEmailConfirmationTokenAsync(user.Id);
-                    var callbackUrl = Url.Action("ConfirmEmail", "Account", new { userId = user.Id, code = code }, protocol: Request.Url.Scheme);
-                    // await UserManager.SendEmailAsync(user.Id, "Confirm your account", "Please confirm your account by clicking <a href=\"" + callbackUrl + "\">here</a>");
-                    SendVerificationEmail(code, callbackUrl, currentUser.FirstName, currentUser.Email);
+                    }
 
                 }
                 // Otherwise, add errors
                 AddErrors(result);
-            }
             }
             // If we got this far, something failed, redisplay form
             return View(model);
@@ -206,35 +229,67 @@ namespace TextBooks.Controllers
 
         private void SendVerificationEmail(string code, string callbackURL, string firstName, string email)
         {
-            var body = "<p>Email From: {0} ({1})</p><p>Message:</p><p>{2}</p>";
-            var message = new MailMessage();
-            message.To.Add(new MailAddress(email));  // replace with valid value 
-            message.From = new MailAddress("ifb299books@gmail.com");  // replace with valid value
-            message.Subject = "Your email subject";
-            message.Body = string.Format(body, "noreply", "ifb299books@gmail.com", message);
-            message.IsBodyHtml = false;
-
-            using (var smtp = new SmtpClient())
+            // SENDGRID - waiting for provisioning. Appears to work on Azure as well as locally, but emails not sent until provisioning is complete.
+            try
             {
-                var credential = new NetworkCredential
-                {
-                    UserName = "ifb299books@gmail.com",  // replace with valid value
-                    Password = "IFB299Password"  // replace with valid value
-                };
-                smtp.UseDefaultCredentials = false;
-                smtp.Credentials = credential;
-                smtp.Host = "smtp.gmail.com";
-                smtp.Port = 587;
-                smtp.EnableSsl = true;
 
-                smtp.Send(message);
 
-                //try {
-                //    await smtp.SendMailAsync(message);
-                //} catch (System.Net.Mail.SmtpException err) {
-                //    System.Diagnostics.Debug.WriteLine(err.ToString());
-                //}
+                var body = "Hi "+ firstName + ",\nPlease confirm your account by clicking <a href =\"" + callbackURL + "\">here</a>.";
+                var message = new MailMessage();
+                message.To.Add(new MailAddress(email, firstName));  // replace with valid value 
+                message.From = new MailAddress("ifb299books@gmail.com", "noreply");  // replace with valid value
+                message.Subject = "Verify Bindr Account";
+                message.Body = string.Format(body, "noreply", "ifb299books@gmail.com", message);
+                message.IsBodyHtml = true;
+
+
+
+                // Init SmtpClient and send
+                SmtpClient smtpClient = new SmtpClient("smtp.sendgrid.net", Convert.ToInt32(587));
+                NetworkCredential credentials = new NetworkCredential("ifb299", "IFB299Password");
+                smtpClient.Credentials = credentials;
+
+                smtpClient.Send(message);
             }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+
+
+
+
+            // GMAIL (WILL NOT WORK ON AZURE, only for local testing.)
+            //var body = "Please confirm your account by clicking <a href =\"" + callbackURL + "\">here</a>.";
+            //var message = new MailMessage();
+            //message.To.Add(new MailAddress(email));  // replace with valid value 
+            //message.From = new MailAddress("ifb299books@gmail.com");  // replace with valid value
+            //message.Subject = "Confirm Bindr Account";
+            //message.Body = string.Format(body, "noreply", "ifb299books@gmail.com", message);
+            //message.IsBodyHtml = true;
+
+            //using (var smtp = new SmtpClient())
+            //{
+            //    var credential = new NetworkCredential
+            //    {
+            //        UserName = "ifb299books@gmail.com",  // replace with valid value
+            //        Password = "IFB299Password"  // replace with valid value
+            //    };
+            //    smtp.UseDefaultCredentials = false;
+            //    smtp.Credentials = credential;
+            //    smtp.Host = "smtp.gmail.com";
+            //    smtp.Port = 587; // 587
+            //    smtp.EnableSsl = true;
+
+            //    //await smtp.SendMailAsync(message);
+            //    smtp.Send(message);
+
+            //    //try {
+            //    //    
+            //    //} catch (System.Net.Mail.SmtpException err) {
+            //    //    System.Diagnostics.Debug.WriteLine(err.ToString());
+            //    //}
+            //}
         }
 
         //
@@ -439,7 +494,8 @@ namespace TextBooks.Controllers
                     result = await UserManager.AddLoginAsync(user.Id, info.Login);
                     if (result.Succeeded)
                     {
-                        await SignInManager.SignInAsync(user, isPersistent: false, rememberBrowser: false);
+                        // don't sign in
+                        //await SignInManager.SignInAsync(user, isPersistent: false, rememberBrowser: false);
                         return RedirectToLocal(returnUrl);
                     }
                 }
@@ -472,7 +528,15 @@ namespace TextBooks.Controllers
 
             return View();
         }
-        
+
+        //
+        // GET: /Account/VerifyEmail
+        [AllowAnonymous]
+        public ActionResult VerifyEmail()
+        {
+            return View();
+        }
+
         //
         // POST: /Account/LogOff
         [HttpPost]
