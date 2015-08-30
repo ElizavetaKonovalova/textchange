@@ -153,28 +153,48 @@ namespace TextBooks.Controllers
             {
                 var user = new ApplicationUser { UserName = model.Email.Split('@')[0], Email = model.Email };
                 var result = await UserManager.CreateAsync(user, model.Password);
-                var resultEmail = await UserManager.CreateAsync(user, model.Email);
-                if (!user.Email.Contains("@connect.qut.edu.au"))
+
+                string address = user.Email.Split('@')[1];
+
+                if (!address.Equals("connect.qut.edu.au"))
                 {
-                    AddErrorsEmail(resultEmail);
+                    AddErrors("The email address is not valid! Use @connect.qut.edu.au");
                 }
-                else
+                else if (result.Succeeded)
                 {
-                    if (result.Succeeded)
+                    // Add firstname, lastname & optional contact number
+
+                    // Create entity for db
+                    IFB299Entities db = new IFB299Entities();
+                    var currentUser = (from table in db.AspNetUsers
+                                       where table.Email == user.Email
+                                       select table).FirstOrDefault();
+
+                    if (currentUser != null)
                     {
-                        await SignInManager.SignInAsync(user, isPersistent: false, rememberBrowser: false);
-
-                       // Send an email with this link
-                        // string code = await UserManager.GenerateEmailConfirmationTokenAsync(user.Id);
-                        // var callbackUrl = Url.Action("ConfirmEmail", "Account", new { userId = user.Id, code = code }, protocol: Request.Url.Scheme);
-                        // await UserManager.SendEmailAsync(user.Id, "Confirm your account", "Please confirm your account by clicking <a href=\"" + callbackUrl + "\">here</a>");
-
-                        return RedirectToAction("Index", "Home");
+                        // Add entries
+                        currentUser.FirstName = model.FirstName;
+                        currentUser.LastName = model.LastName;
+                        currentUser.ContactNumber = model.ContactNumber;
+                        
+                        // Save to database
+                        db.SaveChanges();
                     }
-                    AddErrors(result);
-                }
-            }
 
+                    // Sign the new user in
+                    await SignInManager.SignInAsync(user, isPersistent: false, rememberBrowser: false);
+
+                    // Send an email with this link
+                    // string code = await UserManager.GenerateEmailConfirmationTokenAsync(user.Id);
+                    // var callbackUrl = Url.Action("ConfirmEmail", "Account", new { userId = user.Id, code = code }, protocol: Request.Url.Scheme);
+                    // await UserManager.SendEmailAsync(user.Id, "Confirm your account", "Please confirm your account by clicking <a href=\"" + callbackUrl + "\">here</a>");
+
+                    // Good, account created and user loggied in. Go to Home page.
+                    return RedirectToAction("Index", "Home");
+                }
+                // Otherwise, add errors
+                AddErrors(result);
+            }
             // If we got this far, something failed, redisplay form
             return View(model);
         }
@@ -450,9 +470,9 @@ namespace TextBooks.Controllers
             }
         }
 
-        private void AddErrorsEmail(IdentityResult result)
+        private void AddErrors(String customError)
         {
-            ModelState.AddModelError("", "The email address is not valid! Use @connect.qut.edu.au");
+            ModelState.AddModelError("", customError);
         }
 
         private ActionResult RedirectToLocal(string returnUrl)
