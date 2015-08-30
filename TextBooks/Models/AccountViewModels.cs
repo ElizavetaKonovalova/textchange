@@ -86,6 +86,7 @@ namespace TextBooks.Models
         //[Required]
         //[Display(Name = "First Name")]
         //public string FirstName { get; set; }
+
     }
 
     public class ResetPasswordViewModel
@@ -115,5 +116,24 @@ namespace TextBooks.Models
         [EmailAddress]
         [Display(Name = "Email")]
         public string Email { get; set; }
+    }
+
+    public class ViewAccounts
+    {
+        [Required]
+        [EmailAddress]
+        [Display(Name = "Email")]
+        public string Email { get; set; }
+
+        [Required]
+        [Phone]
+        [Display(Name = "Phone")]
+        public string Phone { get; set; }
+
+        [Required]
+        [Display(Name = "Username")]
+        public string Username { get; set; }
+
+        public IEnumerable<ViewAccounts> ifbEntity { get; set;}
     }
 }

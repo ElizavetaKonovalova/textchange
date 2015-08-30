@@ -1,0 +1,52 @@
+﻿@model TextBooks.Models.ViewAccounts
+@using System.Activities.Statements
+@using Microsoft.AspNet.Identity
+
+@using (Html.BeginForm("ViewAccounts", "Account"))
+{
+
+            <table class="table table-striped">
+
+                <tr>
+
+                    <th style="text-align: center">
+                        Username
+                    </th>
+
+                    <th  style="text-align: center">
+                        Phone
+                    </th>
+
+                    <th style="text-align: center">
+                        Email
+                    </th>
+
+                    <th style="text-align: center">
+                        Manage account
+                    </th>
+
+                </tr>
+
+                @foreach (var account in Model.ifbEntity)
+        {
+                    <tr>
+
+                        <td class="col-xs-3" style="text-align: center">
+                            @Html.DisplayFor(modelItem => account.Username)
+                        </td>
+                        <td class="col-xs-2" style="text-align: center">
+                            @Html.DisplayFor(modelItem => account.Phone)
+                        </td>
+                        <td class="col-xs-4" style="text-align: center">
+                            @Html.DisplayFor(modelItem => account.Email)
+                        </td>
+                        <td class="col-xs-2" style="text-align: center">
+                            <input type="submit" value="Delete" class="btn btn-info" />
+                            @Html.ActionLink("Edit", "Edit", "Account", new { @class = "btn btn-info" })
+                        </td>
+                    </tr>
+        }
+
+            </table>
+            
+  }

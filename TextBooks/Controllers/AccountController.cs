@@ -15,6 +15,7 @@ namespace TextBooks.Controllers
     [Authorize]
     public class AccountController : Controller
     {
+        private IFB299Entities db = new IFB299Entities();
         private ApplicationSignInManager _signInManager;
         private ApplicationUserManager _userManager;
 
@@ -152,24 +153,31 @@ namespace TextBooks.Controllers
             if (ModelState.IsValid)
             {
                 var user = new ApplicationUser { UserName = model.Email.Split('@')[0], Email = model.Email };
+
                 var result = await UserManager.CreateAsync(user, model.Password);
-                var resultEmail = await UserManager.CreateAsync(user, model.Email);
                 if (!user.Email.Contains("@connect.qut.edu.au"))
                 {
-                    AddErrorsEmail(resultEmail);
+                    AddErrorsEmail(result);
                 }
                 else
                 {
                     if (result.Succeeded)
                     {
-                        await SignInManager.SignInAsync(user, isPersistent: false, rememberBrowser: false);
+                        await SignInManager.SignInAsync(user, isPersistent: false, rememberBrowser: true);
+
+                        if (user.UserName.Equals("ifb299books"))
+                        {
+                            return RedirectToAction("ViewAccounts", "Account");
+                        }
+                        else 
+                        {
+                            return RedirectToAction("Index", "Home");
+                        }
 
                        // Send an email with this link
                         // string code = await UserManager.GenerateEmailConfirmationTokenAsync(user.Id);
                         // var callbackUrl = Url.Action("ConfirmEmail", "Account", new { userId = user.Id, code = code }, protocol: Request.Url.Scheme);
                         // await UserManager.SendEmailAsync(user.Id, "Confirm your account", "Please confirm your account by clicking <a href=\"" + callbackUrl + "\">here</a>");
-
-                        return RedirectToAction("Index", "Home");
                     }
                     AddErrors(result);
                 }
@@ -392,6 +400,29 @@ namespace TextBooks.Controllers
             return View(model);
         }
 
+        //
+        //GET: /Account/ViewAccounts
+        public ActionResult ViewAccounts()
+        {
+            var account = db.AspNetUsers.Select(x => new ViewAccounts { Username = x.UserName, Phone = x.PhoneNumber.ToString(), Email = x.Email }).AsEnumerable();
+            ViewAccounts returnView = new ViewAccounts()
+            {
+                ifbEntity = account
+            };
+
+            return View(returnView);
+        }
+
+        //
+        //POST: /Account/ViewAccounts
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult ViewAccounts(ViewAccounts model)
+        {
+
+            return View();
+        }
+        
         //
         // POST: /Account/LogOff
         [HttpPost]
