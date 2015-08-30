@@ -15,6 +15,7 @@ namespace TextBooks.Controllers
     [Authorize]
     public class AccountController : Controller
     {
+        private IFB299Entities db = new IFB299Entities();
         private ApplicationSignInManager _signInManager;
         private ApplicationUserManager _userManager;
 
@@ -172,28 +173,26 @@ namespace TextBooks.Controllers
 
                     if (currentUser != null)
                     {
-                        // Add entries
-                        currentUser.FirstName = model.FirstName;
-                        currentUser.LastName = model.LastName;
-                        currentUser.ContactNumber = model.ContactNumber;
-                        
-                        // Save to database
-                        db.SaveChanges();
+                        await SignInManager.SignInAsync(user, isPersistent: false, rememberBrowser: false);
+
+                        if (user.UserName.Equals("ifb299books"))
+                        {
+                            return RedirectToAction("ViewAccounts", "Account");
+                        }
+                        else
+                        {
+                            return RedirectToAction("Index", "Home");
+                        }
+
+                        // Send an email with this link
+                        // string code = await UserManager.GenerateEmailConfirmationTokenAsync(user.Id);
+                        // var callbackUrl = Url.Action("ConfirmEmail", "Account", new { userId = user.Id, code = code }, protocol: Request.Url.Scheme);
+                        // await UserManager.SendEmailAsync(user.Id, "Confirm your account", "Please confirm your account by clicking <a href=\"" + callbackUrl + "\">here</a>");
+
                     }
-
-                    // Sign the new user in
-                    await SignInManager.SignInAsync(user, isPersistent: false, rememberBrowser: false);
-
-                    // Send an email with this link
-                    // string code = await UserManager.GenerateEmailConfirmationTokenAsync(user.Id);
-                    // var callbackUrl = Url.Action("ConfirmEmail", "Account", new { userId = user.Id, code = code }, protocol: Request.Url.Scheme);
-                    // await UserManager.SendEmailAsync(user.Id, "Confirm your account", "Please confirm your account by clicking <a href=\"" + callbackUrl + "\">here</a>");
-
-                    // Good, account created and user loggied in. Go to Home page.
-                    return RedirectToAction("Index", "Home");
+                    // Otherwise, add errors
+                    AddErrors(result);
                 }
-                // Otherwise, add errors
-                AddErrors(result);
             }
             // If we got this far, something failed, redisplay form
             return View(model);
@@ -412,6 +411,29 @@ namespace TextBooks.Controllers
             return View(model);
         }
 
+        //
+        //GET: /Account/ViewAccounts
+        public ActionResult ViewAccounts()
+        {
+            var account = db.AspNetUsers.Select(x => new ViewAccounts { Username = x.UserName, Phone = x.PhoneNumber.ToString(), Email = x.Email }).AsEnumerable();
+            ViewAccounts returnView = new ViewAccounts()
+            {
+                ifbEntity = account
+            };
+
+            return View(returnView);
+        }
+
+        //
+        //POST: /Account/ViewAccounts
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult ViewAccounts(ViewAccounts model)
+        {
+
+            return View();
+        }
+        
         //
         // POST: /Account/LogOff
         [HttpPost]
