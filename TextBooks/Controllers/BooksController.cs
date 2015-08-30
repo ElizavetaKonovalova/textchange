@@ -20,12 +20,18 @@ namespace TextBooks.Controllers
         }
 
         [HttpPost]
-        public ActionResult Index(string title)
+        public ActionResult Index(string searchQuery)
         {
-            if (title != "" && title != null)
+            if (searchQuery != "" && searchQuery != null)
             {
                 List<Book> result = (from table in db.Books
-                                     where (table.Title.Contains(title) || table.Author.Contains(title))
+                                     where (
+                                     table.ISBN.Contains(searchQuery) || 
+                                     table.Title.Contains(searchQuery) ||
+                                     table.Author.Contains(searchQuery) ||
+                                     table.Edition.Contains(searchQuery) ||
+                                     (table.Year).ToString().Contains(searchQuery)
+                                     )
                                      select table).ToList();
                 if (result != null)
                 {
