@@ -76,9 +76,13 @@
             <PropertyRef Name="B_ID" />
           </Key>
           <Property Name="B_ID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="ISBN" Type="varchar" MaxLength="255" />
           <Property Name="Title" Type="varchar" MaxLength="255" Nullable="false" />
           <Property Name="Author" Type="varchar" MaxLength="255" />
           <Property Name="Edition" Type="varchar" MaxLength="255" />
+          <Property Name="Year" Type="int" />
+          <Property Name="LndBy" Type="nvarchar" MaxLength="255" />
+          <Property Name="BrwdBy" Type="nvarchar" MaxLength="255" />
         </EntityType>
         <Association Name="FK_dbo_AspNetUserClaims_dbo_AspNetUsers_UserId">
           <End Role="AspNetUsers" Type="Self.AspNetUsers" Multiplicity="1">
@@ -193,6 +197,10 @@
           <Property Name="Title" Type="String" Nullable="false" MaxLength="255" FixedLength="false" Unicode="false" />
           <Property Name="Author" Type="String" MaxLength="255" FixedLength="false" Unicode="false" />
           <Property Name="Edition" Type="String" MaxLength="255" FixedLength="false" Unicode="false" />
+          <Property Name="ISBN" Type="String" MaxLength="255" FixedLength="false" Unicode="false" />
+          <Property Name="Year" Type="Int32" />
+          <Property Name="LndBy" Type="String" MaxLength="255" FixedLength="false" Unicode="true" />
+          <Property Name="BrwdBy" Type="String" MaxLength="255" FixedLength="false" Unicode="true" />
         </EntityType>
         <EntityType Name="C__MigrationHistory">
           <Key>
@@ -299,6 +307,10 @@
           <EntitySetMapping Name="Books">
             <EntityTypeMapping TypeName="IFB299Model.Book">
               <MappingFragment StoreEntitySet="Books">
+                <ScalarProperty Name="BrwdBy" ColumnName="BrwdBy" />
+                <ScalarProperty Name="LndBy" ColumnName="LndBy" />
+                <ScalarProperty Name="Year" ColumnName="Year" />
+                <ScalarProperty Name="ISBN" ColumnName="ISBN" />
                 <ScalarProperty Name="Edition" ColumnName="Edition" />
                 <ScalarProperty Name="Author" ColumnName="Author" />
                 <ScalarProperty Name="Title" ColumnName="Title" />

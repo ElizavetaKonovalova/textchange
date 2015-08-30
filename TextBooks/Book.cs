@@ -18,5 +18,9 @@ namespace TextBooks
         public string Title { get; set; }
         public string Author { get; set; }
         public string Edition { get; set; }
+        public string ISBN { get; set; }
+        public Nullable<int> Year { get; set; }
+        public string LndBy { get; set; }
+        public string BrwdBy { get; set; }
     }
 }
