@@ -25,7 +25,7 @@ namespace TextBooks.Controllers
 
 
             
-                int p = 5;
+                //int p = 5;
 
 
             dbcontext.Database.Connection.Open();

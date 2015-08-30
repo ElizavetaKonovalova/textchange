@@ -123,4 +123,23 @@ namespace TextBooks.Models
         [Display(Name = "Email")]
         public string Email { get; set; }
     }
+
+    public class ViewAccounts
+    {
+        [Required]
+        [EmailAddress]
+        [Display(Name = "Email")]
+        public string Email { get; set; }
+
+        [Required]
+        [Phone]
+        [Display(Name = "Phone")]
+        public string Phone { get; set; }
+
+        [Required]
+        [Display(Name = "Username")]
+        public string Username { get; set; }
+
+        public IEnumerable<ViewAccounts> ifbEntity { get; set;}
+    }
 }
