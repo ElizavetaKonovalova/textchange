@@ -9,6 +9,8 @@ using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.Owin;
 using Microsoft.Owin.Security;
 using TextBooks.Models;
+using System.Net.Mail;
+using System.Net;
 
 namespace TextBooks.Controllers
 {
@@ -152,15 +154,18 @@ namespace TextBooks.Controllers
             if (ModelState.IsValid)
             {
                 var user = new ApplicationUser { UserName = model.Email.Split('@')[0], Email = model.Email };
-                var result = await UserManager.CreateAsync(user, model.Password);
 
-                string address = user.Email.Split('@')[1];
-
-                if (!address.Equals("connect.qut.edu.au"))
+                // Check email address is okay.
+                string addressSuffix = user.Email.Split('@')[1];
+                if (!addressSuffix.Equals("connect.qut.edu.au") || user.Email == "ifb299books@gmail.com")
                 {
                     AddErrors("The email address is not valid! Use @connect.qut.edu.au");
+                    return View(model);
                 }
-                else if (result.Succeeded)
+                
+                // Create the account!
+                var result = await UserManager.CreateAsync(user, model.Password);
+                if (result.Succeeded)
                 {
                     // Add firstname, lastname & optional contact number
 
@@ -185,9 +190,10 @@ namespace TextBooks.Controllers
                     await SignInManager.SignInAsync(user, isPersistent: false, rememberBrowser: false);
 
                     // Send an email with this link
-                    // string code = await UserManager.GenerateEmailConfirmationTokenAsync(user.Id);
-                    // var callbackUrl = Url.Action("ConfirmEmail", "Account", new { userId = user.Id, code = code }, protocol: Request.Url.Scheme);
+                    string code = await UserManager.GenerateEmailConfirmationTokenAsync(user.Id);
+                    var callbackUrl = Url.Action("ConfirmEmail", "Account", new { userId = user.Id, code = code }, protocol: Request.Url.Scheme);
                     // await UserManager.SendEmailAsync(user.Id, "Confirm your account", "Please confirm your account by clicking <a href=\"" + callbackUrl + "\">here</a>");
+                    SendVerificationEmail(code, callbackUrl, currentUser.FirstName, currentUser.Email);
 
                     // Good, account created and user loggied in. Go to Home page.
                     return RedirectToAction("Index", "Home");
@@ -197,6 +203,39 @@ namespace TextBooks.Controllers
             }
             // If we got this far, something failed, redisplay form
             return View(model);
+        }
+
+        private void SendVerificationEmail(string code, string callbackURL, string firstName, string email)
+        {
+            var body = "<p>Email From: {0} ({1})</p><p>Message:</p><p>{2}</p>";
+            var message = new MailMessage();
+            message.To.Add(new MailAddress(email));  // replace with valid value 
+            message.From = new MailAddress("ifb299books@gmail.com");  // replace with valid value
+            message.Subject = "Your email subject";
+            message.Body = string.Format(body, "noreply", "ifb299books@gmail.com", message);
+            message.IsBodyHtml = false;
+
+            using (var smtp = new SmtpClient())
+            {
+                var credential = new NetworkCredential
+                {
+                    UserName = "ifb299books@gmail.com",  // replace with valid value
+                    Password = "IFB299Password"  // replace with valid value
+                };
+                smtp.UseDefaultCredentials = false;
+                smtp.Credentials = credential;
+                smtp.Host = "smtp.gmail.com";
+                smtp.Port = 587;
+                smtp.EnableSsl = true;
+
+                smtp.Send(message);
+
+                //try {
+                //    await smtp.SendMailAsync(message);
+                //} catch (System.Net.Mail.SmtpException err) {
+                //    System.Diagnostics.Debug.WriteLine(err.ToString());
+                //}
+            }
         }
 
         //
