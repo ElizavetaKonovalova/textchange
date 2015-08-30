@@ -25,7 +25,7 @@
                     <ul class="nav navbar-nav">
                         <li>@Html.ActionLink("Accounts", "ViewAccounts", "Account")</li>
                         <li>
-                            <form class="form-inline" role="form" action="/books" method="post">
+                            <form class="form-inline" role="form" action="/books" method="post" style="padding-top:8px;">
                                 <div class="form-group">
                                     @Html.TextBox("searchQuery", "", new { name = "name", @class = "form-control" })
                                 </div>
@@ -40,7 +40,7 @@
             {
             <div class="navbar-collapse collapse">
                 <ul class="nav navbar-nav">
-                    <li>@Html.ActionLink("About", "About", "Home")</li>
+                    <li>@Html.ActionLink("Submit a book", "Create", "Books")</li>
                     <li>@Html.ActionLink("Contact", "Contact", "Home")</li>
                     <li>
                         <form class="form-inline" role="form" action="/books" method="post" style="padding-top:8px;">
