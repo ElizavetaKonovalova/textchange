@@ -7,6 +7,8 @@ using System.Net;
 using System.Web;
 using System.Web.Mvc;
 using TextBooks;
+using System.Security.Claims;
+
 
 namespace TextBooks.Controllers
 {
@@ -30,7 +32,7 @@ namespace TextBooks.Controllers
                                      table.Title.Contains(searchQuery) ||
                                      table.Author.Contains(searchQuery) ||
                                      table.Edition.Contains(searchQuery) ||
-                                     (table.Year).ToString().Contains(searchQuery)
+                                     table.Year.Contains(searchQuery)
                                      )
                                      select table).ToList();
                 if (result != null)
@@ -67,13 +69,30 @@ namespace TextBooks.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create([Bind(Include = "B_ID,Title,Author,Edition")] Book book)
+        //Use book.Title for example to get title of the book just submitted.
+        //Bind takes all those arguments and makes a book object that it saves to DB
+        public ActionResult Create([Bind(Include = "B_ID,ISBN,Title,Author,Edition,Year")] Book book)
         {
+            var name = ClaimsPrincipal.Current.Identity.Name;
             if (ModelState.IsValid)
             {
-                db.Books.Add(book);
-                db.SaveChanges();
-                return RedirectToAction("Index");
+                if (name != "")
+                {
+                    if (book.Title == null)
+                    {
+                        ModelState.AddModelError("", "Book Title field can't be empty.");
+                        return View();
+                    }
+                    db.Books.Add(book);
+                    book.Owner = name;
+                    db.SaveChanges();
+                    return RedirectToAction("Index");
+                }
+                else
+                {
+                    ModelState.AddModelError("", "You must be logged in to submit books.");
+                    return View();
+                }
             }
 
             return View(book);
@@ -99,7 +118,7 @@ namespace TextBooks.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit([Bind(Include = "B_ID,Title,Author,Edition")] Book book)
+        public ActionResult Edit([Bind(Include = "B_ID,ISBN,Title,Author,Edition,Year")] Book book)
         {
             if (ModelState.IsValid)
             {
