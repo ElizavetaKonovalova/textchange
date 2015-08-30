@@ -43,10 +43,7 @@
             @Html.DisplayNameFor(model => model.Year)
         </th>
         <th>
-            @Html.DisplayNameFor(model => model.LndBy)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.BrwdBy)
+            @Html.DisplayNameFor(model => model.Owner)
         </th>
         <th></th>
     </tr>
@@ -70,10 +67,7 @@
                 @Html.DisplayFor(modelItem => item.Year)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.LndBy)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.BrwdBy)
+                @Html.DisplayFor(modelItem => item.Owner)
             </td>
             <td>
                 @Html.ActionLink("Edit", "Edit", new { id = item.B_ID }) |

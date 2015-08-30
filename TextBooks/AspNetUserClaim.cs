@@ -12,15 +12,13 @@ namespace TextBooks
     using System;
     using System.Collections.Generic;
     
-    public partial class Book
+    public partial class AspNetUserClaim
     {
-        public int B_ID { get; set; }
-        public string ISBN { get; set; }
-        public string Title { get; set; }
-        public string Author { get; set; }
-        public string Edition { get; set; }
-        public Nullable<int> Year { get; set; }
-        public string Owner { get; set; }
-        public string BrwdBy { get; set; }
+        public int Id { get; set; }
+        public string UserId { get; set; }
+        public string ClaimType { get; set; }
+        public string ClaimValue { get; set; }
+    
+        public virtual AspNetUser AspNetUser { get; set; }
     }
 }
