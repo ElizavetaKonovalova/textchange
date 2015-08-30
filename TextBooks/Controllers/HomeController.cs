@@ -58,9 +58,10 @@ namespace TextBooks.Controllers
 
         public ActionResult Contact()
         {
-            ViewBag.Message = "Your contact page.";
+            return Redirect("mailto:ifb299books@gmail.com?subject=Support%20request");
+            //ViewBag.Message = "Your contact page.";
 
-            return View();
+            //return View();
         }
     }
 }
