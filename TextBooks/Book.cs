@@ -19,7 +19,7 @@ namespace TextBooks
         public string Title { get; set; }
         public string Author { get; set; }
         public string Edition { get; set; }
-        public Nullable<int> Year { get; set; }
+        public string Year { get; set; }
         public string Owner { get; set; }
         public string BrwdBy { get; set; }
     }

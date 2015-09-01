@@ -1,6 +1,4 @@
 ﻿@model TextBooks.Models.ViewAccounts
-@using System.Activities.Statements
-@using Microsoft.AspNet.Identity
 
 @using (Html.BeginForm("ViewAccounts", "Account", FormMethod.Post))
 {
@@ -10,7 +8,11 @@
                 <tr>
 
                     <th style="text-align: center">
-                        Username
+                        First Name
+                    </th>
+
+                    <th style="text-align: center">
+                        Last Name
                     </th>
 
                     <th  style="text-align: center">
@@ -31,8 +33,11 @@
                 {
                     <tr>
 
-                        <td class="col-xs-3" style="text-align: center">
-                            @Html.DisplayFor(modelItem => account.Username)
+                        <td class="col-xs-2" style="text-align: center">
+                            @Html.DisplayFor(modelItem => account.FirstName)
+                        </td>
+                        <td class="col-xs-2" style="text-align: center">
+                            @Html.DisplayFor(modelItem => account.LastName)
                         </td>
                         <td class="col-xs-2" style="text-align: center">
                             @Html.DisplayFor(modelItem => account.Phone)
@@ -41,8 +46,8 @@
                             @Html.DisplayFor(modelItem => account.Email)
                         </td>
                         <td class="col-xs-2" style="text-align: center">
-                            <button type="submit" value=@account.Id class="btn btn-info" name ="Username" >Delete</button>
-                            @Html.ActionLink("Edit", "Edit", "Account",new { @class = "btn btn-info" })
+                            <button type="submit" value=@account.Id class="btn btn-info" name ="id" >Delete</button>
+                            @Html.ActionLink("Edit", "Edit", "Account", new { id = account.Id }, new { @class = "btn btn-info" })
                         </td>
                     </tr>
                 }

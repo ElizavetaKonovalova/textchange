@@ -12,6 +12,8 @@ using TextBooks.Models;
 using System.Net.Mail;
 using System.Net;
 using System.Collections.Generic;
+using System.Net.Mime;
+using System.Data.Entity;
 
 namespace TextBooks.Controllers
 {
@@ -76,6 +78,20 @@ namespace TextBooks.Controllers
             {
                 return View(model);
             }
+
+            // Check if user account is verified
+            IFB299Entities db = new IFB299Entities();
+            var user = (from table in db.AspNetUsers
+                        where model.Username == table.UserName
+                        select table).FirstOrDefault();
+            if (user != null)
+            {
+                if (!user.EmailConfirmed)
+                {
+                    return View("ConfirmEmail");
+                }
+            }
+
 
             // This doesn't count login failures towards account lockout
             // To enable password failures to trigger account lockout, change to shouldLockout: true
@@ -155,7 +171,7 @@ namespace TextBooks.Controllers
         {
             if (ModelState.IsValid)
             {
-                var user = new ApplicationUser { UserName = model.Email.Split('@')[0], Email = model.Email };
+                var user = new ApplicationUser { UserName = model.Email.Split('@')[0], Email = model.Email, PhoneNumber = model.ContactNumber };
 
                 // Check email address is okay.
                 string addressSuffix = user.Email.Split('@')[1];
@@ -179,27 +195,35 @@ namespace TextBooks.Controllers
 
                     if (currentUser != null)
                     {
-                        await SignInManager.SignInAsync(user, isPersistent: false, rememberBrowser: false);
+                        // Sign in the new user account
+                        //await SignInManager.SignInAsync(user, isPersistent: false, rememberBrowser: false);
                         
+                        // Add details to database record
+                        currentUser.FirstName = model.FirstName;
+                        currentUser.LastName = model.LastName;
+                        currentUser.ContactNumber = model.ContactNumber;
+                        db.SaveChanges();
+
+                        // Send an email with this link
+                        string code = await UserManager.GenerateEmailConfirmationTokenAsync(user.Id);
+                        var callbackUrl = Url.Action("ConfirmEmail", "Account", new { userId = user.Id, code = code }, protocol: Request.Url.Scheme);
+                        // await UserManager.SendEmailAsync(user.Id, "Confirm your account", "Please confirm your account by clicking <a href=\"" + callbackUrl + "\">here</a>");
+                        SendVerificationEmail(code, callbackUrl, currentUser.FirstName, currentUser.Email);
+
+                        // Send them on their way
                         if (user.UserName.Equals("ifb299books"))
                         {
                             return RedirectToAction("ViewAccounts", "Account");
                     }
                         else
                         {
-                            return RedirectToAction("Index", "Home");
+                            return RedirectToAction("VerifyEmail", "Account");
                         }
-
-                    // Send an email with this link
-                    string code = await UserManager.GenerateEmailConfirmationTokenAsync(user.Id);
-                    var callbackUrl = Url.Action("ConfirmEmail", "Account", new { userId = user.Id, code = code }, protocol: Request.Url.Scheme);
-                    // await UserManager.SendEmailAsync(user.Id, "Confirm your account", "Please confirm your account by clicking <a href=\"" + callbackUrl + "\">here</a>");
-                    SendVerificationEmail(code, callbackUrl, currentUser.FirstName, currentUser.Email);
+                    }
 
                 }
                 // Otherwise, add errors
                 AddErrors(result);
-            }
             }
             // If we got this far, something failed, redisplay form
             return View(model);
@@ -207,36 +231,68 @@ namespace TextBooks.Controllers
 
         private void SendVerificationEmail(string code, string callbackURL, string firstName, string email)
         {
-            var body = "<p>Email From: {0} ({1})</p><p>Message:</p><p>{2}</p>";
-            var message = new MailMessage();
-            message.To.Add(new MailAddress(email));  // replace with valid value 
-            message.From = new MailAddress("ifb299books@gmail.com");  // replace with valid value
-            message.Subject = "Your email subject";
-            message.Body = string.Format(body, "noreply", "ifb299books@gmail.com", message);
-            message.IsBodyHtml = false;
-
-            using (var smtp = new SmtpClient())
+            // SENDGRID - waiting for provisioning. Appears to work on Azure as well as locally, but emails not sent until provisioning is complete.
+            try
             {
-                var credential = new NetworkCredential
+
+
+                var body = "Hi "+ firstName + ",\nPlease confirm your account by clicking <a href =\"" + callbackURL + "\">here</a>.";
+            var message = new MailMessage();
+                message.To.Add(new MailAddress(email, firstName));  // replace with valid value 
+                message.From = new MailAddress("ifb299books@gmail.com", "noreply");  // replace with valid value
+                message.Subject = "Verify Bindr Account";
+            message.Body = string.Format(body, "noreply", "ifb299books@gmail.com", message);
+                message.IsBodyHtml = true;
+
+
+
+                // Init SmtpClient and send
+                SmtpClient smtpClient = new SmtpClient("smtp.sendgrid.net", Convert.ToInt32(587));
+                NetworkCredential credentials = new NetworkCredential("ifb299", "IFB299Password");
+                smtpClient.Credentials = credentials;
+
+                smtpClient.Send(message);
+            }
+            catch (Exception ex)
                 {
-                    UserName = "ifb299books@gmail.com",  // replace with valid value
-                    Password = "IFB299Password"  // replace with valid value
-                };
-                smtp.UseDefaultCredentials = false;
-                smtp.Credentials = credential;
-                smtp.Host = "smtp.gmail.com";
-                smtp.Port = 587;
-                smtp.EnableSsl = true;
+                Console.WriteLine(ex.Message);
+            }
 
-                smtp.Send(message);
 
-                //try {
-                //    await smtp.SendMailAsync(message);
-                //} catch (System.Net.Mail.SmtpException err) {
-                //    System.Diagnostics.Debug.WriteLine(err.ToString());
+
+
+            // GMAIL (WILL NOT WORK ON AZURE, only for local testing.)
+            //var body = "Please confirm your account by clicking <a href =\"" + callbackURL + "\">here</a>.";
+            //var message = new MailMessage();
+            //message.To.Add(new MailAddress(email));  // replace with valid value 
+            //message.From = new MailAddress("ifb299books@gmail.com");  // replace with valid value
+            //message.Subject = "Confirm Bindr Account";
+            //message.Body = string.Format(body, "noreply", "ifb299books@gmail.com", message);
+            //message.IsBodyHtml = true;
+
+            //using (var smtp = new SmtpClient())
+            //{
+            //    var credential = new NetworkCredential
+            //    {
+            //        UserName = "ifb299books@gmail.com",  // replace with valid value
+            //        Password = "IFB299Password"  // replace with valid value
+            //    };
+            //    smtp.UseDefaultCredentials = false;
+            //    smtp.Credentials = credential;
+            //    smtp.Host = "smtp.gmail.com";
+            //    smtp.Port = 587; // 587
+            //    smtp.EnableSsl = true;
+
+            //    //await smtp.SendMailAsync(message);
+            //    smtp.Send(message);
+
+            //    //try {
+            //    //    
+            //    //} catch (System.Net.Mail.SmtpException err) {
+            //    //    System.Diagnostics.Debug.WriteLine(err.ToString());
+            //    //}
                 //}
             }
-        }
 
         //
         // GET: /Account/ConfirmEmail
@@ -440,7 +496,8 @@ namespace TextBooks.Controllers
                     result = await UserManager.AddLoginAsync(user.Id, info.Login);
                     if (result.Succeeded)
                     {
-                        await SignInManager.SignInAsync(user, isPersistent: false, rememberBrowser: false);
+                        // don't sign in
+                        //await SignInManager.SignInAsync(user, isPersistent: false, rememberBrowser: false);
                         return RedirectToLocal(returnUrl);
                     }
                 }
@@ -467,11 +524,14 @@ namespace TextBooks.Controllers
         //POST: /Account/ViewAccounts
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult ViewAccounts(ViewAccounts model, string Username)
+        public ActionResult ViewAccounts(ViewAccounts model, string id)
         {
-            var findUser = db.AspNetUsers.Find(Username);
-            var delete = db.AspNetUsers.Remove(findUser);
-            db.SaveChanges();
+            var findUser = db.AspNetUsers.Find(id);
+            if (!findUser.UserName.Equals("ifb299books")) 
+            {
+                var delete = db.AspNetUsers.Remove(findUser);
+                db.SaveChanges();
+            }
 
             model = new ViewAccounts
             {
@@ -481,14 +541,61 @@ namespace TextBooks.Controllers
             return View(model);
         }
 
+        public ActionResult Edit(ViewAccounts model, string id)
+        {
+            var user = db.AspNetUsers.Find(id);
+
+            if( user == null)
+            {
+                return HttpNotFound();
+            }
+
+            model = new ViewAccounts
+            {
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                Phone = user.PhoneNumber,
+                Email = user.Email
+            };
+
+            return View(model);
+        }
+
+        //
+        // POST: /Account/Edit
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult Edit([Bind(Include = "Id,FirstName,LastName,Phone,Email")]ViewAccounts model)
+        {
+            var editedUser = db.AspNetUsers.Find(model.Id);
+            editedUser.Email = model.Email;
+            editedUser.PhoneNumber = model.Phone;
+            editedUser.LastName = model.LastName;
+            editedUser.FirstName = model.FirstName;
+            editedUser.Id = model.Id;
+
+            if (ModelState.IsValid)
+            {
+                db.Entry(editedUser).State = EntityState.Modified;
+                db.SaveChanges();
+                return RedirectToAction("/ViewAccounts");
+            }
+            else 
+            {
+                return HttpNotFound();
+            }
+
+        }
+
         public IEnumerable<ViewAccounts> GetAllAccounts()
         {
             return db.AspNetUsers.Select(x => new ViewAccounts 
-            {
-                Username = x.UserName, 
+        {
                 Phone = x.PhoneNumber.ToString(), 
-                Email = x.Email, Id = x.Id 
-            
+                Email = x.Email, Id = x.Id, 
+                FirstName = x.FirstName,
+                LastName = x.LastName
+
             }).AsEnumerable();
         }
         
