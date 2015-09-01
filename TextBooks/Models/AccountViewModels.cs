@@ -140,6 +140,10 @@ namespace TextBooks.Models
         [Display(Name = "Username")]
         public string Username { get; set; }
 
+        [Required]
+        [Display(Name = "Id")]
+        public string Id { get; set; }
+
         public IEnumerable<ViewAccounts> ifbEntity { get; set;}
     }
 }

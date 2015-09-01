@@ -2,9 +2,9 @@
 @using System.Activities.Statements
 @using Microsoft.AspNet.Identity
 
-@using (Html.BeginForm("ViewAccounts", "Account"))
+@using (Html.BeginForm("ViewAccounts", "Account", FormMethod.Post))
 {
-
+    @Html.AntiForgeryToken()
             <table class="table table-striped">
 
                 <tr>
@@ -28,7 +28,7 @@
                 </tr>
 
                 @foreach (var account in Model.ifbEntity)
-        {
+                {
                     <tr>
 
                         <td class="col-xs-3" style="text-align: center">
@@ -41,12 +41,12 @@
                             @Html.DisplayFor(modelItem => account.Email)
                         </td>
                         <td class="col-xs-2" style="text-align: center">
-                            <input type="submit" value="Delete" class="btn btn-info" />
-                            @Html.ActionLink("Edit", "Edit", "Account", new { @class = "btn btn-info" })
+                            <button type="submit" value=@account.Id class="btn btn-info" name ="Username" >Delete</button>
+                            @Html.ActionLink("Edit", "Edit", "Account",new { @class = "btn btn-info" })
                         </td>
                     </tr>
-        }
+                }
 
             </table>
             
-  }
+}

@@ -11,6 +11,7 @@ using Microsoft.Owin.Security;
 using TextBooks.Models;
 using System.Net.Mail;
 using System.Net;
+using System.Collections.Generic;
 
 namespace TextBooks.Controllers
 {
@@ -454,10 +455,9 @@ namespace TextBooks.Controllers
         //GET: /Account/ViewAccounts
         public ActionResult ViewAccounts()
         {
-            var account = db.AspNetUsers.Select(x => new ViewAccounts { Username = x.UserName, Phone = x.PhoneNumber.ToString(), Email = x.Email }).AsEnumerable();
             ViewAccounts returnView = new ViewAccounts()
             {
-                ifbEntity = account
+                ifbEntity = GetAllAccounts()
             };
 
             return View(returnView);
@@ -467,10 +467,29 @@ namespace TextBooks.Controllers
         //POST: /Account/ViewAccounts
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult ViewAccounts(ViewAccounts model)
+        public ActionResult ViewAccounts(ViewAccounts model, string Username)
         {
+            var findUser = db.AspNetUsers.Find(Username);
+            var delete = db.AspNetUsers.Remove(findUser);
+            db.SaveChanges();
 
-            return View();
+            model = new ViewAccounts
+            {
+                ifbEntity = GetAllAccounts()    
+            };
+
+            return View(model);
+        }
+
+        public IEnumerable<ViewAccounts> GetAllAccounts()
+        {
+            return db.AspNetUsers.Select(x => new ViewAccounts 
+            {
+                Username = x.UserName, 
+                Phone = x.PhoneNumber.ToString(), 
+                Email = x.Email, Id = x.Id 
+            
+            }).AsEnumerable();
         }
         
         //
