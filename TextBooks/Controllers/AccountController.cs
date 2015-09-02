@@ -24,6 +24,12 @@ namespace TextBooks.Controllers
         private ApplicationSignInManager _signInManager;
         private ApplicationUserManager _userManager;
 
+        [AllowAnonymous]
+        public ActionResult VerifyEmail()
+        {
+            return View();
+        }
+
         public AccountController()
         {
         }
