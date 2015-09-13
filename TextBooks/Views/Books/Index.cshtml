@@ -3,6 +3,18 @@
 @{
     ViewBag.Title = "Index";
 }
+@{
+    List<string> searchExamples = new List<string>(new string[] { 
+        "A Brief History of the Universe",
+        "Calculus 101", 
+        "Economics for the New Student",
+        "Networks and Their Uses",
+        "The Mysteries of Human Anatomy"
+    });
+    int sizeOfList = searchExamples.Count;
+    Random rnd = new Random();
+    string example = "eg, " + searchExamples[rnd.Next(sizeOfList)];
+}
 <br />
 <div class="container-fluid">
     <h2>TextBooks</h2>
@@ -10,7 +22,7 @@
         <div class="col-md-4">
             <form class="form-inline" role="form" action="/books" method="post">
                 <div class="form-group">
-                    @Html.TextBox("searchQuery", "", new { name = "name", @class = "form-control"})
+                    @Html.TextBox("searchQuery", "", new { name = "name", @class = "form-control", placeholder = example, style="width: 250px;"})
                 </div>
                 <button type="submit" class="btn btn-default">Search</button>
             </form>
