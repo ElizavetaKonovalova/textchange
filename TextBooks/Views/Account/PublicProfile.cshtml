@@ -1,4 +1,4 @@
-﻿@model Tuple<TextBooks.AspNetUser, IEnumerable<TextBooks.Book>, IEnumerable<TextBooks.Book>>
+﻿@model TextBooks.Models.PublicProfileViewModel
 
 @{
     ViewBag.Title = "PublicProfile";
@@ -6,21 +6,21 @@
 <br />
 <div class="container">
 
-    <h1><I>@Html.DisplayFor(model => model.Item1.FirstName)</I></h1>
-    <h5><b>@Html.DisplayFor(model => model.Item1.LastName)</b></h5>
+    <h1><I>@Html.DisplayFor(model => model.targetUser.FirstName)</I></h1>
+    <h5><b>@Html.DisplayFor(model => model.targetUser.LastName)</b></h5>
     <br />
-    @Html.DisplayFor(model => model.Item1.Email)<br />
-    @Html.DisplayFor(model => model.Item1.PhoneNumber)<br />
+    @Html.DisplayFor(model => model.targetUser.Email)<br />
+    @Html.DisplayFor(model => model.targetUser.PhoneNumber)<br />
 
     <br />
 
     <table>
         <tr>
             <th>
-                @Html.DisplayFor(model => model.Item1.FirstName)'s Books
+                @Html.DisplayFor(model => model.targetUser.FirstName)'s Books
             </th>
         </tr>
-        @if (Model.Item2 == null)
+        @if (Model.booksOwned == null)
         {
             <tr>
                 <td>
@@ -30,7 +30,7 @@
         }
         else
         {
-            foreach (var item in Model.Item2)
+            foreach (var item in Model.booksOwned)
             {
                 <tr>
                     <td>
@@ -45,19 +45,19 @@
     <table>
         <tr>
             <th>
-                @Html.DisplayFor(model => model.Item1.FirstName) is borrowing
+                @Html.DisplayFor(model => model.targetUser.FirstName) is borrowing
             </th>
         </tr>
-        @if (Model.Item3 == null)
+        @if (Model.booksBorrowed == null)
         {
             <tr>
                 <td>
-                    No books to show.
+                    No books at the moment.
                 </td>
             </tr>
         } else
         {
-            foreach (var item in Model.Item3)
+            foreach (var item in Model.booksBorrowed)
             {
                 <tr>
                     <td>
@@ -73,11 +73,7 @@
 
     </table>
 
-    @{
-        TextBooks.Models.EmailViewModel email = new TextBooks.Models.EmailViewModel();
-    }
-
-    @using (Html.BeginForm("SendEmail", "Account", FormMethod.Post))
+    @using (Html.BeginForm("ContactUser", "Account", new { toUsername = Model.targetUser.UserName }, FormMethod.Post))
     {
         @Html.AntiForgeryToken()
         <div class="form-horizontal">
@@ -86,14 +82,14 @@
 
             <div class="form-group">
                 <label class="control-label col-md-2">
-                    Message to Send...
+                    Message to Send:
                 </label>
                 <div class="col-md-10">
-                    @Html.TextBoxFor(model => email.message, new { @class = "form-control" })
+                    @Html.TextBoxFor(model => model.contactEmail.message, new { @class = "form-control" })
+                    @Html.HiddenFor(model => model.targetUser.UserName)
                 </div>
             </div>
-
-            <input type="submit" value="Change" class="btn btn-info" />
+            <input type="submit" value="Send" class="btn btn-info" />
         </div>
     }
 

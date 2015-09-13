@@ -123,22 +123,23 @@ namespace TextBooks.Controllers
         public ActionResult PublicProfile(string username)
         {
             IFB299Entities db = new IFB299Entities();
-            var user = (from table in db.AspNetUsers
+            PublicProfileViewModel result = new PublicProfileViewModel();
+
+            result.targetUser = (from table in db.AspNetUsers
                         where table.UserName == username
                         select table).FirstOrDefault();
-            if (user != null)
+            if (result.targetUser != null)
             {
-                List<Book> booksOwned = (from table in db.Books
+                result.booksOwned = (from table in db.Books
                               where table.Owner == username
                               select table).ToList();
-                if (booksOwned.Count == 0) booksOwned = null;
+                if (result.booksOwned.Count == 0) result.booksOwned = null;
 
-                List<Book> booksBorrowed = (from table in db.Books
+                result.booksBorrowed = (from table in db.Books
                                          where table.BrwdBy == username
                                          select table).ToList();
-                if (booksBorrowed.Count == 0) booksBorrowed = null;
-
-                Tuple<AspNetUser, IEnumerable<Book>, IEnumerable<Book>> result = new Tuple<AspNetUser, IEnumerable<Book>, IEnumerable<Book>>(user, booksOwned, booksBorrowed);
+                if (result.booksBorrowed.Count == 0) result.booksBorrowed = null;
+                
                 return View(result);
             }
             return View("Error");
@@ -262,22 +263,16 @@ namespace TextBooks.Controllers
             return View(model);
         }
         
-        private void SendEmailMessage(EmailViewModel model)
+        private bool SendEmailMessage(Email model)
         {
             try
             {
-                // remove these
-                model.toAddress = "a16.cooper@connect.qut.edu.au";
-                model.fromAddress = "andy90@me.com";
-                model.subject = "test subject";
-                // end remove
-
-                var body = model.message;
+                String body = model.message;
                 var message = new MailMessage();
-                message.To.Add(new MailAddress(model.toAddress, "ToName"));  // replace with valid value 
-                message.From = new MailAddress(model.fromAddress, "FromName");  // replace with valid value
+                message.To.Add(new MailAddress(model.toAddress, model.toName));  // replace with valid value 
+                message.From = new MailAddress(model.fromAddress, model.fromName);  // replace with valid value
                 message.Subject = model.subject;
-                message.Body = string.Format(body, "noreply", "ifb299books@gmail.com", message);
+                message.Body = string.Format(body);
                 message.IsBodyHtml = true;
 
                 // Init SmtpClient and send
@@ -286,20 +281,19 @@ namespace TextBooks.Controllers
                 smtpClient.Credentials = credentials;
 
                 smtpClient.Send(message);
+                return true;
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
+                return false;
             }
         }
 
         private void SendVerificationEmail(string code, string callbackURL, string firstName, string email)
         {
-            // SENDGRID - waiting for provisioning. Appears to work on Azure as well as locally, but emails not sent until provisioning is complete.
             try
             {
-
-
                 var body = "Hi " + firstName + ",\nPlease confirm your account by clicking <a href =\"" + callbackURL + "\">here</a>.";
                 var message = new MailMessage();
                 message.To.Add(new MailAddress(email, firstName));  // replace with valid value 
@@ -307,9 +301,7 @@ namespace TextBooks.Controllers
                 message.Subject = "Verify Texchange Account";
                 message.Body = string.Format(body, "noreply", "ifb299books@gmail.com", message);
                 message.IsBodyHtml = true;
-
-
-
+                
                 // Init SmtpClient and send
                 SmtpClient smtpClient = new SmtpClient("smtp.sendgrid.net", Convert.ToInt32(587));
                 NetworkCredential credentials = new NetworkCredential("ifb299", "IFB299Password");
@@ -327,7 +319,6 @@ namespace TextBooks.Controllers
         {
 
             var user = db.AspNetUsers.Where(x => x.Email == email).Select(x => x.FirstName).First().ToString();
-            // SENDGRID - waiting for provisioning. Appears to work on Azure as well as locally, but emails not sent until provisioning is complete.
             try
             {
                 var body = "Hello " +user + ", click the link to reset your password <a href =\"" + callbackURL + "\">here</a>.";
@@ -345,41 +336,9 @@ namespace TextBooks.Controllers
                 smtpClient.Send(message);
             }
             catch (Exception ex)
-                {
+            {
                 Console.WriteLine(ex.Message);
             }
-
-            // GMAIL (WILL NOT WORK ON AZURE, only for local testing.)
-            //var body = "Please confirm your account by clicking <a href =\"" + callbackURL + "\">here</a>.";
-            //var message = new MailMessage();
-            //message.To.Add(new MailAddress(email));  // replace with valid value 
-            //message.From = new MailAddress("ifb299books@gmail.com");  // replace with valid value
-            //message.Subject = "Confirm Bindr Account";
-            //message.Body = string.Format(body, "noreply", "ifb299books@gmail.com", message);
-            //message.IsBodyHtml = true;
-
-            //using (var smtp = new SmtpClient())
-            //{
-            //    var credential = new NetworkCredential
-            //    {
-            //        UserName = "ifb299books@gmail.com",  // replace with valid value
-            //        Password = "IFB299Password"  // replace with valid value
-            //    };
-            //    smtp.UseDefaultCredentials = false;
-            //    smtp.Credentials = credential;
-            //    smtp.Host = "smtp.gmail.com";
-            //    smtp.Port = 587; // 587
-            //    smtp.EnableSsl = true;
-
-            //    //await smtp.SendMailAsync(message);
-            //    smtp.Send(message);
-
-            //    //try {
-            //    //    
-            //    //} catch (System.Net.Mail.SmtpException err) {
-            //    //    System.Diagnostics.Debug.WriteLine(err.ToString());
-            //    //}
-                //}
             }
 
         //
@@ -687,11 +646,29 @@ namespace TextBooks.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult SendEmail([Bind(Include = "toAddress,fromAddress,subject,message")]EmailViewModel model)
+        public ActionResult ContactUser(PublicProfileViewModel model, string toUsername)
         {
-            // Send the email.
+            if (model.contactEmail.message == null)
+            {
+                return RedirectToAction("PublicProfile", "Account", new { username = toUsername });
+            }
 
-            SendEmailMessage(model);
+            var username = ClaimsPrincipal.Current.Identity.GetUserName();
+            if (username != "" && username != null)
+            {
+                IFB299Entities db = new IFB299Entities();
+                var fromUser = (from table in db.AspNetUsers
+                                 where table.UserName == username
+                                 select table).FirstOrDefault();
+
+                model.contactEmail.fromName = fromUser.FirstName + " " + fromUser.LastName;
+                model.contactEmail.fromAddress = fromUser.Email;
+                model.contactEmail.toName = model.targetUser.FirstName + " " + model.targetUser.LastName;
+                model.contactEmail.toAddress = model.targetUser.Email;
+                model.contactEmail.subject = "Contact from Texchange";
+                
+                //SendEmailMessage(model.contactEmail);
+            }
 
             return RedirectToAction("Index", "Home"); // until we setup returnUrl string
         }
