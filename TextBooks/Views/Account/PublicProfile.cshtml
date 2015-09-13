@@ -1,0 +1,15 @@
+﻿@model Tuple<TextBooks.AspNetUser, IEnumerable<TextBooks.Book>, IEnumerable<TextBooks.Book>>
+
+@{
+    ViewBag.Title = "PublicProfile";
+}
+<br />
+<div class="container">
+
+    @Html.DisplayFor(model => model.Item1.UserName)<br />
+    Html.DisplayFor(model[0] => model[0].Email)<br />
+    Html.DisplayFor(model[0] => model[0].PhoneNumber)<br />
+    Html.DisplayFor(model[0] => model[0].FirstName)<br />
+    Html.DisplayFor(model[0] => model[0].LastName)<br />
+
+</div>
