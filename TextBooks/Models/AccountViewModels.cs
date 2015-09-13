@@ -15,6 +15,14 @@ namespace TextBooks.Models
         public string ReturnUrl { get; set; }
     }
 
+    public class EmailViewModel
+    {
+        public string toAddress { get; set; }
+        public string fromAddress { get; set; }
+        public string subject { get; set; }
+        public string message { get; set; }
+    }
+
     public class SendCodeViewModel
     {
         public string SelectedProvider { get; set; }
