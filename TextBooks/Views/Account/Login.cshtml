@@ -14,17 +14,20 @@
                 <h4>Your username is the part before @@connect.qut.edu.au</h4>
                 <hr />
                 @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                
                 <div class="form-group">
                     @Html.LabelFor(m => m.Username, new { @class = "col-md-2 control-label" })
-                    <div class="col-md-10">
+                    <div class="col-xs-3">
                         @Html.TextBoxFor(m => m.Username, new { @class = "form-control" })
-                        @@connect.qut.edu.au
                         @Html.ValidationMessageFor(m => m.Username, "", new { @class = "text-danger" })
                     </div>
+                    <div class="col-xs-offset-1">
+                            @@connect.qut.edu.au
+                     </div>
                 </div>
                 <div class="form-group">
                     @Html.LabelFor(m => m.Password, new { @class = "col-md-2 control-label" })
-                    <div class="col-md-10">
+                    <div class="col-xs-3">
                         @Html.PasswordFor(m => m.Password, new { @class = "form-control" })
                         @Html.ValidationMessageFor(m => m.Password, "", new { @class = "text-danger" })
                     </div>
@@ -42,7 +45,7 @@
                 </div>
                 <div class="form-group">
                     <div class="col-md-offset-2 col-md-10">
-                        <input type="submit" value="Log in" class="btn btn-info" />
+                        <input type="submit" value="Log in" class="btn btn-default" />
                     </div>
                 </div>
             }
