@@ -6,9 +6,10 @@
     ViewBag.Title = "Details";
 }
 
-<h2>Book Details</h2>
+<h2>Details</h2>
 
 <div>
+    <h4>Book</h4>
     <hr />
     <dl class="dl-horizontal">
 
@@ -63,7 +64,5 @@
         </dd>
 
     </dl>
+    @Html.ActionLink("Back to List", "Index", null, new { @class = "btn btn-default" })
 </div>
-<p>
-    @Html.ActionLink("Back to List", "Index", null, new { @class="btn btn-default"})
-</p>

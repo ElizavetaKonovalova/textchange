@@ -78,36 +78,19 @@ namespace TextBooks.Controllers
             {
                 if (name != "")
                 {
-
-                    bool failed = false;
-
-                    if (book.ISBN == null)
-                    {
-                        ModelState.AddModelError("", "Book ISBN field can't be empty.");
-                        failed = true;
-                    }
                     if (book.Title == null)
                     {
                         ModelState.AddModelError("", "Book Title field can't be empty.");
-                        failed = true;
-                    }
-                    if (book.Author == null)
-                    {
-                        ModelState.AddModelError("", "Book Author field can't be empty.");
-                        failed = true;
+                        return View();
                     }
                     if (book.Year == null)
                     {
                         ModelState.AddModelError("", "Book Year field can't be empty.");
-                        failed = true;
+                        return View();
                     }
                     if (book.Edition == null)
                     {
                         ModelState.AddModelError("", "Book Edition field can't be empty.");
-                        failed = true;
-                    }
-
-                    if (failed == true) {
                         return View();
                     }
 
