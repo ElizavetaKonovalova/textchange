@@ -22,8 +22,8 @@
         </tr>
         <tr>
             <td>
-                @if (Model.HasPassword)
-                {
+            @if (Model.HasPassword)
+            {
                     @Html.ActionLink("Change your password", "ChangePassword", null, new { @class = "btn btn-default" })
                 }
                 else
@@ -40,11 +40,11 @@
                     @Html.ActionLink("Change", "AddPhoneNumber")
                     @: &nbsp;|&nbsp;
                     @Html.ActionLink("Remove", "RemovePhoneNumber")
-                }
-                else
-                {
+            }
+            else
+            {
                     @Html.ActionLink("Add", "AddPhoneNumber", null, new { @class = "btn btn-default"  })
-                }
+            }
             </td>
         </tr>
         @*

@@ -118,6 +118,33 @@ namespace TextBooks.Controllers
         }
 
         //
+        // GET: /Account/PublicProfile
+        [AllowAnonymous]
+        public ActionResult PublicProfile(string username)
+        {
+            IFB299Entities db = new IFB299Entities();
+            var user = (from table in db.AspNetUsers
+                        where table.UserName == username
+                        select table).FirstOrDefault();
+            if (user != null)
+            {
+                List<Book> booksOwned = (from table in db.Books
+                              where table.Owner == username
+                              select table).ToList();
+                if (booksOwned.Count == 0) booksOwned = null;
+
+                List<Book> booksBorrowed = (from table in db.Books
+                                         where table.BrwdBy == username
+                                         select table).ToList();
+                if (booksBorrowed.Count == 0) booksBorrowed = null;
+
+                Tuple<AspNetUser, IEnumerable<Book>, IEnumerable<Book>> result = new Tuple<AspNetUser, IEnumerable<Book>, IEnumerable<Book>>(user, booksOwned, booksBorrowed);
+                return View(result);
+            }
+            return View("Error");
+        }
+
+        //
         // GET: /Account/VerifyCode
         [AllowAnonymous]
         public async Task<ActionResult> VerifyCode(string provider, string returnUrl, bool rememberMe)

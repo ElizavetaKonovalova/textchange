@@ -1,0 +1,71 @@
+﻿@model Tuple<TextBooks.AspNetUser, IEnumerable<TextBooks.Book>, IEnumerable<TextBooks.Book>>
+
+@{
+    ViewBag.Title = "PublicProfile";
+}
+<br />
+<div class="container">
+
+    <b>User:</b><br />
+    @Html.DisplayFor(model => model.Item1.FirstName)<br />
+    @Html.DisplayFor(model => model.Item1.LastName)<br />
+    @Html.DisplayFor(model => model.Item1.Email)<br />
+    @Html.DisplayFor(model => model.Item1.PhoneNumber)<br />
+
+    <br />
+
+    <table>
+        <tr>
+            <th>
+                @Html.DisplayFor(model => model.Item1.FirstName)'s Books
+            </th>
+        </tr>
+        @if (Model.Item2 == null)
+        {
+            <tr>
+                <td>
+                    No books to show.
+                </td>
+            </tr>
+        }
+        else
+        {
+            foreach (var item in Model.Item2)
+            {
+                <tr>
+                    <td>
+                        @Html.ActionLink((item.Title), "Details", "Books", new { id = item.B_ID }, null)
+                    </td>
+                </tr>
+            }
+        }
+    </table>
+    <br />
+
+    <table>
+        <tr>
+            <th>
+                @Html.DisplayFor(model => model.Item1.FirstName) is borrowing
+            </th>
+        </tr>
+        @if (Model.Item3 == null)
+        {
+            <tr>
+                <td>
+                    No books to show.
+                </td>
+            </tr>
+        } else
+        {
+            foreach (var item in Model.Item3)
+            {
+                <tr>
+                    <td>
+                        @Html.ActionLink((item.Title), "Details", "Books", new { id = item.B_ID }, null)
+                    </td>
+                </tr>
+            }
+        }
+    </table>
+    <br />
+</div>

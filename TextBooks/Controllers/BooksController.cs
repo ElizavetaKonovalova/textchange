@@ -83,6 +83,17 @@ namespace TextBooks.Controllers
                         ModelState.AddModelError("", "Book Title field can't be empty.");
                         return View();
                     }
+                    if (book.Year == null)
+                    {
+                        ModelState.AddModelError("", "Book Year field can't be empty.");
+                        return View();
+                    }
+                    if (book.Edition == null)
+                    {
+                        ModelState.AddModelError("", "Book Edition field can't be empty.");
+                        return View();
+                    }
+
                     db.Books.Add(book);
                     book.Owner = name;
                     db.SaveChanges();

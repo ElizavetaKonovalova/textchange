@@ -1,5 +1,7 @@
 ﻿@model TextBooks.Book
 
+
+
 @{
     ViewBag.Title = "Details";
 }
@@ -49,6 +51,16 @@
 
         <dd>
             @Html.DisplayFor(model => model.Year)
+        </dd>
+
+        <br>
+
+        <dt>
+            Owner profile:
+        </dt>
+        <!-- This will link to the user's public profile page when done -->
+        <dd>
+            @Html.ActionLink(Model.Owner, "PublicProfile", "Account", new { username = Model.Owner }, null)
         </dd>
 
     </dl>
