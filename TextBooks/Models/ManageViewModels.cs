@@ -83,4 +83,17 @@ namespace TextBooks.Models
         public string SelectedProvider { get; set; }
         public ICollection<System.Web.Mvc.SelectListItem> Providers { get; set; }
     }
+
+    public class ViewMyBooks
+    {
+        public string BookTitle { get; set; }
+        public string Author { get; set; }
+        public string Edition { get; set; }
+        public string Year { get; set; }
+        public string ISBN { get; set; }
+        public int B_ID { get; set; }
+        public string Owner { get; set; }
+
+        public IEnumerable<ViewMyBooks> BookDetails { get; set; }
+    }
 }

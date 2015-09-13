@@ -118,18 +118,18 @@ namespace TextBooks.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit([Bind(Include = "B_ID,ISBN,Title,Author,Edition,Year")] Book book)
+        public ActionResult Edit([Bind(Include = "B_ID,ISBN,Title,Author,Edition,Year,Owner")] Book book)
         {
             if (ModelState.IsValid)
             {
                 db.Entry(book).State = EntityState.Modified;
                 db.SaveChanges();
-                return RedirectToAction("Index");
+                return RedirectToAction("../Manage/ViewMyBooks");
             }
             return View(book);
         }
 
-        // GET: Books/Delete/5
+        // GET: Books/Delete/id
         public ActionResult Delete(int? id)
         {
             if (id == null)
@@ -152,7 +152,7 @@ namespace TextBooks.Controllers
             Book book = db.Books.Find(id);
             db.Books.Remove(book);
             db.SaveChanges();
-            return RedirectToAction("Index");
+            return RedirectToAction("../Manage/ViewMyBooks");
         }
 
         protected override void Dispose(bool disposing)
