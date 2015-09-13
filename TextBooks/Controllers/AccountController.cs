@@ -128,12 +128,17 @@ namespace TextBooks.Controllers
                         select table).FirstOrDefault();
             if (user != null)
             {
+                List<Book> booksOwned = (from table in db.Books
+                              where table.Owner == username
+                              select table).ToList();
+                if (booksOwned.Count == 0) booksOwned = null;
 
-                List<Book> booksOwned = new List<Book>();
-                List<Book> booksBorrowed = new List<Book>();
+                List<Book> booksBorrowed = (from table in db.Books
+                                         where table.BrwdBy == username
+                                         select table).ToList();
+                if (booksBorrowed.Count == 0) booksBorrowed = null;
 
-                Tuple<AspNetUser, List<Book>, List<Book>> result = new Tuple<AspNetUser, List<Book>, List<Book>>(user, booksOwned, booksBorrowed);
-
+                Tuple<AspNetUser, IEnumerable<Book>, IEnumerable<Book>> result = new Tuple<AspNetUser, IEnumerable<Book>, IEnumerable<Book>>(user, booksOwned, booksBorrowed);
                 return View(result);
             }
             return View("Error");
