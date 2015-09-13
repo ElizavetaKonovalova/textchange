@@ -7,12 +7,14 @@ using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.Owin;
 using Microsoft.Owin.Security;
 using TextBooks.Models;
+using System.Security.Claims;
 
 namespace TextBooks.Controllers
 {
     [Authorize]
     public class ManageController : Controller
     {
+        private IFB299Entities db = new IFB299Entities();
         private ApplicationSignInManager _signInManager;
         private ApplicationUserManager _userManager;
 
@@ -112,22 +114,38 @@ namespace TextBooks.Controllers
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> AddPhoneNumber(AddPhoneNumberViewModel model)
         {
+            string currentLoggedInUser = null;
+            if (ClaimsPrincipal.Current.Identity.IsAuthenticated)
+                currentLoggedInUser = ClaimsPrincipal.Current.Identity.Name;
+
             if (!ModelState.IsValid)
             {
                 return View(model);
             }
-            // Generate the token and send it
-            var code = await UserManager.GenerateChangePhoneNumberTokenAsync(User.Identity.GetUserId(), model.Number);
-            if (UserManager.SmsService != null)
+            //// Generate the token and send it
+            //var code = await UserManager.GenerateChangePhoneNumberTokenAsync(User.Identity.GetUserId(), model.Number);
+            //if (UserManager.SmsService != null)
+            //{
+            //    var message = new IdentityMessage
+            //    {
+            //        Destination = model.Number,
+            //        Body = "Your security code is: " + code
+            //    };
+            //    await UserManager.SmsService.SendAsync(message);
+            //}
+            //return RedirectToAction("VerifyPhoneNumber", new { PhoneNumber = model.Number });
+            else 
             {
-                var message = new IdentityMessage
-                {
-                    Destination = model.Number,
-                    Body = "Your security code is: " + code
-                };
-                await UserManager.SmsService.SendAsync(message);
+                //var phone = (from users in db.AspNetUsers
+                //             where users.UserName == currentLoggedInUser
+                //             select new { Value = users.PhoneNumber }).ToString();
+
+                //if (String.IsNullOrEmpty(phone))
+                //{
+                    
+                //}
             }
-            return RedirectToAction("VerifyPhoneNumber", new { PhoneNumber = model.Number });
+            return Redirect("Index");
         }
 
         //
@@ -295,6 +313,28 @@ namespace TextBooks.Controllers
                 CurrentLogins = userLogins,
                 OtherLogins = otherLogins
             });
+        }
+
+        //
+        //GET: /Manage/ViewMyBooks
+        public ActionResult ViewMyBooks()
+        {
+            string currentLoggedInUser = null;
+            if (ClaimsPrincipal.Current.Identity.IsAuthenticated)
+                currentLoggedInUser = ClaimsPrincipal.Current.Identity.Name;
+
+            var books = (from book in db.Books
+                         where book.Owner == currentLoggedInUser
+                       select new ViewMyBooks { Author = book.Author, BookTitle = book.Title,
+                           Edition = book.Edition, ISBN = book.ISBN, Year = book.Year, B_ID = book.B_ID, 
+                           Owner = book.Owner }).AsEnumerable();
+
+            ViewMyBooks model = new ViewMyBooks
+            {
+                BookDetails = books
+            };
+
+            return View(model);
         }
 
         //

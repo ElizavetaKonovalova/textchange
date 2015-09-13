@@ -66,6 +66,7 @@ namespace TextBooks.Models
         [Display(Name = "Password")]
         public string Password { get; set; }
 
+        [Required]
         [Display(Name = "Username")]
         public string Username { get; set; }
 
