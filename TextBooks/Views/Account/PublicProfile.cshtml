@@ -68,4 +68,39 @@
         }
     </table>
     <br />
+    <br />
+
+    <!-- Button trigger modal -->
+    <button type="button" class="btn btn-primary btn-lg" data-toggle="modal" data-target="#myModal">
+        Contact this user
+    </button>
+
+    <!-- Modal -->
+    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <!--Get the user's name so that it can show up the top of the modal-->
+                    @{
+                        string userContacted = Model.Item1.FirstName;
+                    }
+                    <h4 class="modal-title" id="myModalLabel">Sending message to user: @userContacted</h4>
+                </div>
+                <div class="modal-body">
+                    <form accept-charset="UTF-8" action="" method="POST">
+                        <!--This is where the user types in their message-->
+                        <textarea class="form-control" id="text" name="text" placeholder="Type in your message" rows="5"></textarea>                
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <!--Cancel and submit buttons. No idea how the submit will send the stuff to the controller-->
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                    <input class="btn btn-primary" type="submit"/>
+
+                </div>
+            </div>
+        </div>
+    </div>
+    <br />
 </div>
