@@ -78,19 +78,36 @@ namespace TextBooks.Controllers
             {
                 if (name != "")
                 {
+
+                    bool failed = false;
+
+                    if (book.ISBN == null)
+                    {
+                        ModelState.AddModelError("", "Book ISBN field can't be empty.");
+                        failed = true;
+                    }
                     if (book.Title == null)
                     {
                         ModelState.AddModelError("", "Book Title field can't be empty.");
-                        return View();
+                        failed = true;
+                    }
+                    if (book.Author == null)
+                    {
+                        ModelState.AddModelError("", "Book Author field can't be empty.");
+                        failed = true;
                     }
                     if (book.Year == null)
                     {
                         ModelState.AddModelError("", "Book Year field can't be empty.");
-                        return View();
+                        failed = true;
                     }
                     if (book.Edition == null)
                     {
                         ModelState.AddModelError("", "Book Edition field can't be empty.");
+                        failed = true;
+                    }
+
+                    if (failed == true) {
                         return View();
                     }
 
@@ -129,18 +146,18 @@ namespace TextBooks.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit([Bind(Include = "B_ID,ISBN,Title,Author,Edition,Year")] Book book)
+        public ActionResult Edit([Bind(Include = "B_ID,ISBN,Title,Author,Edition,Year,Owner")] Book book)
         {
             if (ModelState.IsValid)
             {
                 db.Entry(book).State = EntityState.Modified;
                 db.SaveChanges();
-                return RedirectToAction("Index");
+                return RedirectToAction("../Manage/ViewMyBooks");
             }
             return View(book);
         }
 
-        // GET: Books/Delete/5
+        // GET: Books/Delete/id
         public ActionResult Delete(int? id)
         {
             if (id == null)
@@ -163,7 +180,7 @@ namespace TextBooks.Controllers
             Book book = db.Books.Find(id);
             db.Books.Remove(book);
             db.SaveChanges();
-            return RedirectToAction("Index");
+            return RedirectToAction("../Manage/ViewMyBooks");
         }
 
         protected override void Dispose(bool disposing)
