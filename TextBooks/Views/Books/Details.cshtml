@@ -60,7 +60,7 @@
         </dt>
         <!-- This will link to the user's public profile page when done -->
         <dd>
-            @Html.DisplayFor(model => model.Owner)
+            @Html.ActionLink(Model.Owner, "PublicProfile", "Account", new { username = Model.Owner }, null)
         </dd>
 
     </dl>
