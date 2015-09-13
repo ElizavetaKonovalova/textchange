@@ -79,7 +79,9 @@
                 @Html.DisplayFor(modelItem => item.Year)
             </td>
             <td>
-                @Html.ActionLink(item.Owner, "PublicProfile", "Account", new { username = item.Owner }, null)
+
+                @Html.ActionLink((item.Owner), "PublicProfile", "Account", new { username = item.Owner }, null)
+
             </td>
             <td>
                 @Html.ActionLink("Edit", "Edit", new { id = item.B_ID }) |
