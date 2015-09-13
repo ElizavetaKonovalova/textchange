@@ -73,6 +73,45 @@
 
     </table>
 
+    <br />
+
+    <!-- Button trigger modal -->
+    <button type="button" class="btn btn-primary btn-lg" data-toggle="modal" data-target="#myModal">
+    Contact this user
+    </button>
+    
+    <!-- Modal -->
+    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <!--Get the user's name so that it can show up the top of the modal-->
+                    @{
+                    string userContacted = Model.targetUser.FirstName + " " + Model.targetUser.LastName;
+                    }
+                    <h4 class="modal-title" id="myModalLabel">Sending message to user: @userContacted</h4>
+                </div>
+                <div class="modal-body">
+                    <form id="modal-form" accept-charset="UTF-8" action="" method="POST">
+                        <!--This is where the user types in their message-->
+                        @Html.TextAreaFor(model => model.contactEmail.message,
+                        new {   @class = "form-control",
+                                @style = "width:100%",
+                                @placeholder = "Type in your message",
+                                @rows="8"})
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <!--Cancel and submit buttons. Not sure if it should be a button or just input-->
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                    <input class="btn btn-primary" type="submit" />
+                </div>
+            </div>
+        </div>
+    </div>
+    <br />
+
     @using (Html.BeginForm("ContactUser", "Account", new { toUsername = Model.targetUser.UserName }, FormMethod.Post))
     {
         @Html.AntiForgeryToken()
