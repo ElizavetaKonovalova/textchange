@@ -261,6 +261,37 @@ namespace TextBooks.Controllers
             // If we got this far, something failed, redisplay form
             return View(model);
         }
+        
+        private void SendEmailMessage(EmailViewModel model)
+        {
+            try
+            {
+                // remove these
+                model.toAddress = "a16.cooper@connect.qut.edu.au";
+                model.fromAddress = "andy90@me.com";
+                model.subject = "test subject";
+                // end remove
+
+                var body = model.message;
+                var message = new MailMessage();
+                message.To.Add(new MailAddress(model.toAddress, "ToName"));  // replace with valid value 
+                message.From = new MailAddress(model.fromAddress, "FromName");  // replace with valid value
+                message.Subject = model.subject;
+                message.Body = string.Format(body, "noreply", "ifb299books@gmail.com", message);
+                message.IsBodyHtml = true;
+
+                // Init SmtpClient and send
+                SmtpClient smtpClient = new SmtpClient("smtp.sendgrid.net", Convert.ToInt32(587));
+                NetworkCredential credentials = new NetworkCredential("ifb299", "IFB299Password");
+                smtpClient.Credentials = credentials;
+
+                smtpClient.Send(message);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+        }
 
         private void SendVerificationEmail(string code, string callbackURL, string firstName, string email)
         {
@@ -652,6 +683,17 @@ namespace TextBooks.Controllers
                 return HttpNotFound();
             }
 
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult SendEmail([Bind(Include = "toAddress,fromAddress,subject,message")]EmailViewModel model)
+        {
+            // Send the email.
+
+            SendEmailMessage(model);
+
+            return RedirectToAction("Index", "Home"); // until we setup returnUrl string
         }
 
         public IEnumerable<ViewAccounts> GetAllAccounts()

@@ -66,6 +66,37 @@
                 </tr>
             }
         }
+
+        
+
+
+
     </table>
+
+    @{
+        TextBooks.Models.EmailViewModel email = new TextBooks.Models.EmailViewModel();
+    }
+
+    @using (Html.BeginForm("SendEmail", "Account", FormMethod.Post))
+    {
+        @Html.AntiForgeryToken()
+        <div class="form-horizontal">
+            <h2><strong>Sending an email</strong></h2>
+            <hr />
+
+            <div class="form-group">
+                <label class="control-label col-md-2">
+                    Message to Send...
+                </label>
+                <div class="col-md-10">
+                    @Html.TextBoxFor(model => email.message, new { @class = "form-control" })
+                </div>
+            </div>
+
+            <input type="submit" value="Change" class="btn btn-info" />
+        </div>
+    }
+
+
     <br />
 </div>
