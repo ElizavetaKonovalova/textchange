@@ -46,12 +46,11 @@
                             @Html.DisplayFor(modelItem => account.Email)
                         </td>
                         <td class="col-xs-2" style="text-align: center">
-                            <button type="submit" value=@account.Id class="btn btn-info" name ="id" >Delete</button>
+                            <button type="submit" value=@account.Id class="btn btn-info" name ="id" onclick="window.alert('You have successfully deleted the account')" >Delete</button>
                             @Html.ActionLink("Edit", "Edit", "Account", new { id = account.Id }, new { @class = "btn btn-info" })
                         </td>
                     </tr>
                 }
 
-            </table>
-            
+           </table>
 }
