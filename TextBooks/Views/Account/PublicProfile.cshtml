@@ -24,10 +24,30 @@
         }
     }
 
-    <h1><I>
+    <h1>
         @Html.DisplayFor(model => model.targetUser.FirstName)
         @Html.DisplayFor(model => model.targetUser.LastName)
-    </I></h1>
+    </h1>
+
+
+    <div>
+        <b>Rating:</b>
+        <span class="thumbs-up">
+            @Model.targetUser.ThumbsUp <span class="glyphicon glyphicon-thumbs-up"></span>
+        </span>
+        <span class="thumbs-down">
+            @Model.targetUser.ThumbsDown <span class="glyphicon glyphicon-thumbs-down"></span>
+        </span>
+    </div>
+    <style>
+        .thumbs-up {
+            color: mediumseagreen;
+        }
+        .thumbs-down {
+            color:red;
+        }
+    </style>
+    
     <br />
     <b>Email: </b> @Html.DisplayFor(model => model.targetUser.Email)<br />
     @if (Model.targetUser.PhoneNumber != null)
@@ -46,7 +66,6 @@
 
     <br />
     <br />
-
     <table>
         <tr>
             <th>
