@@ -217,6 +217,10 @@ input::-moz-focus-inner {
 textarea {
   overflow: auto;
   vertical-align: top;
+
+  min-width: 100%;
+  width: 100%;
+
 }
 
 table {
