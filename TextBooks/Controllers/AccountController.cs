@@ -120,7 +120,7 @@ namespace TextBooks.Controllers
         //
         // GET: /Account/PublicProfile
         [AllowAnonymous]
-        public ActionResult PublicProfile(string username)
+        public ActionResult PublicProfile(string username, string emailsent)
         {
             IFB299Entities db = new IFB299Entities();
             PublicProfileViewModel result = new PublicProfileViewModel();
@@ -139,6 +139,17 @@ namespace TextBooks.Controllers
                                          where table.BrwdBy == username
                                          select table).ToList();
                 if (result.booksBorrowed.Count == 0) result.booksBorrowed = null;
+
+                if (emailsent == "success")
+                {
+                    result.contactEmail = new Email();
+                    result.contactEmail.success = true;
+                }
+                if (emailsent == "error")
+                {
+                    result.contactEmail = new Email();
+                    result.contactEmail.success = false;
+                }
                 
                 return View(result);
             }
@@ -645,29 +656,54 @@ namespace TextBooks.Controllers
         }
 
         [HttpPost]
-        [ValidateAntiForgeryToken]
+        //[ValidateAntiForgeryToken]
         public ActionResult ContactUser(PublicProfileViewModel model, string toUsername)
         {
-            if (model.contactEmail.message == null)
+            // Check that the model has been passed in with a valid mail message
+            Email mailMessage = model.contactEmail;
+            if (mailMessage.message == null)
             {
-                return RedirectToAction("PublicProfile", "Account", new { username = toUsername });
+                // todo: should pop an alert to let them know the email wasn't sent because it was empty.
+                return RedirectToAction("PublicProfile", "Account", new { username = toUsername, emailsent = "error" });
             }
 
-            var username = ClaimsPrincipal.Current.Identity.GetUserName();
-            if (username != "" && username != null)
+            string fromUsername = ClaimsPrincipal.Current.Identity.GetUserName();
+
+            if (fromUsername != "" && fromUsername != null)
             {
                 IFB299Entities db = new IFB299Entities();
-                var fromUser = (from table in db.AspNetUsers
-                                 where table.UserName == username
+                AspNetUser fromUser = (from table in db.AspNetUsers
+                                 where table.UserName == fromUsername
                                  select table).FirstOrDefault();
 
-                model.contactEmail.fromName = fromUser.FirstName + " " + fromUser.LastName;
-                model.contactEmail.fromAddress = fromUser.Email;
-                model.contactEmail.toName = model.targetUser.FirstName + " " + model.targetUser.LastName;
-                model.contactEmail.toAddress = model.targetUser.Email;
-                model.contactEmail.subject = "Contact from Texchange";
-                
-                //SendEmailMessage(model.contactEmail);
+                AspNetUser toUser = (from table in db.AspNetUsers
+                              where table.UserName == toUsername
+                              select table).FirstOrDefault();
+
+                if (fromUser == null || toUser == null)
+                {
+                    return View("Error");
+                }
+
+                mailMessage.fromName = fromUser.FirstName + " " + fromUser.LastName;
+                mailMessage.fromAddress = fromUser.Email;
+                mailMessage.toName = toUser.FirstName+ " " + toUser.LastName;
+                mailMessage.toAddress = toUser.Email;
+                mailMessage.subject = "Contact from Texchange";
+
+                // Swap out our new lines chars for html line breaks, in order to preserve formatting.
+                mailMessage.message = mailMessage.message.Replace(System.Environment.NewLine, "<br />");
+                mailMessage.message = "Hi " + toUser.FirstName + ",<br /><br />You've received a message from "
+                    + fromUser.FirstName + " " + fromUser.LastName + " on Texchange:<br /><br /><em>"
+                    + "Hi " + toUser.FirstName + ",<br/>" + mailMessage.message
+                    + "</em><br /><br />" + "<b>You can reply to this email to contact " + fromUser.FirstName
+                    + ".</b><br /><br />" + "Kind Regards,<br />The Texchange Team";
+
+                bool result = SendEmailMessage(mailMessage);
+                if (result)
+                {
+                    return RedirectToAction("PublicProfile", "Account", new { username = toUsername, emailsent = "success" });
+                }
             }
 
             return RedirectToAction("Index", "Home"); // until we setup returnUrl string

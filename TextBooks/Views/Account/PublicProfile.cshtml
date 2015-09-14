@@ -6,18 +6,51 @@
 <br />
 <div class="container">
 
-    <h1><I>@Html.DisplayFor(model => model.targetUser.FirstName)</I></h1>
-    <h5><b>@Html.DisplayFor(model => model.targetUser.LastName)</b></h5>
-    <br />
-    @Html.DisplayFor(model => model.targetUser.Email)<br />
-    @Html.DisplayFor(model => model.targetUser.PhoneNumber)<br />
+    @if (Model.contactEmail != null)
+    {
+        if (Model.contactEmail.success == true)
+        {
+            <div class="alert alert-success alert-dismissible" role="alert">
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <strong>Success!</strong> Your message has been sent.
+            </div>
+        }
+        else
+        {
+            <div class="alert alert-warning alert-dismissible" role="alert">
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <strong>Oops!</strong> Your message wasn't sent. Was it empty?
+            </div>
+        }
+    }
 
+    <h1><I>
+        @Html.DisplayFor(model => model.targetUser.FirstName)
+        @Html.DisplayFor(model => model.targetUser.LastName)
+    </I></h1>
+    <br />
+    <b>Email: </b> @Html.DisplayFor(model => model.targetUser.Email)<br />
+    @if (Model.targetUser.PhoneNumber != null)
+    {
+        <b>Phone: </b>@Html.DisplayFor(model => model.targetUser.PhoneNumber)<br />
+    } else
+    {
+        <em>No phone number listed.</em><br />
+    }
+    <br />
+
+    <!-- Button trigger modal -->
+    <button type="button" class="btn btn-default btn-sm" data-toggle="modal" data-target="#myModal">
+        Send Email
+    </button>
+
+    <br />
     <br />
 
     <table>
         <tr>
             <th>
-                @Html.DisplayFor(model => model.targetUser.FirstName)'s Books
+                @Html.DisplayFor(model => model.targetUser.FirstName)'s Books:
             </th>
         </tr>
         @if (Model.booksOwned == null)
@@ -41,11 +74,10 @@
         }
     </table>
     <br />
-
     <table>
         <tr>
             <th>
-                @Html.DisplayFor(model => model.targetUser.FirstName) is borrowing
+                @Html.DisplayFor(model => model.targetUser.FirstName) is Borrowing:
             </th>
         </tr>
         @if (Model.booksBorrowed == null)
@@ -66,19 +98,9 @@
                 </tr>
             }
         }
-
-        
-
-
-
     </table>
-
     <br />
 
-    <!-- Button trigger modal -->
-    <button type="button" class="btn btn-primary btn-lg" data-toggle="modal" data-target="#myModal">
-    Contact this user
-    </button>
     
     <!-- Modal -->
     <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
@@ -88,50 +110,37 @@
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                     <!--Get the user's name so that it can show up the top of the modal-->
                     @{
-                    string userContacted = Model.targetUser.FirstName + " " + Model.targetUser.LastName;
+                    string toUserFullName = Model.targetUser.FirstName + " " + Model.targetUser.LastName;
                     }
-                    <h4 class="modal-title" id="myModalLabel">Sending message to user: @userContacted</h4>
+                    <h4 class="modal-title" id="myModalLabel">Contact @toUserFullName</h4>
                 </div>
                 <div class="modal-body">
-                    <form id="modal-form" accept-charset="UTF-8" action="" method="POST">
+                    @using (Html.BeginForm("ContactUser", "Account", new { toUsername = Model.targetUser.UserName }, FormMethod.Post, new { id = "modal-form" }))
+                    {
+                        <p>Hi @Model.targetUser.FirstName,</p>
                         <!--This is where the user types in their message-->
                         @Html.TextAreaFor(model => model.contactEmail.message,
-                        new {   @class = "form-control",
-                                @style = "width:100%",
-                                @placeholder = "Type in your message",
-                                @rows="8"})
-                    </form>
+                            new { @class = "form-control col-md-12",
+                                @style = "min-width: 100%",
+                                @placeholder = "Type your message for " + Model.targetUser.FirstName + " here.",
+                                @rows ="8"})
+                    }
                 </div>
                 <div class="modal-footer">
                     <!--Cancel and submit buttons. Not sure if it should be a button or just input-->
                     <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-                    <input class="btn btn-primary" type="submit" />
+                    <input id="btn-submit" class="btn btn-primary" type="submit" value="Send Message" />
+                    <script type="text/javascript">
+                        document.getElementById("btn-submit").onclick = function () {
+                            var form = document.getElementById("modal-form");
+                            form.submit();
+                        }
+                    </script>
                 </div>
             </div>
         </div>
     </div>
     <br />
-
-    @using (Html.BeginForm("ContactUser", "Account", new { toUsername = Model.targetUser.UserName }, FormMethod.Post))
-    {
-        @Html.AntiForgeryToken()
-        <div class="form-horizontal">
-            <h2><strong>Sending an email</strong></h2>
-            <hr />
-
-            <div class="form-group">
-                <label class="control-label col-md-2">
-                    Message to Send:
-                </label>
-                <div class="col-md-10">
-                    @Html.TextBoxFor(model => model.contactEmail.message, new { @class = "form-control" })
-                    @Html.HiddenFor(model => model.targetUser.UserName)
-                </div>
-            </div>
-            <input type="submit" value="Send" class="btn btn-info" />
-        </div>
-    }
-
 
     <br />
 </div>

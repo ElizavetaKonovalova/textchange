@@ -41,6 +41,9 @@ namespace TextBooks.Models
         // Subject & Message
         public string subject { get; set; }
         public string message { get; set; }
+
+        // Success / fail
+        public bool success { get; set; }
     }
 
     public class SendCodeViewModel
