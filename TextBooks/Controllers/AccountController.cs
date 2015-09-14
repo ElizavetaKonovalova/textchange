@@ -24,14 +24,14 @@ namespace TextBooks.Controllers
         private ApplicationSignInManager _signInManager;
         private ApplicationUserManager _userManager;
 
+        public AccountController()
+        {
+        }
+
         [AllowAnonymous]
         public ActionResult VerifyEmail()
         {
             return View();
-        }
-
-        public AccountController()
-        {
         }
 
         public AccountController(ApplicationUserManager userManager, ApplicationSignInManager signInManager )
@@ -94,13 +94,12 @@ namespace TextBooks.Controllers
             {
                 if (!user.EmailConfirmed)
                 {
+                    // If they're unverified, send them to the appropriate view.
                     return View("ConfirmEmail");
                 }
             }
 
-
-            // This doesn't count login failures towards account lockout
-            // To enable password failures to trigger account lockout, change to shouldLockout: true
+            // "shouldLockout: false" means that users won't get locked out for repeated incorrect passwords. This is okay for now.
             var result = await SignInManager.PasswordSignInAsync(model.Username, model.Password, model.RememberMe, shouldLockout: false);
             switch (result)
             {
@@ -120,27 +119,49 @@ namespace TextBooks.Controllers
         //
         // GET: /Account/PublicProfile
         [AllowAnonymous]
-        public ActionResult PublicProfile(string username)
+        public ActionResult PublicProfile(string username, string emailsent)
         {
             IFB299Entities db = new IFB299Entities();
-            var user = (from table in db.AspNetUsers
+            PublicProfileViewModel result = new PublicProfileViewModel();
+
+            // Get the target user
+            result.targetUser = (from table in db.AspNetUsers
                         where table.UserName == username
                         select table).FirstOrDefault();
-            if (user != null)
+
+            // Check the user was found
+            if (result.targetUser != null)
             {
-                List<Book> booksOwned = (from table in db.Books
+                // List all the books owned by the target user
+                result.booksOwned = (from table in db.Books
                               where table.Owner == username
                               select table).ToList();
-                if (booksOwned.Count == 0) booksOwned = null;
+                if (result.booksOwned.Count == 0) result.booksOwned = null;
 
-                List<Book> booksBorrowed = (from table in db.Books
+                // List all the books being borrowed by the target user
+                result.booksBorrowed = (from table in db.Books
                                          where table.BrwdBy == username
                                          select table).ToList();
-                if (booksBorrowed.Count == 0) booksBorrowed = null;
+                if (result.booksBorrowed.Count == 0) result.booksBorrowed = null;
 
-                Tuple<AspNetUser, IEnumerable<Book>, IEnumerable<Book>> result = new Tuple<AspNetUser, IEnumerable<Book>, IEnumerable<Book>>(user, booksOwned, booksBorrowed);
+                // If we've already tried to send a contact email, save this into 
+                // the model so the view can display an appropriate message
+                if (emailsent == "success")
+                {
+                    result.contactEmail = new Email();
+                    result.contactEmail.success = true;
+                }
+                if (emailsent == "error")
+                {
+                    result.contactEmail = new Email();
+                    result.contactEmail.success = false;
+                }
+                
+                // Done
                 return View(result);
             }
+            // There should be no links on the site to users that don't exist
+            // If for some reason there is, let's show an error page
             return View("Error");
         }
 
@@ -206,7 +227,7 @@ namespace TextBooks.Controllers
             {
                 var user = new ApplicationUser { UserName = model.Email.Split('@')[0], Email = model.Email, PhoneNumber = model.ContactNumber };
 
-                // Check email address is okay.
+                // Check email address is okay
                 string addressSuffix = user.Email.Split('@')[1];
                 if (!addressSuffix.Equals("connect.qut.edu.au") || user.Email == "ifb299books@gmail.com")
                 {
@@ -214,40 +235,34 @@ namespace TextBooks.Controllers
                     return View(model);
                 }
                 
-                // Create the account!
+                // Create the account
                 var result = await UserManager.CreateAsync(user, model.Password);
                 if (result.Succeeded)
                 {
-                    // Add firstname, lastname & optional contact number
-
-                    // Create entity for db
+                    // Create Entities object for database access
                     IFB299Entities db = new IFB299Entities();
                     var currentUser = (from table in db.AspNetUsers
                                        where table.Email == user.Email
                                        select table).FirstOrDefault();
 
                     if (currentUser != null)
-                    {
-                        // Sign in the new user account
-                        //await SignInManager.SignInAsync(user, isPersistent: false, rememberBrowser: false);
-                        
+                    {                      
                         // Add details to database record
                         currentUser.FirstName = model.FirstName;
                         currentUser.LastName = model.LastName;
                         currentUser.ContactNumber = model.ContactNumber;
                         db.SaveChanges();
 
-                        // Send an email with this link
+                        // Send an email with link to a confirmation code, used to verify their account
                         string code = await UserManager.GenerateEmailConfirmationTokenAsync(user.Id);
                         var callbackUrl = Url.Action("ConfirmEmail", "Account", new { userId = user.Id, code = code }, protocol: Request.Url.Scheme);
-                        // await UserManager.SendEmailAsync(user.Id, "Confirm your account", "Please confirm your account by clicking <a href=\"" + callbackUrl + "\">here</a>");
                         SendVerificationEmail(code, callbackUrl, currentUser.FirstName, currentUser.Email);
 
-                        // Send them on their way
+                        // If the page user is the admin show them the accounts, otherwise prompt them to check their email.
                         if (user.UserName.Equals("ifb299books"))
                         {
                             return RedirectToAction("ViewAccounts", "Account");
-                    }
+                        }
                         else
                         {
                             return RedirectToAction("VerifyEmail", "Account");
@@ -255,40 +270,73 @@ namespace TextBooks.Controllers
                     }
 
                 }
-                // Otherwise, add errors
+                // If we failed to create the user account
+                // (or if the account was created but then couldn't be found (i.e. database errors))
                 AddErrors(result);
             }
-            // If we got this far, something failed, redisplay form
+            // If we got this far, something failed. Let's redisplay the Register form (with errors).
             return View(model);
         }
-
-        private void SendVerificationEmail(string code, string callbackURL, string firstName, string email)
+        
+        private bool SendEmailMessage(Email model)
         {
-            // SENDGRID - waiting for provisioning. Appears to work on Azure as well as locally, but emails not sent until provisioning is complete.
             try
             {
+                // Get message from Email class
+                string body = model.message;
 
-
-                var body = "Hi " + firstName + ",\nPlease confirm your account by clicking <a href =\"" + callbackURL + "\">here</a>.";
+                // Setup a new MailMessage to send to target user
                 var message = new MailMessage();
-                message.To.Add(new MailAddress(email, firstName));  // replace with valid value 
-                message.From = new MailAddress("ifb299books@gmail.com", "noreply");  // replace with valid value
-                message.Subject = "Verify Texchange Account";
-                message.Body = string.Format(body, "noreply", "ifb299books@gmail.com", message);
+                message.To.Add(new MailAddress(model.toAddress, model.toName));
+                message.From = new MailAddress(model.fromAddress, model.fromName);
+                message.Subject = model.subject;
+                message.Body = string.Format(body);
                 message.IsBodyHtml = true;
 
-
-
-                // Init SmtpClient and send
+                // Init SmtpClient with credentials for the SendGrid Account
                 SmtpClient smtpClient = new SmtpClient("smtp.sendgrid.net", Convert.ToInt32(587));
                 NetworkCredential credentials = new NetworkCredential("ifb299", "IFB299Password");
                 smtpClient.Credentials = credentials;
 
+                // Send the email
                 smtpClient.Send(message);
+
+                // If we got this far, the email has been sent. Return true.s
+                return true;
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
+                return false;
+            }
+        }
+
+        private void SendVerificationEmail(string code, string callbackURL, string firstName, string email)
+        {
+            try
+            {
+                string body = "Hi " + firstName + ",\nPlease confirm your account by clicking <a href =\"" + callbackURL + "\">here</a>.";
+
+                // Setup MailMessage ready for sending
+                MailMessage message = new MailMessage();
+                message.To.Add(new MailAddress(email, firstName)); 
+                message.From = new MailAddress("ifb299books@gmail.com", "noreply");
+                message.Subject = "Verify Texchange Account";
+                message.Body = string.Format(body, "noreply", "ifb299books@gmail.com", message);
+                message.IsBodyHtml = true;
+                
+                // Init SmtpClient with credentials from the SendGrid account
+                SmtpClient smtpClient = new SmtpClient("smtp.sendgrid.net", Convert.ToInt32(587));
+                NetworkCredential credentials = new NetworkCredential("ifb299", "IFB299Password");
+                smtpClient.Credentials = credentials;
+
+                // Send the email
+                smtpClient.Send(message);
+            }
+            catch (Exception e)
+            {
+                // If somethign went wrong, write the error to the console for debugging.
+                Console.WriteLine(e.Message);
             }
         }
 
@@ -296,7 +344,6 @@ namespace TextBooks.Controllers
         {
 
             var user = db.AspNetUsers.Where(x => x.Email == email).Select(x => x.FirstName).First().ToString();
-            // SENDGRID - waiting for provisioning. Appears to work on Azure as well as locally, but emails not sent until provisioning is complete.
             try
             {
                 var body = "Hello " +user + ", click the link to reset your password <a href =\"" + callbackURL + "\">here</a>.";
@@ -314,42 +361,10 @@ namespace TextBooks.Controllers
                 smtpClient.Send(message);
             }
             catch (Exception ex)
-                {
+            {
                 Console.WriteLine(ex.Message);
             }
-
-            // GMAIL (WILL NOT WORK ON AZURE, only for local testing.)
-            //var body = "Please confirm your account by clicking <a href =\"" + callbackURL + "\">here</a>.";
-            //var message = new MailMessage();
-            //message.To.Add(new MailAddress(email));  // replace with valid value 
-            //message.From = new MailAddress("ifb299books@gmail.com");  // replace with valid value
-            //message.Subject = "Confirm Bindr Account";
-            //message.Body = string.Format(body, "noreply", "ifb299books@gmail.com", message);
-            //message.IsBodyHtml = true;
-
-            //using (var smtp = new SmtpClient())
-            //{
-            //    var credential = new NetworkCredential
-            //    {
-            //        UserName = "ifb299books@gmail.com",  // replace with valid value
-            //        Password = "IFB299Password"  // replace with valid value
-            //    };
-            //    smtp.UseDefaultCredentials = false;
-            //    smtp.Credentials = credential;
-            //    smtp.Host = "smtp.gmail.com";
-            //    smtp.Port = 587; // 587
-            //    smtp.EnableSsl = true;
-
-            //    //await smtp.SendMailAsync(message);
-            //    smtp.Send(message);
-
-            //    //try {
-            //    //    
-            //    //} catch (System.Net.Mail.SmtpException err) {
-            //    //    System.Diagnostics.Debug.WriteLine(err.ToString());
-            //    //}
-                //}
-            }
+        }
 
         //
         // GET: /Account/ConfirmEmail
@@ -654,6 +669,60 @@ namespace TextBooks.Controllers
 
         }
 
+        [HttpPost]
+        //[ValidateAntiForgeryToken]
+        public ActionResult ContactUser(PublicProfileViewModel model, string toUsername)
+        {
+            // Check that the model has been passed in with a valid mail message
+            Email mailMessage = model.contactEmail;
+            if (mailMessage.message == null)
+            {
+                // todo: should pop an alert to let them know the email wasn't sent because it was empty.
+                return RedirectToAction("PublicProfile", "Account", new { username = toUsername, emailsent = "error" });
+            }
+
+            string fromUsername = ClaimsPrincipal.Current.Identity.GetUserName();
+
+            if (fromUsername != "" && fromUsername != null)
+            {
+                IFB299Entities db = new IFB299Entities();
+                AspNetUser fromUser = (from table in db.AspNetUsers
+                                 where table.UserName == fromUsername
+                                 select table).FirstOrDefault();
+
+                AspNetUser toUser = (from table in db.AspNetUsers
+                              where table.UserName == toUsername
+                              select table).FirstOrDefault();
+
+                if (fromUser == null || toUser == null)
+                {
+                    return View("Error");
+                }
+
+                mailMessage.fromName = fromUser.FirstName + " " + fromUser.LastName;
+                mailMessage.fromAddress = fromUser.Email;
+                mailMessage.toName = toUser.FirstName+ " " + toUser.LastName;
+                mailMessage.toAddress = toUser.Email;
+                mailMessage.subject = "Contact from Texchange";
+
+                // Swap out our new lines chars for html line breaks, in order to preserve formatting.
+                mailMessage.message = mailMessage.message.Replace(System.Environment.NewLine, "<br />");
+                mailMessage.message = "Hi " + toUser.FirstName + ",<br /><br />You've received a message from "
+                    + fromUser.FirstName + " " + fromUser.LastName + " on Texchange:<br /><br /><em>"
+                    + "Hi " + toUser.FirstName + ",<br/>" + mailMessage.message
+                    + "</em><br /><br />" + "<b>You can reply to this email to contact " + fromUser.FirstName
+                    + ".</b><br /><br />" + "Kind Regards,<br />The Texchange Team";
+
+                bool result = SendEmailMessage(mailMessage);
+                if (result)
+                {
+                    return RedirectToAction("PublicProfile", "Account", new { username = toUsername, emailsent = "success" });
+                }
+            }
+
+            return RedirectToAction("Index", "Home"); // until we setup returnUrl string
+        }
+
         public IEnumerable<ViewAccounts> GetAllAccounts()
         {
             return db.AspNetUsers.Select(x => new ViewAccounts 
@@ -724,7 +793,7 @@ namespace TextBooks.Controllers
             }
         }
 
-        private void AddErrors(String customError)
+        private void AddErrors(string customError)
         {
             ModelState.AddModelError("", customError);
         }
