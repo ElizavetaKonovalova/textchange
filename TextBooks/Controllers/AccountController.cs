@@ -95,7 +95,7 @@ namespace TextBooks.Controllers
                 if (!user.EmailConfirmed)
                 {
                     // If they're unverified, send them to the appropriate view.
-                    return View("ConfirmEmail");
+                    return View("VerifyEmail");
                 }
             }
 
@@ -121,7 +121,10 @@ namespace TextBooks.Controllers
         [AllowAnonymous]
         public ActionResult PublicProfile(string username, string emailsent)
         {
+            // Create instance of Entities object for database access
             IFB299Entities db = new IFB299Entities();
+
+            // Create emtpy model
             PublicProfileViewModel result = new PublicProfileViewModel();
 
             // Get the target user
@@ -160,8 +163,8 @@ namespace TextBooks.Controllers
                 // Done
                 return View(result);
             }
-            // There should be no links on the site to users that don't exist
-            // If for some reason there is, let's show an error page
+            // There should be no links to users that don't exist!
+            // If for some reason there is one, error so that we fix it.
             return View("Error");
         }
 
@@ -225,7 +228,7 @@ namespace TextBooks.Controllers
         {
             if (ModelState.IsValid)
             {
-                var user = new ApplicationUser { UserName = model.Email.Split('@')[0], Email = model.Email, PhoneNumber = model.ContactNumber };
+                var user = new ApplicationUser { UserName = model.Email.Split('@')[0], Email = model.Email };
 
                 // Check email address is okay
                 string addressSuffix = user.Email.Split('@')[1];
@@ -301,7 +304,7 @@ namespace TextBooks.Controllers
                 // Send the email
                 smtpClient.Send(message);
 
-                // If we got this far, the email has been sent. Return true.s
+                // If we got this far, the email has been sent. 
                 return true;
             }
             catch (Exception ex)
@@ -315,14 +318,15 @@ namespace TextBooks.Controllers
         {
             try
             {
-                string body = "Hi " + firstName + ",\nPlease confirm your account by clicking <a href =\"" + callbackURL + "\">here</a>.";
+                string body = "Hi " + firstName + ",<br />Please confirm your account by clicking <a href =\""
+                    + callbackURL + "\">here</a>.<br/>Kind Regards,<br/>The Texchange Team";
 
-                // Setup MailMessage ready for sending
+                // Setup MailMessage ready for sending verification email
                 MailMessage message = new MailMessage();
                 message.To.Add(new MailAddress(email, firstName)); 
                 message.From = new MailAddress("ifb299books@gmail.com", "noreply");
                 message.Subject = "Verify Texchange Account";
-                message.Body = string.Format(body, "noreply", "ifb299books@gmail.com", message);
+                message.Body = string.Format(body);
                 message.IsBodyHtml = true;
                 
                 // Init SmtpClient with credentials from the SendGrid account
@@ -677,42 +681,51 @@ namespace TextBooks.Controllers
             Email mailMessage = model.contactEmail;
             if (mailMessage.message == null)
             {
-                // todo: should pop an alert to let them know the email wasn't sent because it was empty.
+                // No email content to send, don't send it empty and let the view know it wasn't sent.
                 return RedirectToAction("PublicProfile", "Account", new { username = toUsername, emailsent = "error" });
             }
 
+            // Get the currently logged in user
             string fromUsername = ClaimsPrincipal.Current.Identity.GetUserName();
-
             if (fromUsername != "" && fromUsername != null)
             {
+                // Create Entity object for database access
                 IFB299Entities db = new IFB299Entities();
+
+                // Get required details about the user sending the email
                 AspNetUser fromUser = (from table in db.AspNetUsers
                                  where table.UserName == fromUsername
                                  select table).FirstOrDefault();
 
+                // Get required details about the user receiving the email
                 AspNetUser toUser = (from table in db.AspNetUsers
                               where table.UserName == toUsername
                               select table).FirstOrDefault();
 
+                // Check the users were received successfully
                 if (fromUser == null || toUser == null)
                 {
                     return View("Error");
                 }
 
+                // Setup the Email with all the required info
                 mailMessage.fromName = fromUser.FirstName + " " + fromUser.LastName;
                 mailMessage.fromAddress = fromUser.Email;
                 mailMessage.toName = toUser.FirstName+ " " + toUser.LastName;
                 mailMessage.toAddress = toUser.Email;
                 mailMessage.subject = "Contact from Texchange";
 
-                // Swap out our new lines chars for html line breaks, in order to preserve formatting.
+                // Swap out our new lines chars for html line breaks in order to preserve formatting.
                 mailMessage.message = mailMessage.message.Replace(System.Environment.NewLine, "<br />");
+
+                // Wrap the message in a default template
                 mailMessage.message = "Hi " + toUser.FirstName + ",<br /><br />You've received a message from "
                     + fromUser.FirstName + " " + fromUser.LastName + " on Texchange:<br /><br /><em>"
                     + "Hi " + toUser.FirstName + ",<br/>" + mailMessage.message
                     + "</em><br /><br />" + "<b>You can reply to this email to contact " + fromUser.FirstName
                     + ".</b><br /><br />" + "Kind Regards,<br />The Texchange Team";
 
+                // Send the email
                 bool result = SendEmailMessage(mailMessage);
                 if (result)
                 {
@@ -720,7 +733,10 @@ namespace TextBooks.Controllers
                 }
             }
 
-            return RedirectToAction("Index", "Home"); // until we setup returnUrl string
+            // One of the user accounts wasn't able to be received, or something else went wrong
+            // Perhaps a user account was deleted while an message was being written?
+            // Let's go to the home page and start again.
+            return RedirectToAction("Index", "Home");
         }
 
         public IEnumerable<ViewAccounts> GetAllAccounts()
