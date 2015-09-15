@@ -3,19 +3,6 @@
     Layout = "~/Views/Shared/_LayoutOption.cshtml";
 }
 
-@{
-    List<string> searchExamples = new List<string>(new string[] {
-        "A Brief History of the Universe",
-        "Calculus 101",
-        "Economics for the New Student",
-        "Networks and Their Uses",
-        "The Mysteries of Human Anatomy"
-    });
-    int sizeOfList = searchExamples.Count;
-    Random rnd = new Random();
-    string example = "eg, " + searchExamples[rnd.Next(sizeOfList)];
-}
-
 <header>
     <div class="header-content">
         <div class="header-content-inner">
@@ -26,36 +13,60 @@
         <div class="search-form">
             <form class="form-inline" role="form" action="/books" method="post" style="padding-top:8px;">
                 <div class="form-group">
-                    @Html.TextBox("searchQuery", "", new { name = "name", @class = "form-control", placeholder = example, style = "width: 250px;" })
+                    @Html.TextBox("searchQuery", "", new { name = "name", @id = "indexSearchControl", @class = "form-control", style = "width: 250px;" })
                 </div>
                 <button type="submit" class="btn btn-default btn-transparent">Search</button>
             </form>
         </div>
 </div>
 </header>
-    
 
+<script type="text/javascript">
+    searchExamples = [
+        "A Brief History of the Universe",
+        "A Brief History of Time",
+        "Stephen Hawking",
+        "Learning Python",
+        "Calculus 101",
+        "Mark Lutz and David Ascher",
+        "Economics for the New Student",
+        "All About Water",
+        "Networks and Their Uses",
+        "The Mysteries of Human Anatomy",
+        "Calculus - Early Transcendentals",
+        "Anton Bivens Davis",
+        "Essential Business Process Modelling",
+        "Publication Manual of the American Psychological Association"
+    ];
+    var randomNumber = function () {
+        return Math.floor(Math.random() * searchExamples.length);
+    }
+    var newSelection = function () {
+        return "eg, " + searchExamples[randomNumber()];
+    }
+    document.getElementById("indexSearchControl").placeholder = newSelection();
+    currentSuggestion = newSelection();
+    index = 0;
+    addLetter = function () {
+        index++;
+        if (index < 35) {
+            currentSubstring = currentSuggestion.substr(0, index);
+        } else {
+            currentSubstring = currentSuggestion.substr(index - 34, index);
+        }
+        document.getElementById("indexSearchControl").placeholder = currentSubstring;
 
-@*<div class="row">
-    <div class="col-lg-6">
-        <div class="row">
-            <h2>Borrow</h2>
-            <p>
-                Borrowing textbooks is easy with Texchange - just search and choose from available books.
-            </p>
-        </div>
-        <div class="row">
-            <a href="Books" class="btn btn-primary btn-lg">Search Now &raquo;</a>
-        </div>
-    </div>
-    <div class="col-lg-6">
-        <div class="row">
-            <h2>Lend</h2>
-            <p>
-                Sharing is caring. Allow your fellow students to borrow your spare text books. As a bonus, lenders can borrow more books!
-            </p>
-        </div>
-        <div class="row">
-            <a href="Account/Register" class="btn btn-primary btn-lg">Sign Up &raquo;</a>
-        </div>
-</div>*@
+        if (index >= currentSuggestion.length) {
+            currentSuggestion = newSelection();
+            index = 0;
+            window.setTimeout(addLetter, 11000);
+        } else {
+            if (currentSubstring.substring(index-1, index) == " ") {
+                window.setTimeout(addLetter, 150);
+            } else {
+                window.setTimeout(addLetter, 70);
+            }
+        }
+    }
+    window.setTimeout(addLetter, 3000);
+</script>

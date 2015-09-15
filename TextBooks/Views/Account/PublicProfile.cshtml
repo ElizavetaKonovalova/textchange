@@ -50,9 +50,9 @@
 
     <br />
     <b>Email: </b> @Html.DisplayFor(model => model.targetUser.Email)<br />
-    @if (Model.targetUser.PhoneNumber != null)
+    @if (Model.targetUser.ContactNumber != null)
     {
-        <b>Phone: </b>@Html.DisplayFor(model => model.targetUser.PhoneNumber)<br />
+        <b>Phone: </b>@Html.DisplayFor(model => model.targetUser.ContactNumber)<br />
     } else
     {
         <em>No phone number listed.</em><br />
