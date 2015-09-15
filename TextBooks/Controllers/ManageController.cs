@@ -8,6 +8,7 @@ using Microsoft.AspNet.Identity.Owin;
 using Microsoft.Owin.Security;
 using TextBooks.Models;
 using System.Security.Claims;
+using System.Data.Entity;
 
 namespace TextBooks.Controllers
 {
@@ -144,6 +145,15 @@ namespace TextBooks.Controllers
                 //{
                     
                 //}
+
+                var userPhone = db.AspNetUsers.Where(x => x.UserName == currentLoggedInUser)
+                    .Select(x => new AspNetUser 
+                    {
+                        PhoneNumber = model.Number
+                    });
+
+                db.Entry(userPhone).State = EntityState.Modified;
+                db.SaveChanges();
             }
             return Redirect("Index");
         }

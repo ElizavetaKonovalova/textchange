@@ -51,6 +51,9 @@
                     <ul class="nav navbar-nav">
                         <li>@Html.ActionLink("Submit a book", "Create", "Books")</li>
                         <li>@Html.ActionLink("Contact", "Contact", "Home")</li>
+                        <li>
+                            @Html.ActionLink("My Account", "Index", "Manage", routeValues: null, htmlAttributes: new { title = "Manage" })
+                        </li>
                     </ul>
                     @Html.Partial("_LoginPartial")
                 </div>

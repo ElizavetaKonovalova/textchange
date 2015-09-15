@@ -8,7 +8,7 @@
 <p class="text-success">@ViewBag.StatusMessage</p>
 <div>
     <h4 style="text-align:center;">Change your account settings</h4>
-    <table class="table table-hover">
+    <table class="table">
         <tr>
             <th>
                 Password
@@ -21,30 +21,31 @@
             </th>
         </tr>
         <tr>
-            <td>
+            <td class="col-xs-4">
             @if (Model.HasPassword)
             {
-                    @Html.ActionLink("Change your password", "ChangePassword", null, new { @class = "btn btn-default" })
+                    @Html.ActionLink("Change your password", "ChangePassword", null, new { @class = "btn btn-default btn-transparent" })
                 }
                 else
                 {
-                    @Html.ActionLink("Create", "SetPassword", null, new { @class = "btn btn-default" })
+                    @Html.ActionLink("Create", "SetPassword", null, new { @class = "btn btn-default btn-transparent" })
                 }
             </td>
-            <td>
-                @Html.ActionLink("View", "ViewMyBooks", null, new { @class = "btn btn-default" })
+            <td class="col-xs-4">
+                @Html.ActionLink("View", "ViewMyBooks", null, new { @class = "btn btn-default btn-transparent" })
             </td>
-            <td>
+            <td class="col-xs-4">
                 @if (Model.PhoneNumber != null)
                 {
-                    @Html.ActionLink("Change", "AddPhoneNumber")
-                    @: &nbsp;|&nbsp;
-                    @Html.ActionLink("Remove", "RemovePhoneNumber")
-            }
-            else
-            {
-                    @Html.ActionLink("Add", "AddPhoneNumber", null, new { @class = "btn btn-default"  })
-            }
+                    <div class="form-inline">
+                        @Html.ActionLink("Change", "AddPhoneNumber", null, new { @class = "btn btn-default btn-transparent" })
+                        @Html.ActionLink("Remove", "RemovePhoneNumber", null, new { @class = "btn btn-default btn-transparent" })
+                    </div>
+                }
+                else
+                {
+                    @Html.ActionLink("Add", "AddPhoneNumber", null, new { @class = "btn btn-default btn-transparent" })
+                }
             </td>
         </tr>
         @*
@@ -87,3 +88,10 @@
                 }*@
     </table>
 </div>
+
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+    @Styles.Render("~/Content/css")
+    <link href="@Url.Content("~/Content/Home.css")" rel="stylesheet" type="text/css" />
+}

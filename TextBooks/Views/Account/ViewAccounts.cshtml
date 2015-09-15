@@ -3,7 +3,7 @@
 @using (Html.BeginForm("ViewAccounts", "Account", FormMethod.Post))
 {
     @Html.AntiForgeryToken()
-            <table class="table table-striped">
+            <table class="table">
 
                 <tr>
 
@@ -46,11 +46,17 @@
                             @Html.DisplayFor(modelItem => account.Email)
                         </td>
                         <td class="col-xs-2" style="text-align: center">
-                            <button type="submit" value=@account.Id class="btn btn-info" name ="id" onclick="window.alert('You have successfully deleted the account')" >Delete</button>
-                            @Html.ActionLink("Edit", "Edit", "Account", new { id = account.Id }, new { @class = "btn btn-info" })
+                            <button type="submit" value=@account.Id class="btn btn-default btn-transparent" name="id" onclick="window.alert('You have successfully deleted the account')">Delete</button>
+                            @Html.ActionLink("Edit", "Edit", "Account", new { id = account.Id }, new { @class = "btn btn-default btn-transparent" })
                         </td>
                     </tr>
                 }
 
            </table>
+}
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+    @Styles.Render("~/Content/css")
+    <link href="@Url.Content("~/Content/Home.css")" rel="stylesheet" type="text/css" />
 }
