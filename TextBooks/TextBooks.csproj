@@ -314,6 +314,7 @@
     <Content Include="Views\Account\Edit.cshtml" />
     <Content Include="Views\Account\PublicProfile.cshtml" />
     <Content Include="Views\Shared\_LayoutOption.cshtml" />
+    <Content Include="Views\Manage\ViewMyBooks.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
