@@ -49,6 +49,11 @@ footer {
     color: white;
 }
 
+input#searchQuery.form-control {
+    background-color: transparent;
+    color: white;
+}
+
 #indexSearchControl {
     display: inline;
 }
