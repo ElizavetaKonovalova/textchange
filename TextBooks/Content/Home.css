@@ -65,12 +65,19 @@ footer {
 }
 
 h1, h2, h3, h4, h5, h6, p {
-
     color:white;
     text-align:center;
 }
 
 div {
-
     color:white;
+}
+
+div .modal-text {
+    color: black;
+    text-align: left;
+}
+
+div .modal-footer {
+    text-align: right;
 }

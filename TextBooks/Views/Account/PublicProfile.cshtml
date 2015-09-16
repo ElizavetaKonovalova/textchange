@@ -124,12 +124,12 @@
                     @{
                     string toUserFullName = Model.targetUser.FirstName + " " + Model.targetUser.LastName;
                     }
-                    <h4 class="modal-title" id="myModalLabel">Contact @toUserFullName</h4>
+                    <h4 class="modal-title modal-text" id="myModalLabel">Contact @toUserFullName</h4>
                 </div>
                 <div class="modal-body">
                     @using (Html.BeginForm("ContactUser", "Account", new { toUsername = Model.targetUser.UserName }, FormMethod.Post, new { id = "modal-form" }))
                     {
-                        <p>Hi @Model.targetUser.FirstName,</p>
+                        <p class="modal-text">Hi @Model.targetUser.FirstName,</p>
                         <!--This is where the user types in their message-->
                         @Html.TextAreaFor(model => model.contactEmail.message,
                             new { @class = "form-control col-md-12",
@@ -138,7 +138,7 @@
                                 @rows ="8"})
                     }
                 </div>
-                <div class="modal-footer">
+                <div class="modal-footer modal-text">
                     <!--Cancel and submit buttons. Not sure if it should be a button or just input-->
                     <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
                     <input id="btn-submit" class="btn btn-primary" type="submit" value="Send Message" />
