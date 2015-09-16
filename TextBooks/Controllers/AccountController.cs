@@ -121,6 +121,13 @@ namespace TextBooks.Controllers
         [AllowAnonymous]
         public ActionResult PublicProfile(string username, string emailsent)
         {
+            // Check user is logged in. If not, send them to the Register page.
+            var loggedIn = ClaimsPrincipal.Current.Identity.IsAuthenticated;
+            if (!loggedIn)
+            {
+                return View("Register");
+            }
+
             // Create instance of Entities object for database access
             IFB299Entities db = new IFB299Entities();
 
