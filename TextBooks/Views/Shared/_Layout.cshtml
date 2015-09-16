@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@ViewBag.Title - Texchange</title>
     @Styles.Render("~/Content/css")
+    @Styles.Render("~/Content/Home.css")
     @Scripts.Render("~/bundles/modernizr")
 
 </head>
@@ -77,7 +78,7 @@
     </div>
     <div class="container body-content">
         @RenderBody()
-        <hr />
+        @*<hr />*@
         <footer>
             <p>&copy; @DateTime.Now.Year - Texchange</p>
         </footer>
