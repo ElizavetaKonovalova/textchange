@@ -8,6 +8,9 @@ using Microsoft.AspNet.Identity.Owin;
 using Microsoft.Owin.Security;
 using TextBooks.Models;
 using System.Security.Claims;
+using System.Data.Entity;
+using System.Data.Entity.Validation;
+using System.Diagnostics;
 
 namespace TextBooks.Controllers
 {
@@ -114,38 +117,51 @@ namespace TextBooks.Controllers
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> AddPhoneNumber(AddPhoneNumberViewModel model)
         {
-            string currentLoggedInUser = null;
-            if (ClaimsPrincipal.Current.Identity.IsAuthenticated)
-                currentLoggedInUser = ClaimsPrincipal.Current.Identity.Name;
-
-            if (!ModelState.IsValid)
+            if (model.Number.Length > 14)
             {
-                return View(model);
+                AddErrors("Please type the correct number! Not longer then 13 characters.");
             }
-            //// Generate the token and send it
-            //var code = await UserManager.GenerateChangePhoneNumberTokenAsync(User.Identity.GetUserId(), model.Number);
-            //if (UserManager.SmsService != null)
-            //{
-            //    var message = new IdentityMessage
-            //    {
-            //        Destination = model.Number,
-            //        Body = "Your security code is: " + code
-            //    };
-            //    await UserManager.SmsService.SendAsync(message);
-            //}
-            //return RedirectToAction("VerifyPhoneNumber", new { PhoneNumber = model.Number });
-            else 
+            else
             {
-                //var phone = (from users in db.AspNetUsers
-                //             where users.UserName == currentLoggedInUser
-                //             select new { Value = users.PhoneNumber }).ToString();
 
-                //if (String.IsNullOrEmpty(phone))
-                //{
-                    
-                //}
+                string currentLoggedInUser = null;
+                if (ClaimsPrincipal.Current.Identity.IsAuthenticated)
+                    currentLoggedInUser = ClaimsPrincipal.Current.Identity.Name;
+
+                if (!ModelState.IsValid)
+                {
+                    return View(model);
+                }
+                else
+                {
+                    var userID = db.AspNetUsers.FirstOrDefault(x => x.UserName == currentLoggedInUser);
+                    userID.PhoneNumber = model.Number;
+                    userID.ContactNumber = model.Number;
+                    try
+                    {
+                        db.Entry(userID).State = EntityState.Modified;
+                        db.SaveChanges();
+                    }
+                    catch (DbEntityValidationException dbEx)
+                    {
+                        foreach (var validationErrors in dbEx.EntityValidationErrors)
+                        {
+                            foreach (var validationError in validationErrors.ValidationErrors)
+                            {
+                                Trace.TraceInformation("Property: {0} Error: {1}",
+                                                        validationError.PropertyName,
+                                                        validationError.ErrorMessage);
+                            }
+                        }
+                    }
+                }
             }
-            return Redirect("Index");
+            return RedirectToAction("Index", new { Message = ManageMessageId.AddPhoneSuccess });
+        }
+
+        private void AddErrors(string p)
+        {
+            ModelState.AddModelError("", p);
         }
 
         //

@@ -217,6 +217,10 @@ input::-moz-focus-inner {
 textarea {
   overflow: auto;
   vertical-align: top;
+
+  min-width: 100%;
+  width: 100%;
+
 }
 
 table {
@@ -315,7 +319,7 @@ body {
   font-size: 14px;
   line-height: 1.428571429;
   color: #333333;
-  background-color: #ffffff;
+  background-color: #428bca;
 }
 
 input,
