@@ -620,9 +620,15 @@ namespace TextBooks.Controllers
         public ActionResult ViewAccounts(ViewAccounts model, string id)
         {
             var findUser = db.AspNetUsers.Find(id);
+            var findBook = db.Books.Where(x => x.Owner.Equals(findUser.UserName)).Select(x => x);
+
             if (!findUser.UserName.Equals("ifb299books")) 
             {
-                var delete = db.AspNetUsers.Remove(findUser);
+                var deleteUser = db.AspNetUsers.Remove(findUser);
+                if (findBook != null) 
+                {
+                    var deleteBook = db.Books.RemoveRange(findBook);
+                }
                 db.SaveChanges();
             }
 

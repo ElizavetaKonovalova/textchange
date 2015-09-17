@@ -96,9 +96,9 @@ namespace TextBooks.Controllers
                         ModelState.AddModelError("", "Book Author field can't be empty.");
                         failed = true;
                     }
-                    if (book.Year == null)
+                    if (book.Year.Length == 0|| book.Year.Length > 4)
                     {
-                        ModelState.AddModelError("", "Book Year field can't be empty.");
+                        ModelState.AddModelError("", "Book Year field can't be empty or contain more than 4 digits");
                         failed = true;
                     }
                     if (book.Edition == null)
