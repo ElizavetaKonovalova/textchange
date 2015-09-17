@@ -18,7 +18,7 @@ namespace TextBooks.Controllers
 
         public ActionResult Index()
         {
-            return View(db.Books.ToList());
+            return View(db.Books.OrderBy(x=>x.Title).ToList());
         }
 
         [HttpPost]
@@ -34,13 +34,13 @@ namespace TextBooks.Controllers
                                      table.Edition.Contains(searchQuery) ||
                                      table.Year.Contains(searchQuery)
                                      )
-                                     select table).ToList();
+                                     select table).OrderBy(x=>x.Title).ToList();
                 if (result != null)
                 {
                     return View(result);
                 }
             }
-            return View(db.Books.ToList());
+            return View(db.Books.OrderBy(x => x.Title).ToList());
         }
 
         // GET: Books/Details/5
