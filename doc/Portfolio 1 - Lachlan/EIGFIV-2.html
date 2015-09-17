@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head profile="http://selenium-ide.openqa.org/profiles/test-case">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<link rel="selenium.base" href="http://texchange.xyz/" />
+<title>EIGFIV-2</title>
+</head>
+<body>
+<table cellpadding="1" cellspacing="1" border="1">
+<thead>
+<tr><td rowspan="1" colspan="3">EIGFIV-2</td></tr>
+</thead><tbody>
+<tr>
+	<td>open</td>
+	<td>/</td>
+	<td></td>
+</tr>
+<tr>
+	<td>clickAndWait</td>
+	<td>id=registerLink</td>
+	<td></td>
+</tr>
+<tr>
+	<td>type</td>
+	<td>id=FirstName</td>
+	<td>Test</td>
+</tr>
+<tr>
+	<td>type</td>
+	<td>id=LastName</td>
+	<td>Account</td>
+</tr>
+<tr>
+	<td>type</td>
+	<td>id=ContactNumber</td>
+	<td>0123456789</td>
+</tr>
+<tr>
+	<td>type</td>
+	<td>id=Email</td>
+	<td>Test.Account@connect.qut.edu.au</td>
+</tr>
+<tr>
+	<td>type</td>
+	<td>id=Password</td>
+	<td>Password1234!</td>
+</tr>
+<tr>
+	<td>type</td>
+	<td>id=ConfirmPassword</td>
+	<td>Password1234!</td>
+</tr>
+<tr>
+	<td>clickAndWait</td>
+	<td>css=input.btn.btn-default</td>
+	<td></td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>css=h2</td>
+	<td>VerifyEmail</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>css=p</td>
+	<td>Please check your email and click the link provided to verify your account.</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//p[2]</td>
+	<td>exact:Need help? Click the contact button above to email an administrator.</td>
+</tr>
+
+</tbody></table>
+</body>
+</html>

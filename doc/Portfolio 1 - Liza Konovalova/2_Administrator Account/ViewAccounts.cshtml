@@ -1,0 +1,62 @@
+﻿@model TextBooks.Models.ViewAccounts
+
+@using (Html.BeginForm("ViewAccounts", "Account", FormMethod.Post))
+{
+    @Html.AntiForgeryToken()
+            <table class="table">
+
+                <tr>
+
+                    <th style="text-align: center">
+                        First Name
+                    </th>
+
+                    <th style="text-align: center">
+                        Last Name
+                    </th>
+
+                    <th  style="text-align: center">
+                        Phone
+                    </th>
+
+                    <th style="text-align: center">
+                        Email
+                    </th>
+
+                    <th style="text-align: center">
+                        Manage account
+                    </th>
+
+                </tr>
+
+                @foreach (var account in Model.ifbEntity)
+                {
+                    <tr>
+
+                        <td class="col-xs-2" style="text-align: center">
+                            @Html.DisplayFor(modelItem => account.FirstName)
+                        </td>
+                        <td class="col-xs-2" style="text-align: center">
+                            @Html.DisplayFor(modelItem => account.LastName)
+                        </td>
+                        <td class="col-xs-2" style="text-align: center">
+                            @Html.DisplayFor(modelItem => account.Phone)
+                        </td>
+                        <td class="col-xs-4" style="text-align: center">
+                            @Html.DisplayFor(modelItem => account.Email)
+                        </td>
+                        <td class="col-xs-2" style="text-align: center">
+                            <button type="submit" value=@account.Id class="btn btn-default btn-transparent" name="id" onclick="window.alert('You have successfully deleted the account')">Delete</button>
+                            @Html.ActionLink("Edit", "Edit", "Account", new { id = account.Id }, new { @class = "btn btn-default btn-transparent" })
+                        </td>
+                    </tr>
+                }
+
+           </table>
+}
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+    @Styles.Render("~/Content/css")
+    <link href="@Url.Content("~/Content/Home.css")" rel="stylesheet" type="text/css" />
+}

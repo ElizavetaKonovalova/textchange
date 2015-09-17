@@ -1,0 +1,106 @@
+﻿<!-- I did some work in here with the placeholder text examples, adding some extra fields to the 
+results tables, and fixing some links so they point to the right place
+Full code available in views/books/index.cshtml-->
+
+@model IEnumerable<TextBooks.Book>
+
+@{
+    ViewBag.Title = "Index";
+}
+<!-- This code selects a random string from a few examples and uses is as the placeholder text in the search bar on the site -->
+@{
+    List<string> searchExamples = new List<string>(new string[] { 
+        "A Brief History of the Universe",
+        "Calculus 101", 
+        "Economics for the New Student",
+        "Networks and Their Uses",
+        "The Mysteries of Human Anatomy"
+    });
+    int sizeOfList = searchExamples.Count;
+    Random rnd = new Random();
+    string example = "eg, " + searchExamples[rnd.Next(sizeOfList)];
+}
+<br />
+<div class="container-fluid">
+    <h2>TextBooks</h2>
+    <hr/>
+    
+    <div class="row">
+        <div class="col-md-6">
+            <div class="search-form">
+                <form class="form-inline" role="form" action="/books" method="post">
+                    <div class="form-group">
+                    <!-- This is where the search box is and the placeholder text -->
+                        @Html.TextBox("searchQuery", "", new { name = "name", @class = "form-control", placeholder = example, style = "width: 250px;" })
+                        <button type="submit" class="btn btn-default btn-transparent">Search</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div class="col-md-6 pull-right">
+            <form class="form-inline pull-right" role="form" action="/books" method="get">
+                <button type="submit" class="btn btn-default btn-transparent pull-right">Show All Books</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<br />
+<br />
+
+<!-- Search results are displayed here. The title of the field is displayed and also the relevant result below -->
+<table class="table table-hover" style="color:#0094ff;">
+    <tr>
+        <th>
+            @Html.DisplayNameFor(model => model.ISBN)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Title)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Author)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Edition)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Year)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Owner)
+        </th>
+        <th></th>
+    </tr>
+
+    @foreach (var item in Model)
+    {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.ISBN)
+            </td>
+            <td>
+            <!-- This links the book's title text in the results to the details page for the book-->
+                @Html.ActionLink((item.Title), "Details", new { id = item.B_ID })
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Author)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Edition)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Year)
+            </td>
+            <td>
+            <!-- This links the user's name text in the results to their profile page-->
+                @Html.ActionLink((item.Owner), "PublicProfile", "Account", new { username = item.Owner }, null)
+
+            </td>
+            @*<td>
+                @Html.ActionLink("Edit", "Edit", new { id = item.B_ID }) |
+                @Html.ActionLink("Delete", "Delete", new { id = item.B_ID })
+            </td>*@
+        </tr>
+    }
+
+</table>

@@ -1,0 +1,62 @@
+﻿@model TextBooks.Models.ViewMyBooks
+@{
+    ViewBag.Title = "View My Books";
+}
+
+<table class="table table-hover" style="color:#0094ff;">
+    <tr>
+        <th>
+            @Html.DisplayNameFor(model => model.ISBN)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.BookTitle)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Author)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Edition)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Year)
+        </th>
+        <th>
+            Manage
+        </th>
+    </tr>
+
+    @foreach (var item in Model.BookDetails)
+    {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.ISBN)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.BookTitle)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Author)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Edition)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Year)
+            </td>
+            <td>
+                @Html.ActionLink("Edit", "../Books/Edit", new { id = item.B_ID }, new { @class = "btn btn-default" })
+                @Html.ActionLink("Delete", "../Books/Delete", "Books", new { id = item.B_ID }, new { @class = "btn btn-default" })
+            </td>
+        </tr>
+    }
+
+</table>
+
+@Html.ActionLink("Back", "Index", null, new { @class = "btn btn-default" })
+
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+    @Styles.Render("~/Content/css")
+    <link href="@Url.Content("~/Content/Home.css")" rel="stylesheet" type="text/css" />
+}
