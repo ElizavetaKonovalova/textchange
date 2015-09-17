@@ -260,7 +260,7 @@ namespace TextBooks.Controllers
                         // Add details to database record
                         currentUser.FirstName = model.FirstName;
                         currentUser.LastName = model.LastName;
-                        currentUser.ContactNumber = model.ContactNumber;
+                        currentUser.PhoneNumber = model.ContactNumber;
                         db.SaveChanges();
 
                         // Send an email with link to a confirmation code, used to verify their account

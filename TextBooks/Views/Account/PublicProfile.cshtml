@@ -29,7 +29,9 @@
         @Html.DisplayFor(model => model.targetUser.LastName)
     </h1>
 
-    <div class="col-xs-3">
+    <hr />
+
+    <div class="col-md-3">
     <div>
         <b>Rating:</b>
         <span class="thumbs-up">
@@ -42,9 +44,9 @@
 
     <br />
     <b>Email: </b> @Html.DisplayFor(model => model.targetUser.Email)<br />
-    @if (Model.targetUser.ContactNumber != null)
+    @if (Model.targetUser.PhoneNumber != null)
     {
-        <b>Phone: </b>@Html.DisplayFor(model => model.targetUser.ContactNumber)<br />
+        <b>Phone: </b>@Html.DisplayFor(model => model.targetUser.PhoneNumber)<br />
     } else
     {
         <em>No phone number listed.</em><br />

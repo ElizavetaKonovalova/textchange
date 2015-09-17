@@ -156,7 +156,7 @@ namespace TextBooks.Controllers
                     }
                 }
             }
-            return RedirectToAction("Index", new { Message = ManageMessageId.ChangePasswordSuccess });
+            return RedirectToAction("Index", new { Message = ManageMessageId.AddPhoneSuccess });
         }
 
         private void AddErrors(string p)

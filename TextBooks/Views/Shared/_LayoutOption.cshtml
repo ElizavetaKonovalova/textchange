@@ -49,11 +49,8 @@
             <!--Otherwise if the user is not the admin they get other stuff in thier navbar-->
                 <div class="navbar-collapse collapse">
                     <ul class="nav navbar-nav">
-                        <li>@Html.ActionLink("Submit a book", "Create", "Books")</li>
-                        <li>@Html.ActionLink("Contact", "Contact", "Home")</li>
-                        <li>
-                            @Html.ActionLink("My Account", "Index", "Manage", routeValues: null, htmlAttributes: new { title = "Manage" })
-                        </li>
+                        <li>@Html.ActionLink("Submit A Book", "Create", "Books")</li>
+                        <li><a href="mailto:ifb299books@gmail.com?subject=Support%20Request">Contact Us</a></li>
                     </ul>
                     @Html.Partial("_LoginPartial")
                 </div>

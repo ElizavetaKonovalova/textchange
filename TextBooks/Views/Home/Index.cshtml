@@ -8,12 +8,12 @@
         <div class="header-content-inner">
     <h1 class="text-center">Texchange</h1>
             <hr />
-            <p class="lead text-center">Borrow & lend text books at QUT.</p>
+            <p class="lead text-center">Borrow & lend textbooks at QUT.</p>
         </div>
         <div class="search-form">
             <form class="form-inline" role="form" action="/books" method="post" style="padding-top:8px;">
                 <div class="form-group">
-                    @Html.TextBox("searchQuery", "", new { name = "name", @id = "indexSearchControl", @class = "form-control", style = "width: 250px;" })
+                    @Html.TextBox("searchQuery", "", new { name = "name", @id = "indexSearchControl", @class = "form-control home", style = "width: 250px;" })
                 </div>
                 <button type="submit" class="btn btn-default btn-transparent">Search</button>
             </form>
@@ -32,7 +32,7 @@
         "Economics for the New Student",
         "All About Water",
         "Networks and Their Uses",
-        "The Mysteries of Human Anatomy",
+        "Mysteries of Human Anatomy",
         "Calculus - Early Transcendentals",
         "Anton Bivens Davis",
         "Essential Business Process Modelling",
@@ -59,7 +59,7 @@
         if (index >= currentSuggestion.length) {
             currentSuggestion = newSelection();
             index = 0;
-            window.setTimeout(addLetter, 11000);
+            window.setTimeout(addLetter, 7000);
         } else {
             if (currentSubstring.substring(index-1, index) == " ") {
                 window.setTimeout(addLetter, 150);
