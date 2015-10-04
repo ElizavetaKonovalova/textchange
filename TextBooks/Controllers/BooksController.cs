@@ -64,6 +64,59 @@ namespace TextBooks.Controllers
             return View();
         }
 
+        // Query the GoogleBooksAPI for 
+        public ActionResult GoogleBooksQuery(string term)
+        {
+            if (term == "" || term == " ") return null;
+
+            var booksService = new Google.Apis.Books.v1.BooksService();
+            
+            var query = booksService.Volumes.List(term);
+            query.LangRestrict = "en";
+            query.MaxResults = 10;
+            var results = query.Execute();
+
+
+            // TODO Check for errors (here?)
+
+            // Get required details
+            var titlesList = new List<string>();
+            var authorsList = new List<string>();
+            var isbnList = new List<string>();
+            var yearList = new List<string>();
+
+            int i = 0;
+            while(i < results.Items.Count && titlesList.Count < 5)
+            {
+                if ((results.Items[i].VolumeInfo.Title != null)
+                    && (results.Items[i].VolumeInfo.Authors != null)
+                    && (results.Items[i].VolumeInfo.IndustryIdentifiers != null)
+                    && (results.Items[i].VolumeInfo.PublishedDate != null))
+                {
+                    if (!titlesList.Contains(results.Items[i].VolumeInfo.Title))
+                    {
+                        titlesList.Add(results.Items[i].VolumeInfo.Title);
+                        authorsList.Add(results.Items[i].VolumeInfo.Authors[0]);
+                        if (results.Items[i].VolumeInfo.Authors.Count > 1)
+                        {
+                            authorsList[authorsList.Count-1] += (", " + (results.Items[i].VolumeInfo.Authors[1]));
+                        }
+                        if (results.Items[i].VolumeInfo.Authors.Count > 2)
+                        {
+                            authorsList[authorsList.Count - 1] += (", " + (results.Items[i].VolumeInfo.Authors[2]));
+                        }
+                        isbnList.Add(results.Items[i].VolumeInfo.IndustryIdentifiers.FirstOrDefault().Identifier);
+                        yearList.Add(results.Items[i].VolumeInfo.PublishedDate.Substring(0, 4));
+                    }
+                }
+                i++;
+            }
+
+            List<string>[] resultsObj = { titlesList, authorsList, isbnList, yearList };
+            return Json(resultsObj, JsonRequestBehavior.AllowGet);
+        }
+
+
         // POST: Books/Create
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
@@ -96,7 +149,7 @@ namespace TextBooks.Controllers
                         ModelState.AddModelError("", "Book Author field can't be empty.");
                         failed = true;
                     }
-                    if (book.Year.Length == 0|| book.Year.Length > 4)
+                    if (book.Year == null || book.Year.Length == 0|| book.Year.Length > 4)
                     {
                         ModelState.AddModelError("", "Book Year field can't be empty or contain more than 4 digits");
                         failed = true;

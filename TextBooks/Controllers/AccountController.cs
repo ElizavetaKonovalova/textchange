@@ -34,6 +34,11 @@ namespace TextBooks.Controllers
             return View();
         }
 
+        public static string TokensCount()
+        {
+            return "123";
+        }
+
         public AccountController(ApplicationUserManager userManager, ApplicationSignInManager signInManager )
         {
             UserManager = userManager;

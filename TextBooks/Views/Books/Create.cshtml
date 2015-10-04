@@ -4,67 +4,135 @@
     ViewBag.Title = "Create";
 }
 
-<h2>Book Submission</h2>
-
+<h2>Submit A Book</h2>
 
 @using (Html.BeginForm()) 
 {
     @Html.AntiForgeryToken()
-    
+
     <div class="form-horizontal">
         <hr />
-        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
-        <div class="form-group">
-            @Html.LabelFor(model => model.ISBN, htmlAttributes: new { @class = "control-label col-xs-5" })
-            <div class="col-xs-6">
-                @Html.EditorFor(model => model.ISBN, new { htmlAttributes = new { @class = "form-control" } })
-                @Html.ValidationMessageFor(model => model.ISBN, "", new { @class = "text-danger" })
-            </div>
+        <div class="spacer" style="height: 50px">
         </div>
 
+        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
         <div class="form-group">
-            @Html.LabelFor(model => model.Title, htmlAttributes: new { @class = "control-label col-xs-5" })
-            <div class="col-xs-6">
-                @Html.EditorFor(model => model.Title, new { htmlAttributes = new { @class = "form-control" } })
+            @Html.Label(" ", htmlAttributes: new { @class = "control-label col-xs-5 spinner"})
+            @Html.LabelFor(model => model.Title, htmlAttributes: new { @class = "control-label col-xs-5 auto-hidden", @style = "display: none", @id = "textLabel" })
+            <div class="col-md-6">
+                @Html.EditorFor(model => model.Title, new { htmlAttributes = new { @class = "form-control", @id = "titleTextBox", @placeholder = "Enter the title of the textbook."} })
                 @Html.ValidationMessageFor(model => model.Title, "", new { @class = "text-danger" })
             </div>
         </div>
 
-        <div class="form-group">
+        <div class="form-group auto-hidden" style="display: none">
             @Html.LabelFor(model => model.Author, htmlAttributes: new { @class = "control-label col-xs-5" })
-            <div class="col-xs-6">
-                @Html.EditorFor(model => model.Author, new { htmlAttributes = new { @class = "form-control" } })
+            <div class="col-md-6">
+                @Html.EditorFor(model => model.Author, new { htmlAttributes = new { @class = "form-control", @id = "authorTextBox"} })
                 @Html.ValidationMessageFor(model => model.Author, "", new { @class = "text-danger" })
             </div>
         </div>
 
-        <div class="form-group">
-            @Html.LabelFor(model => model.Edition, htmlAttributes: new { @class = "control-label col-xs-5" })
-            <div class="col-xs-6">
-                @Html.EditorFor(model => model.Edition, new { htmlAttributes = new { @class = "form-control" } })
-                @Html.ValidationMessageFor(model => model.Edition, "", new { @class = "text-danger" })
+        <div class="form-group auto-hidden" style="display: none">
+            @Html.LabelFor(model => model.ISBN, htmlAttributes: new { @class = "control-label col-xs-5" })
+            <div class="col-md-6">
+                @Html.EditorFor(model => model.ISBN, new { htmlAttributes = new { @class = "form-control", @id = "isbnTextBox" } })
+                @Html.ValidationMessageFor(model => model.ISBN, "", new { @class = "text-danger" })
             </div>
         </div>
 
-        <div class="form-group">
+        <div class="form-group auto-hidden" style="display: none">
             @Html.LabelFor(model => model.Year, htmlAttributes: new { @class = "control-label col-xs-5" })
-            <div class="col-xs-6">
-                @Html.EditorFor(model => model.Year, new { htmlAttributes = new { @class = "form-control" } })
+            <div class="col-md-6">
+                @Html.EditorFor(model => model.Year, new { htmlAttributes = new { @class = "form-control", @id = "yearTextBox" } })
                 @Html.ValidationMessageFor(model => model.Year, "", new { @class = "text-danger" })
             </div>
         </div>
 
-        <div class="form-group">
-            <div class="col-md-offset-5 col-xs-6">
-                <input type="submit" value="Create" class="btn btn-default btn-transparent" />
-                @Html.ActionLink("Back to List", "Index", null, new { @class = "btn btn-default btn-transparent" })
+        <div class="form-group auto-hidden" style="display: none">
+            @Html.LabelFor(model => model.Edition, htmlAttributes: new { @class = "control-label col-xs-5" })
+            <div class="col-md-6">
+                @Html.EditorFor(model => model.Edition, new { htmlAttributes = new { @class = "form-control", @id = "editionTextBox" } })
+                @Html.ValidationMessageFor(model => model.Edition, "", new { @class = "text-danger" })
             </div>
         </div>
+
+        <div class="form-group auto-hidden" style="display: none">
+            <div class="col-md-offset-5 col-xs-6">
+                <input type="submit" value="Submit Book" class="btn btn-default btn-transparent" />
+                @Html.ActionLink("Cancel", "Index", "Home", null, new { @class = "btn btn-default btn-transparent" })
+            </div>
+        </div>
+    </div>
+
+    <div class="spinner" style="height: 244px">
     </div>
 }
 
 @section Scripts {
     @Scripts.Render("~/bundles/jqueryval")
     @Styles.Render("~/Content/css")
+    @Styles.Render("~/bundles/jqueryuicss")
+    @Scripts.Render("~/bundles/jqueryui")
     <link href="@Url.Content("~/Content/Home.css")" rel="stylesheet" type="text/css" />
+    
+    <!--Script for autocomplete. This has to be inline at the moment since it uses Razor 
+        commands to generate controller POST URLs.-->
+    <script>
+        var autocompleteData;
+        var autocompleteTerm;
+        $(document).ready(function () {
+            $('#titleTextBox').value = "";
+            $('#titleTextBox').autocomplete(
+                {
+                    source: function (request, response) {
+                        $('.auto-hidden').hide();
+
+                        var titles = new Array();
+                        autocompleteTerm = request.term;
+                        $.post('@Url.Action("GoogleBooksQuery", "Books")',
+                        {
+                            term: request.term
+                        },
+                        function (data, status) {
+                            autocompleteData = data;
+                            for (var i = 0; i < data[0].length; i++) {
+                                titles[i] = data[0][i];
+                            }
+                            titles[data[0].length] = "None of these...";
+                            response(titles);
+                        });
+                        response(["..."]);
+                    },
+                    select: function (event, ui) {
+                        $('.auto-hidden').fadeIn();
+                        $('.spinner').hide();
+
+                        if (ui.item.value == "None of these...") {
+                            ui.item.value = autocompleteTerm;
+                            document.getElementById("authorTextBox").value = "";
+                            document.getElementById("isbnTextBox").value = "";
+                            document.getElementById("yearTextBox").value = "";
+                            document.getElementById("editionTextBox").value = "";
+                        } else {
+                            var title = ui.item.value;
+                            var i = 0;
+                            for (; autocompleteData[0][i] != title; i++) { }
+                            document.getElementById("authorTextBox").value = autocompleteData[1][i];
+                            document.getElementById("isbnTextBox").value = autocompleteData[2][i];
+                            document.getElementById("yearTextBox").value = autocompleteData[3][i];
+                            document.getElementById("editionTextBox").value = "1st";
+                        }
+                    }
+                })
+            $('#titleTextBox').bind('input', function () {
+                if ($('#titleTextBox').value == null) {
+                    $('.auto-hidden').fadeOut(200, function() {
+                        $('.spinner').show();
+                    })
+                }
+            });
+        });
+    </script>
 }

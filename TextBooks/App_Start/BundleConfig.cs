@@ -28,6 +28,13 @@ namespace TextBooks
                       "~/Content/bootstrap.css",
                       "~/Content/bootstrap.min.css",
                       "~/Content/site.css"));
+
+            bundles.Add(new ScriptBundle("~/bundles/jqueryui").Include(
+                      "~/Scripts/jquery-ui.js",
+                      "~/Scripts/Autocomplete.js"));
+
+            bundles.Add(new StyleBundle("~/bundles/jqueryuicss").Include(
+                      "~/Content/jquery-ui.css"));
         }
     }
 }
