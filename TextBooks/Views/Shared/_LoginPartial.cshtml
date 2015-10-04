@@ -10,7 +10,11 @@
         <li>
             <div style="color:#ffffff; padding-top:15px; padding: 15px; line-height:20px; position: relative; display: block;">
                 Hello @User.Identity.GetUserName().Split('@')[0]!
+                <br />
+                You have @TextBooks.Controllers.AccountController.getTokens(User.Identity.GetUserId()) tokens.
+                
             </div>
+
         </li>
         <li><a href="javascript:document.getElementById('logoutForm').submit()">Log off</a></li>
     </ul>

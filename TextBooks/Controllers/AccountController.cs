@@ -641,6 +641,14 @@ namespace TextBooks.Controllers
             return View(model);
         }
 
+        public static string getTokens(string id)
+        {
+            IFB299Entities db = new IFB299Entities();
+            var user = db.AspNetUsers.Find(id);
+            string tokenCount = user.Tokens.ToString();
+            return tokenCount;
+        }
+
         public ActionResult Edit(ViewAccounts model, string id)
         {
             var user = db.AspNetUsers.Find(id);

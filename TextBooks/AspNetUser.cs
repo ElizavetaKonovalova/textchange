@@ -39,6 +39,7 @@ namespace TextBooks
         public string ContactNumber { get; set; }
         public int ThumbsUp { get; set; }
         public int ThumbsDown { get; set; }
+        public int Tokens { get; set; }
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<AspNetUserClaim> AspNetUserClaims { get; set; }
