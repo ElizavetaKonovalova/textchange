@@ -261,6 +261,7 @@ namespace TextBooks.Controllers
                         currentUser.FirstName = model.FirstName;
                         currentUser.LastName = model.LastName;
                         currentUser.PhoneNumber = model.ContactNumber;
+                        currentUser.Tokens = 1;
                         db.SaveChanges();
 
                         // Send an email with link to a confirmation code, used to verify their account
