@@ -201,8 +201,45 @@ namespace TextBooks.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Edit([Bind(Include = "B_ID,ISBN,Title,Author,Edition,Year,Owner")] Book book)
         {
+            var name = ClaimsPrincipal.Current.Identity.Name;
             if (ModelState.IsValid)
             {
+                if (name != "")
+                {
+
+                    bool failed = false;
+
+                    if (book.ISBN == null)
+                    {
+                        ModelState.AddModelError("", "Book ISBN field can't be empty.");
+                        failed = true;
+                    }
+                    if (book.Title == null)
+                    {
+                        ModelState.AddModelError("", "Book Title field can't be empty.");
+                        failed = true;
+                    }
+                    if (book.Author == null)
+                    {
+                        ModelState.AddModelError("", "Book Author field can't be empty.");
+                        failed = true;
+                    }
+                    if (book.Year == null || book.Year.Length == 0 || book.Year.Length > 4)
+                    {
+                        ModelState.AddModelError("", "Book Year field can't be empty or contain more than 4 digits");
+                        failed = true;
+                    }
+                    if (book.Edition == null)
+                    {
+                        ModelState.AddModelError("", "Book Edition field can't be empty.");
+                        failed = true;
+                    }
+
+                    if (failed == true)
+                    {
+                        return View();
+                    }
+                }
                 db.Entry(book).State = EntityState.Modified;
                 db.SaveChanges();
                 return RedirectToAction("../Manage/ViewMyBooks");
