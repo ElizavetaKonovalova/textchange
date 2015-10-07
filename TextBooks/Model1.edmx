@@ -262,6 +262,7 @@
           <Property Name="ContactNumber" Type="String" MaxLength="15" FixedLength="false" Unicode="true" />
           <Property Name="ThumbsUp" Type="Int32" Nullable="false" />
           <Property Name="ThumbsDown" Type="Int32" Nullable="false" />
+          <Property Name="Tokens" Type="Int32" Nullable="false" />
           <NavigationProperty Name="AspNetUserClaims" Relationship="IFB299Model.FK_dbo_AspNetUserClaims_dbo_AspNetUsers_UserId" FromRole="AspNetUser" ToRole="AspNetUserClaim" />
           <NavigationProperty Name="AspNetUserLogins" Relationship="IFB299Model.FK_dbo_AspNetUserLogins_dbo_AspNetUsers_UserId" FromRole="AspNetUser" ToRole="AspNetUserLogin" />
           <NavigationProperty Name="AspNetRoles" Relationship="IFB299Model.AspNetUserRoles" FromRole="AspNetUser" ToRole="AspNetRole" />

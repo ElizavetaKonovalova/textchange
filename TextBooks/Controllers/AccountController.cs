@@ -36,6 +36,11 @@ namespace TextBooks.Controllers
             return View();
         }
 
+        public static string TokensCount()
+        {
+            return "123";
+        }
+
         public AccountController(ApplicationUserManager userManager, ApplicationSignInManager signInManager )
         {
             UserManager = userManager;
@@ -266,6 +271,7 @@ namespace TextBooks.Controllers
                         currentUser.FirstName = model.FirstName;
                         currentUser.LastName = model.LastName;
                         currentUser.PhoneNumber = model.ContactNumber;
+                        currentUser.Tokens = 1;
                         db.SaveChanges();
 
                         // Send an email with link to a confirmation code, used to verify their account
@@ -610,6 +616,14 @@ namespace TextBooks.Controllers
             };
 
             return View(model);
+        }
+
+        public static string getTokens(string id)
+        {
+            IFB299Entities db = new IFB299Entities();
+            var user = db.AspNetUsers.Find(id);
+            string tokenCount = user.Tokens.ToString();
+            return tokenCount;
         }
 
         public ActionResult Edit(ViewAccounts model, string id)
