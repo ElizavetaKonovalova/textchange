@@ -11,6 +11,7 @@ using Microsoft.Owin.Security;
 using TextBooks.Models;
 using System.Net.Mail;
 using System.Net;
+using TextBooks.App_Start;
 using System.Collections.Generic;
 using System.Net.Mime;
 using System.Data.Entity;
@@ -21,6 +22,7 @@ namespace TextBooks.Controllers
     public class AccountController : Controller
     {
         private IFB299Entities db = new IFB299Entities();
+        private SharedMethods shared = new SharedMethods();
         private ApplicationSignInManager _signInManager;
         private ApplicationUserManager _userManager;
 
@@ -128,9 +130,6 @@ namespace TextBooks.Controllers
                 return View("Register");
             }
 
-            // Create instance of Entities object for database access
-            IFB299Entities db = new IFB299Entities();
-
             // Create emtpy model
             PublicProfileViewModel result = new PublicProfileViewModel();
 
@@ -156,15 +155,21 @@ namespace TextBooks.Controllers
 
                 // If we've already tried to send a contact email, save this into 
                 // the model so the view can display an appropriate message
-                if (emailsent == "success")
+                switch (emailsent)
                 {
-                    result.contactEmail = new Email();
-                    result.contactEmail.success = true;
-                }
-                if (emailsent == "error")
-                {
-                    result.contactEmail = new Email();
-                    result.contactEmail.success = false;
+                    case "success":
+                        result.contactEmail = new Email();
+                        result.contactEmail.success = true;
+                        break;
+                    case "error":
+                        result.contactEmail = new Email();
+                        result.contactEmail.success = false;
+                        break;
+                    case "youself":
+                        result.contactEmail = new Email();
+                        result.contactEmail.success = false;
+                        shared.AddErrors("Do you really want to send a request to YOURSELF?!");
+                        break;
                 }
                 
                 // Done
@@ -241,7 +246,7 @@ namespace TextBooks.Controllers
                 string addressSuffix = user.Email.Split('@')[1];
                 if (!addressSuffix.Equals("connect.qut.edu.au") || user.Email == "ifb299books@gmail.com")
                 {
-                    AddErrors("The email address is not valid! Use @connect.qut.edu.au");
+                    shared.AddErrors("The email address is not valid! Use @connect.qut.edu.au");
                     return View(model);
                 }
                 
@@ -286,39 +291,6 @@ namespace TextBooks.Controllers
             }
             // If we got this far, something failed. Let's redisplay the Register form (with errors).
             return View(model);
-        }
-        
-        private bool SendEmailMessage(Email model)
-        {
-            try
-            {
-                // Get message from Email class
-                string body = model.message;
-
-                // Setup a new MailMessage to send to target user
-                var message = new MailMessage();
-                message.To.Add(new MailAddress(model.toAddress, model.toName));
-                message.From = new MailAddress(model.fromAddress, model.fromName);
-                message.Subject = model.subject;
-                message.Body = string.Format(body);
-                message.IsBodyHtml = true;
-
-                // Init SmtpClient with credentials for the SendGrid Account
-                SmtpClient smtpClient = new SmtpClient("smtp.sendgrid.net", Convert.ToInt32(587));
-                NetworkCredential credentials = new NetworkCredential("ifb299", "IFB299Password");
-                smtpClient.Credentials = credentials;
-
-                // Send the email
-                smtpClient.Send(message);
-
-                // If we got this far, the email has been sent. 
-                return true;
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-                return false;
-            }
         }
 
         private void SendVerificationEmail(string code, string callbackURL, string firstName, string email)
@@ -427,7 +399,7 @@ namespace TextBooks.Controllers
                 }
                 else 
                 {
-                    AddErrors("You have typed the wrong email! Use @connect.qut.edu.au");
+                    shared.AddErrors("You have typed the wrong email! Use @connect.qut.edu.au");
                 }
             }
 
@@ -690,6 +662,7 @@ namespace TextBooks.Controllers
         //[ValidateAntiForgeryToken]
         public ActionResult ContactUser(PublicProfileViewModel model, string toUsername)
         {
+
             // Check that the model has been passed in with a valid mail message
             Email mailMessage = model.contactEmail;
             if (mailMessage.message == null)
@@ -702,9 +675,6 @@ namespace TextBooks.Controllers
             string fromUsername = ClaimsPrincipal.Current.Identity.GetUserName();
             if (fromUsername != "" && fromUsername != null)
             {
-                // Create Entity object for database access
-                IFB299Entities db = new IFB299Entities();
-
                 // Get required details about the user sending the email
                 AspNetUser fromUser = (from table in db.AspNetUsers
                                  where table.UserName == fromUsername
@@ -739,7 +709,7 @@ namespace TextBooks.Controllers
                     + ".</b><br /><br />" + "Kind Regards,<br />The Texchange Team";
 
                 // Send the email
-                bool result = SendEmailMessage(mailMessage);
+                bool result = shared.SendEmailMessage(mailMessage);
                 if (result)
                 {
                     return RedirectToAction("PublicProfile", "Account", new { username = toUsername, emailsent = "success" });
@@ -751,7 +721,6 @@ namespace TextBooks.Controllers
             // Let's go to the home page and start again.
             return RedirectToAction("Index", "Home");
         }
-
         public IEnumerable<ViewAccounts> GetAllAccounts()
         {
             return db.AspNetUsers.Select(x => new ViewAccounts 
@@ -820,11 +789,6 @@ namespace TextBooks.Controllers
             {
                 ModelState.AddModelError("", error);
             }
-        }
-
-        private void AddErrors(string customError)
-        {
-            ModelState.AddModelError("", customError);
         }
 
         private ActionResult RedirectToLocal(string returnUrl)

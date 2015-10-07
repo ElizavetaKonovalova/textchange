@@ -14,6 +14,7 @@
         <AssociationConnector Association="IFB299Model.FK_dbo_AspNetUserClaims_dbo_AspNetUsers_UserId" />
         <AssociationConnector Association="IFB299Model.FK_dbo_AspNetUserLogins_dbo_AspNetUsers_UserId" />
         <AssociationConnector Association="IFB299Model.AspNetUserRoles" />
+        <EntityTypeShape EntityType="IFB299Model.Request" Width="1.5" PointX="5.375" PointY="6.75" />
       </Diagram>
     </edmx:Diagrams>
   </edmx:Designer>

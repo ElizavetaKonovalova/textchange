@@ -10,13 +10,13 @@
     <h4 style="text-align:center;">Change your account settings</h4>
     <table class="table">
         <tr>
-            <th>
+            <th style="text-align:center">
                 Password
             </th>
-            <th>
+            <th style="text-align:center">
                 Books
             </th>
-            <th>
+            <th style="text-align:center">
                 Phone
             </th>
         </tr>
@@ -32,7 +32,9 @@
                 }
             </td>
             <td class="col-xs-4">
-                @Html.ActionLink("View", "ViewMyBooks", null, new { @class = "btn btn-default btn-transparent" })
+                @Html.ActionLink("Uploaded", "ViewMyBooks", null, new { @class = "btn btn-default btn-transparent" })
+                @Html.ActionLink("Borrowed", "ViewMyBooksBorrowed", null, new { @class = "btn btn-default btn-transparent" })
+                @Html.ActionLink("Requests", "RequestsToBorrow", null, new { @class = "btn btn-default btn-transparent" })
             </td>
             <td class="col-xs-4">
                 @if (Model.PhoneNumber != null)

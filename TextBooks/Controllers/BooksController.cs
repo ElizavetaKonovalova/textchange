@@ -6,7 +6,9 @@ using System.Linq;
 using System.Net;
 using System.Web;
 using System.Web.Mvc;
+using TextBooks.App_Start;
 using TextBooks;
+using TextBooks.Models;
 using System.Security.Claims;
 
 
@@ -15,6 +17,7 @@ namespace TextBooks.Controllers
     public class BooksController : Controller
     {
         private IFB299Entities db = new IFB299Entities();
+        private SharedMethods shared = new SharedMethods();
 
         public ActionResult Index()
         {
@@ -28,34 +31,19 @@ namespace TextBooks.Controllers
             {
                 List<Book> result = (from table in db.Books
                                      where (
-                                     table.ISBN.Contains(searchQuery) || 
+                                     table.ISBN.Contains(searchQuery) ||
                                      table.Title.Contains(searchQuery) ||
                                      table.Author.Contains(searchQuery) ||
                                      table.Edition.Contains(searchQuery) ||
                                      table.Year.Contains(searchQuery)
                                      )
-                                     select table).OrderBy(x=>x.Title).ToList();
+                                     select table).OrderBy(x => x.Title).ToList();
                 if (result != null)
                 {
                     return View(result);
                 }
             }
             return View(db.Books.OrderBy(x => x.Title).ToList());
-        }
-
-        // GET: Books/Details/5
-        public ActionResult Details(int? id)
-        {
-            if (id == null)
-            {
-                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
-            }
-            Book book = db.Books.Find(id);
-            if (book == null)
-            {
-                return HttpNotFound();
-            }
-            return View(book);
         }
 
         // GET: Books/Create
@@ -181,6 +169,120 @@ namespace TextBooks.Controllers
             db.Books.Remove(book);
             db.SaveChanges();
             return RedirectToAction("../Manage/ViewMyBooks");
+        }
+
+        // GET: Books/Details/5
+        public ActionResult Details(int? id, string username)
+        {
+            var loggedIn = ClaimsPrincipal.Current.Identity.IsAuthenticated;
+            if (!loggedIn)
+            {
+                return View("../Account/Register");
+            }
+
+            if (id == null)
+            {
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+            }
+
+            var books = (from book in db.Books
+                         where book.B_ID == id
+                         select new ViewMyBooks
+                         {
+                             Author = book.Author,
+                             BookTitle = book.Title,
+                             Edition = book.Edition,
+                             ISBN = book.ISBN,
+                             Year = book.Year,
+                             B_ID = book.B_ID,
+                             Owner = book.Owner
+                         }).AsEnumerable();
+
+            ViewMyBooks model = new ViewMyBooks
+            {
+                targetUser = (from table in db.AspNetUsers
+                              where table.UserName == username
+                              select table).FirstOrDefault(),
+                BookDetails = books,
+                B_ID = books.Select(x=>x.B_ID).Single()
+            };
+
+            return View(model);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult Details(ViewMyBooks model, string toUsername, int bookID)
+        {
+            ManageController manage = new ManageController();
+            // Check that the model has been passed in with a valid mail message
+            Email mailMessage = model.contactEmail;
+            if (mailMessage.message == null)
+            {
+                // No email content to send, don't send it empty and let the view know it wasn't sent.
+                return RedirectToAction("PublicProfile", "Account", new { username = toUsername, emailsent = "error" });
+            }
+
+            // Get the currently logged in user
+            string fromUsername = ClaimsPrincipal.Current.Identity.Name;
+            //&& !toUsername.Equals(fromUsername)
+            if (fromUsername != "" && fromUsername != null)
+            {
+                // Get required details about the user sending the email
+                AspNetUser fromUser = (from table in db.AspNetUsers
+                                       where table.UserName == fromUsername
+                                       select table).FirstOrDefault();
+
+                // Get required details about the user receiving the email
+                AspNetUser toUser = (from table in db.AspNetUsers
+                                     where table.UserName == toUsername
+                                     select table).FirstOrDefault();
+
+                // Check the users were received successfully
+                if (fromUser == null || toUser == null)
+                {
+                    return View("Error");
+                }
+
+                var bookDetails = db.Books.Find(bookID);
+                // Setup the Email with all the required info
+                mailMessage.fromName = fromUser.FirstName + " " + fromUser.LastName;
+                mailMessage.fromAddress = fromUser.Email;
+                mailMessage.toName = toUser.FirstName + " " + toUser.LastName;
+                mailMessage.toAddress = toUser.Email;
+                mailMessage.subject = "Contact from Texchange";
+
+                // Swap out our new lines chars for html line breaks in order to preserve formatting.
+                mailMessage.message = mailMessage.message.Replace(System.Environment.NewLine, "<br />");
+
+                // Wrap the message in a default template
+                mailMessage.message = "Hi " + toUser.FirstName + ",<br /><br />You've received a request from "
+                    + fromUser.FirstName + " " + fromUser.LastName + " to borrow your book: <br/><br/> <strong>Title:</strong> "
+                    + bookDetails.Title + "<br/> <strong>Year:</strong> " + bookDetails.Year
+                    + "<br/><strong> Author: </strong>" + bookDetails.Author + "<br/><br/> on Texchange:<br /><br /><em>"
+                    + "Hi " + toUser.FirstName + ",<br/>" + mailMessage.message
+                    + "</em><br /><br />" + "You may <button class='btn btn-default '>Accept</button> the request or <button>Decline</button> it. <br/><b>You can reply to this email to contact "
+                    + fromUser.FirstName + ".</b><br /><br />" + "Kind Regards,<br />The Texchange Team";
+
+                // Send the email
+                bool result = shared.SendEmailMessage(mailMessage);
+                if (result)
+                {
+                    toUser.Notified += 1;
+                    var request = new Request();
+                    request.RequestFrom = fromUser.UserName;
+                    request.UserID = toUser.Id;
+                    request.RequestText = "Request to borrow "+bookDetails.Title+", "+bookDetails.Author+", "+bookDetails.Year+".";
+                    db.Requests.Add(request);
+                    db.SaveChanges();
+                    manage.setMessage(mailMessage.message);
+                    return RedirectToAction("PublicProfile", "Account", new { username = toUsername, emailsent = "success" });
+                }
+            }
+            // One of the user accounts wasn't able to be received, or something else went wrong
+            // Perhaps a user account was deleted while an message was being written?
+            // Let's go to the home page and start again.
+            return RedirectToAction("PublicProfile", "Account", new { username = toUsername, emailsent = "yourself" });
         }
 
         protected override void Dispose(bool disposing)

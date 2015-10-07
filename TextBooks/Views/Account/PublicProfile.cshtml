@@ -80,7 +80,7 @@
             {
                 <tr>
                     <td>
-                        @Html.ActionLink((item.Title), "Details", "Books", new { id = item.B_ID }, null)
+                        @Html.ActionLink((item.Title), "Details", "Books", new { id = item.B_ID, username = item.Owner }, null)
                     </td>
                 </tr>
             }
@@ -137,7 +137,8 @@
                             new { @class = "form-control col-md-12",
                                 @style = "min-width: 100%",
                                 @placeholder = "Type your message for " + Model.targetUser.FirstName + " here.",
-                                @rows ="8"})
+                                @rows ="8"
+                            })
                     }
                 </div>
                 <div class="modal-footer modal-text">

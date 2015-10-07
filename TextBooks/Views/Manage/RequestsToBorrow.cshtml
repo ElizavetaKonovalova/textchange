@@ -1,0 +1,31 @@
+﻿@model TextBooks.Models.RequestsToBorrowView
+
+@{
+    ViewBag.Title = "Requests";
+}
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+    
+    <div class="form-horizontal">
+        <h4>Requests</h4>
+        <hr />
+        
+        @Html.DisplayFor(model=>Model.message)
+
+        <div class="form-group">
+            <div class="col-md-offset-5 col-xs-6">
+                <button type="submit" value="Accept" class="btn btn-default btn-transparent" >Accept</button>
+                <button type="submit" value="Decline" class="btn btn-default btn-transparent">Decline</button>
+                @Html.ActionLink("Back to List", "Index", null, new { @class = "btn btn-default btn-transparent" })
+            </div>
+        </div>
+    </div>
+}
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+    @Styles.Render("~/Content/css")
+    <link href="@Url.Content("~/Content/Home.css")" rel="stylesheet" type="text/css" />
+}

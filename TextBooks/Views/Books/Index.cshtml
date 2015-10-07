@@ -72,7 +72,7 @@
                 @Html.DisplayFor(modelItem => item.ISBN)
             </td>
             <td>
-                @Html.ActionLink((item.Title), "Details", new { id = item.B_ID })
+                @Html.ActionLink((item.Title), "Details", new { id = item.B_ID, username = item.Owner })
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.Author)

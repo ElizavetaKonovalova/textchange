@@ -20,6 +20,7 @@ namespace TextBooks.Controllers
         private IFB299Entities db = new IFB299Entities();
         private ApplicationSignInManager _signInManager;
         private ApplicationUserManager _userManager;
+        private string messageFromUser;
 
         public ManageController()
         {
@@ -354,6 +355,35 @@ namespace TextBooks.Controllers
         }
 
         //
+        //GET: /Manage/ViewMyBooks
+        public ActionResult ViewMyBooksBorrowed()
+        {
+            string currentLoggedInUser = null;
+            if (ClaimsPrincipal.Current.Identity.IsAuthenticated)
+                currentLoggedInUser = ClaimsPrincipal.Current.Identity.Name;
+
+            var books = (from book in db.Books
+                         where book.Owner == currentLoggedInUser && book.BrwdBy != null
+                         select new ViewMyBooks
+                         {
+                             Author = book.Author,
+                             BookTitle = book.Title,
+                             Edition = book.Edition,
+                             ISBN = book.ISBN,
+                             Year = book.Year,
+                             B_ID = book.B_ID,
+                             Borrower = book.BrwdBy
+                         }).AsEnumerable();
+
+            ViewMyBooks model = new ViewMyBooks
+            {
+                BookDetails = books
+            };
+
+            return View(model);
+        }
+
+        //
         // POST: /Manage/LinkLogin
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -361,6 +391,41 @@ namespace TextBooks.Controllers
         {
             // Request a redirect to the external login provider to link a login for the current user
             return new AccountController.ChallengeResult(provider, Url.Action("LinkLoginCallback", "Manage"), User.Identity.GetUserId());
+        }
+
+        public void setMessage(string message)
+        {
+            messageFromUser = message;
+        }
+
+        public string getMessage()
+        {
+            return messageFromUser;
+        }
+
+        public ActionResult RequestsToBorrow(RequestsToBorrowView request)
+        {
+            var userId = db.AspNetUsers.Where(x=>x.UserName == User.Identity.Name).Select(x=>x.Id).FirstOrDefault();
+            var newRequest = db.Requests.Where(x => x.UserID == userId )
+                .Select(x => new { x.RequestText, x.RequestFrom});
+
+            if (newRequest.ToList().Count() >=1 )
+            {
+                request = new RequestsToBorrowView
+                {
+                    message = newRequest.Select(x => x.RequestText).Single(),
+                    RequestsAll = newRequest.AsEnumerable()
+                };
+            }
+            else
+            {
+                request = new RequestsToBorrowView
+                {
+                    message = "You don't have any requests!"
+                };
+            }
+
+            return View(request);
         }
 
         //

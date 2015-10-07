@@ -5,15 +5,19 @@
     {
     @Html.AntiForgeryToken()
 
-    <ul class="nav navbar-nav navbar-right">
-        
-        <li>
-            <div style="color:#ffffff; padding-top:15px; padding: 15px; line-height:20px; position: relative; display: block;">
-                Hello @User.Identity.GetUserName().Split('@')[0]!
-            </div>
-        </li>
-        <li><a href="javascript:document.getElementById('logoutForm').submit()">Log off</a></li>
-    </ul>
+        if (User.Identity.Name.Equals("ifb299books"))
+        {
+            <ul class="nav navbar-nav navbar-right">
+                <li><a href="javascript:document.getElementById('logoutForm').submit()">Log off</a></li>
+            </ul>
+        }
+        else
+        {
+            <ul class="nav navbar-nav navbar-right">
+                <li>@Html.ActionLink(User.Identity.Name, "Index", "Manage", routeValues: null, htmlAttributes: new { title = "Manage" })</li>
+                <li><a href="javascript:document.getElementById('logoutForm').submit()">Log off</a></li>
+            </ul>
+        }
     }
 }
 else

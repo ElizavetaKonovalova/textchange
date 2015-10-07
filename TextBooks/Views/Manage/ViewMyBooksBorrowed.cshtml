@@ -1,17 +1,13 @@
 ﻿@model TextBooks.Models.ViewMyBooks
 @{
-    ViewBag.Title = "View My Books";
+    ViewBag.Title = "View My Books Borrowed";
 }
 
 <div style="margin:5px;">
-    @Html.ActionLink("Back To My Account", "Index", null, new { @class = "btn btn-default btn-transparent" })
+    @Html.ActionLink("Back To My Account", "Index", null, new { @class = "btn btn-default btn-transparent"})
 </div>
-
 <table class="table table-hover" style="color:#0094ff;">
     <tr>
-        <th>
-            @Html.DisplayNameFor(model => model.ISBN)
-        </th>
         <th>
             @Html.DisplayNameFor(model => model.BookTitle)
         </th>
@@ -25,7 +21,10 @@
             @Html.DisplayNameFor(model => model.Year)
         </th>
         <th>
-            Manage
+            @Html.DisplayNameFor(model => model.Borrower)
+        </th>
+        <th>
+            Returned?
         </th>
     </tr>
 
@@ -48,8 +47,7 @@
                 @Html.DisplayFor(modelItem => item.Year)
             </td>
             <td>
-                @Html.ActionLink("Edit", "../Books/Edit", new { id = item.B_ID }, new { @class = "btn btn-default" })
-                @Html.ActionLink("Delete", "../Books/Delete", "Books", new { id = item.B_ID }, new { @class = "btn btn-default" })
+                @Html.DisplayFor(modelItem => item.Borrower)
             </td>
         </tr>
     }
