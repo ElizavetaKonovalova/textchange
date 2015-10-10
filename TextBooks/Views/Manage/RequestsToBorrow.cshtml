@@ -3,16 +3,13 @@
 @{
     ViewBag.Title = "Requests";
 }
-   
-    <div class="form-horizontal">
         <h4>Requests</h4>
         <hr />
-
-        <div class ="col-offset-md-10" style="margin-bottom:10px;">
-            @Html.ActionLink("Back to List", "Index", null, new { @class = "btn btn-default btn-transparent" })
+        <div class ="col-offset-md-10" style="margin:5px;">
+            @Html.ActionLink("Back to My Account", "Index", null, new { @class = "btn btn-default btn-transparent" })
         </div>
         
-        <table class="table-hover">
+        <table class=" table table-hover">
             <tr>
                 <th class="col-xs-6">
                     Request
@@ -35,6 +32,10 @@
                     @Html.DisplayFor(model => messages.sender)
                 </td>
                 <td>
+                    @if (messages.message.Equals("Currently, you have no requests.")) 
+                    {
+                    }else
+                    {
                     <div class="form-group">
                        @using (Html.BeginForm("RequestsToBorrow", "Manage", new {bookValue = messages.bookID, borrower = messages.borrower, requestID = messages.requestID }, FormMethod.Post))
                        {
@@ -43,11 +44,11 @@
                             <button name ="responce" type="submit" id="decline" value ="Decline" class="btn btn-default btn-transparent">Decline</button>
                        }
                     </div>
+                    }
                 </td>
                 </tr>
         }
-            </table>
-    </div>
+    </table>
 
 @section Scripts {
     @Scripts.Render("~/bundles/jqueryval")

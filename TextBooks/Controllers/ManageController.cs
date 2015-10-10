@@ -371,7 +371,62 @@ namespace TextBooks.Controllers
         }
 
         //
-        //GET: /Manage/ViewMyBooks
+        //GET: /Manage/ViewMyBooksBorrower/
+        public ActionResult ViewMyBooksBorrower()
+        {
+            string currentLoggedInUser = null;
+            if (ClaimsPrincipal.Current.Identity.IsAuthenticated)
+                currentLoggedInUser = ClaimsPrincipal.Current.Identity.Name;
+
+            return View(getBorrowed(currentLoggedInUser));
+        }
+
+        private ViewMyBooks getBorrowed(string user)
+        {
+            var books = (from book in db.Books
+                         where book.BrwdBy == user
+                         select new ViewMyBooks
+                         {
+                             Author = book.Author,
+                             BookTitle = book.Title,
+                             Edition = book.Edition,
+                             ISBN = book.ISBN,
+                             Year = book.Year,
+                             B_ID = book.B_ID,
+                             Borrower = book.BrwdBy
+                         }).AsEnumerable();
+
+            ViewMyBooks model = new ViewMyBooks
+            {
+                BookDetails = books
+            };
+
+            return model;
+        }
+
+        //
+        //POST: /Manage/ViewMyBooksBorrower/
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult ViewMyBooksBorrower(string returnBtn)
+        {
+            string currentLoggedInUser = null;
+            if (ClaimsPrincipal.Current.Identity.IsAuthenticated)
+                currentLoggedInUser = ClaimsPrincipal.Current.Identity.Name;
+
+            var book = db.Books.Find(returnBtn);
+
+            if (book.BrwdBy.Equals(currentLoggedInUser))
+            {
+                book.BrwdBy = null;
+                db.SaveChanges();
+            }
+
+            return View(getBorrowed(currentLoggedInUser));
+        }
+
+        //
+        //GET: /Manage/ViewMyBooksBorrowed/
         public ActionResult ViewMyBooksBorrowed()
         {
             string currentLoggedInUser = null;

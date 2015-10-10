@@ -380,6 +380,7 @@
     <Content Include="Views\Manage\ViewMyBooks.cshtml" />
     <Content Include="Views\Manage\ViewMyBooksBorrowed.cshtml" />
     <Content Include="Views\Manage\RequestsToBorrow.cshtml" />
+    <Content Include="Views\Manage\ViewMyBooksBorrower.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

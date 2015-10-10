@@ -21,7 +21,7 @@
             </th>
         </tr>
         <tr>
-            <td class="col-xs-4">
+            <td class="col-xs-3">
             @if (Model.HasPassword)
             {
                     @Html.ActionLink("Change your password", "ChangePassword", null, new { @class = "btn btn-default btn-transparent" })
@@ -34,9 +34,10 @@
             <td class="col-xs-4">
                 @Html.ActionLink("Uploaded", "ViewMyBooks", null, new { @class = "btn btn-default btn-transparent" })
                 @Html.ActionLink("Borrowed", "ViewMyBooksBorrowed", null, new { @class = "btn btn-default btn-transparent" })
+                @Html.ActionLink("I'm borrowing", "ViewMyBooksBorrower", null, new { @class = "btn btn-default btn-transparent" })
                 @Html.ActionLink("Requests", "RequestsToBorrow", null, new { @class = "btn btn-default btn-transparent" })
             </td>
-            <td class="col-xs-4">
+            <td class="col-xs-2">
                 @if (Model.PhoneNumber != null)
                 {
                     <div class="form-inline">

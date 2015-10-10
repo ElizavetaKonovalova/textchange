@@ -30,12 +30,13 @@ namespace TextBooks.Controllers
             if (searchQuery != "" && searchQuery != null)
             {
                 List<Book> result = (from table in db.Books
-                                     where (
+                                     where ((
                                      table.ISBN.Contains(searchQuery) ||
                                      table.Title.Contains(searchQuery) ||
                                      table.Author.Contains(searchQuery) ||
                                      table.Edition.Contains(searchQuery) ||
-                                     table.Year.Contains(searchQuery)
+                                     table.Year.Contains(searchQuery)) && 
+                                     table.BrwdBy.Equals(null)
                                      )
                                      select table).OrderBy(x => x.Title).ToList();
                 if (result != null)
@@ -43,7 +44,7 @@ namespace TextBooks.Controllers
                     return View(result);
                 }
             }
-            return View(db.Books.OrderBy(x => x.Title).ToList());
+            return View(db.Books.Where(x=>x.BrwdBy.Equals(null)).OrderBy(x => x.Title).ToList());
         }
 
         // GET: Books/Create
@@ -327,8 +328,8 @@ namespace TextBooks.Controllers
             //&& !toUsername.Equals(fromUsername)
             if (fromUsername != "" && fromUsername != null)
             {
-                if ((!fromUsername.Equals(toUsername) && bookDetails.BrwdBy == null) || !fromUsername.Equals(toUsername) 
-                    || bookDetails.BrwdBy == null)
+                if ((!fromUsername.Equals(toUsername) && String.IsNullOrEmpty(bookDetails.BrwdBy) == true) 
+                    || String.IsNullOrEmpty(bookDetails.BrwdBy) == true)
                 {
                     // Get required details about the user sending the email
                     AspNetUser fromUser = (from table in db.AspNetUsers
@@ -357,7 +358,7 @@ namespace TextBooks.Controllers
                         + bookDetails.Title + "<br/> <strong>Year:</strong> " + bookDetails.Year
                         + "<br/><strong> Author: </strong>" + bookDetails.Author + "<br/><br/> on Texchange:<br /><br /><em>"
                         + "Hi " + toUser.FirstName + ",<br/>" + mailMessage.message
-                        + "</em><br /><br />" + "You may <button class='btn btn-default '>Accept</button> the request or <button>Decline</button> it. <br/><b>You can reply to this email to contact "
+                        + "</em><br /><br />" + "You may <button class='btn btn-danger '>Accept</button> the request or <button>Decline</button> it. <br/><b>You can reply to this email to contact "
                         + fromUser.FirstName + ".</b><br /><br />" + "Kind Regards,<br />The Texchange Team";
 
                     // Send the email
