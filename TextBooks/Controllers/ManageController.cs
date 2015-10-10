@@ -118,10 +118,25 @@ namespace TextBooks.Controllers
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> AddPhoneNumber(AddPhoneNumberViewModel model)
         {
+            bool failed = false;
+
             if (model.Number.Length > 14)
-            {
-                AddErrors("Please type the correct number! Not longer then 13 characters.");
+            {               
+                ModelState.AddModelError("", "Please type the correct number. Not longer than 13 characters.");
+                failed = true;
             }
+
+            if (model.Number.Length < 8)
+            {
+                ModelState.AddModelError("", "Please type the correct number. Not shorter than 8 characters.");
+                failed = true;
+            }
+
+            if (failed == true)
+            {
+                return View();
+            }
+
             else
             {
 
