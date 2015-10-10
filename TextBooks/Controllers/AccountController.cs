@@ -934,6 +934,12 @@ namespace TextBooks.Controllers
             return View();
         }
 
+        public int getUserRequests(string userName)
+        {
+            var user = db.AspNetUsers.Where(x=>x.UserName == userName).Select(x=>x.Id).FirstOrDefault();
+            return db.Requests.Where(x=>x.UserID == user).Select(x=>x).Count();
+        }
+
         protected override void Dispose(bool disposing)
         {
             if (disposing)

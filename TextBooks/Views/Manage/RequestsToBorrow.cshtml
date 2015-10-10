@@ -3,11 +3,16 @@
 @{
     ViewBag.Title = "Requests";
 }
-    
+   
     <div class="form-horizontal">
         <h4>Requests</h4>
         <hr />
-        <table class="table-condensed">
+
+        <div class ="col-offset-md-10" style="margin-bottom:10px;">
+            @Html.ActionLink("Back to List", "Index", null, new { @class = "btn btn-default btn-transparent" })
+        </div>
+        
+        <table class="table-hover">
             <tr>
                 <th class="col-xs-6">
                     Request
@@ -42,8 +47,6 @@
                 </tr>
         }
             </table>
-
-        @Html.ActionLink("Back to List", "Index", null, new { @class = "btn btn-default btn-transparent" })
     </div>
 
 @section Scripts {

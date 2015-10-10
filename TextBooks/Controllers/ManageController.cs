@@ -460,7 +460,7 @@ namespace TextBooks.Controllers
                 results.BrwdBy = borrower;
                 db.SaveChanges();                
 
-                confirmation.message = "Hello, " + borrow.FirstName + " " + borrow.LastName+
+                confirmation.message = "Hello " + borrow.FirstName + " " + borrow.LastName+
                     ",<br /><br/> You have recently sent a request to "+owner.FirstName+
                     " "+owner.LastName+" to borrow this book:<br/><br/><b>Title</b>:"+results.Title+"<br/><b>Author</b>: "
                     + results.Author + "<br/><b>Year:</b> " + results.Year + 
@@ -469,10 +469,15 @@ namespace TextBooks.Controllers
 
                 account.incrementTokens(owner.Id);
                 account.decrementTokens(borrow.Id);
+
+                if (owner.Notified >= 1)
+                {
+                    owner.Notified -= 1;
+                }
             }
             else
             {
-                confirmation.message = "Hello, " + borrow.FirstName + " " + borrow.LastName 
+                confirmation.message = "Hello " + borrow.FirstName + " " + borrow.LastName 
                     + ",<br /><br/> You have recently sent a request to " + owner.FirstName +" " + owner.LastName 
                     + " to borrow this book:<br/><br/><b>Title</b>:" + results.Title + "<br/><b>Author</b>: "
                     + results.Author + "<br/><b>Year:</b> " + results.Year +
