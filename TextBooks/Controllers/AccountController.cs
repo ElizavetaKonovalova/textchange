@@ -618,12 +618,31 @@ namespace TextBooks.Controllers
             return View(model);
         }
 
+        //Gets how many tokens the user has from the database
         public static string getTokens(string id)
         {
             IFB299Entities db = new IFB299Entities();
             var user = db.AspNetUsers.Find(id);
             string tokenCount = user.Tokens.ToString();
             return tokenCount;
+        }
+
+        //Adds one to the users tokens
+        public static void incrementTokens(string id)
+        {
+            IFB299Entities db = new IFB299Entities();
+            var user = db.AspNetUsers.Find(id);
+            user.Tokens += 1;
+            db.SaveChanges();
+        }
+
+        //Subtracts one from the users tokens
+        public static void decrementTokens(string id)
+        {
+            IFB299Entities db = new IFB299Entities();
+            var user = db.AspNetUsers.Find(id);
+            user.Tokens -= 1;
+            db.SaveChanges();
         }
 
         public ActionResult Edit(ViewAccounts model, string id)
