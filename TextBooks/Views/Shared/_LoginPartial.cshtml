@@ -16,12 +16,12 @@
             <ul class="nav navbar-nav navbar-right">
                 <li>
                     <div style="color:#ffffff; padding-top:15px; padding: 10px; line-height:10px; position: relative; display: block;">
-                        Hello @User.Identity.GetUserName().Split('@')[0].Split('.')[0]!
                         <button type="button" class="btn btn-default btn-transparent" data-toggle="tooltip" data-placement="bottom" title="Tooltip on bottom">You have @TextBooks.Controllers.AccountController.getTokens(User.Identity.GetUserId()) tokens.</button>
                     </div>
-                </li>
-
-                <li>@Html.ActionLink(User.Identity.Name, "Index", "Manage", routeValues: null, htmlAttributes: new { title = "Manage" })</li>
+                </li>    
+                <li>@Html.ActionLink(
+                   "Hi " + TextBooks.Controllers.AccountController.GetFirstNameForUsername(User.Identity.GetUserName())+"!", 
+                   "Index", "Manage", routeValues: null, htmlAttributes: new { title = "Manage" })</li>
         <li><a href="javascript:document.getElementById('logoutForm').submit()">Log off</a></li>
     </ul>
     }

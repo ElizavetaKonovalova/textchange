@@ -814,10 +814,17 @@ namespace TextBooks.Controllers
             return RedirectToAction("Index", "Home");
         }
 
-        public static string GetFirstNameForUsername(string username)
+        public static string GetFirstNameForUsername(string userid)
         {
-
-            return "name";
+            IFB299Entities db = new IFB299Entities();
+            string firstName = (from table in db.AspNetUsers
+                           where table.UserName == userid
+                           select table.FirstName).FirstOrDefault();
+            if (firstName == null)
+            {
+                return ""; // Something is very wrong, should logout immediately.
+            }
+            return firstName;
         }
 
         internal class ChallengeResult : HttpUnauthorizedResult
