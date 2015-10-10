@@ -188,6 +188,7 @@
           <EntitySet Name="AspNetUserLogins" EntityType="IFB299Model.AspNetUserLogin" />
           <EntitySet Name="AspNetUsers" EntityType="IFB299Model.AspNetUser" />
           <EntitySet Name="Books" EntityType="IFB299Model.Book" />
+          <EntitySet Name="Requests" EntityType="IFB299Model.Request" />
           <AssociationSet Name="FK_dbo_AspNetUserClaims_dbo_AspNetUsers_UserId" Association="IFB299Model.FK_dbo_AspNetUserClaims_dbo_AspNetUsers_UserId">
             <End Role="AspNetUser" EntitySet="AspNetUsers" />
             <End Role="AspNetUserClaim" EntitySet="AspNetUserClaims" />
@@ -200,7 +201,6 @@
             <End Role="AspNetRole" EntitySet="AspNetRoles" />
             <End Role="AspNetUser" EntitySet="AspNetUsers" />
           </AssociationSet>
-          <EntitySet Name="Requests" EntityType="IFB299Model.Request" />
         </EntityContainer>
         <EntityType Name="C__MigrationHistory">
           <Key>
@@ -263,11 +263,10 @@
           <Property Name="ThumbsUp" Type="Int32" Nullable="false" />
           <Property Name="ThumbsDown" Type="Int32" Nullable="false" />
           <Property Name="Tokens" Type="Int32" Nullable="false" />
+          <Property Name="Notified" Type="Int32" Nullable="false" />
           <NavigationProperty Name="AspNetUserClaims" Relationship="IFB299Model.FK_dbo_AspNetUserClaims_dbo_AspNetUsers_UserId" FromRole="AspNetUser" ToRole="AspNetUserClaim" />
           <NavigationProperty Name="AspNetUserLogins" Relationship="IFB299Model.FK_dbo_AspNetUserLogins_dbo_AspNetUsers_UserId" FromRole="AspNetUser" ToRole="AspNetUserLogin" />
           <NavigationProperty Name="AspNetRoles" Relationship="IFB299Model.AspNetUserRoles" FromRole="AspNetUser" ToRole="AspNetRole" />
-          <Property Name="Tokens" Type="Int32" Nullable="false" />
-          <Property Name="Notified" Type="Int32" Nullable="false" />
         </EntityType>
         <EntityType Name="Book">
           <Key>
@@ -281,6 +280,15 @@
           <Property Name="Year" Type="String" MaxLength="255" FixedLength="false" Unicode="true" />
           <Property Name="Owner" Type="String" MaxLength="255" FixedLength="false" Unicode="true" />
           <Property Name="BrwdBy" Type="String" MaxLength="255" FixedLength="false" Unicode="true" />
+        </EntityType>
+        <EntityType Name="Request">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" />
+          <Property Name="UserID" Type="String" Nullable="false" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="RequestFrom" Type="String" Nullable="false" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="RequestText" Type="String" Nullable="false" MaxLength="Max" FixedLength="false" Unicode="true" />
         </EntityType>
         <Association Name="FK_dbo_AspNetUserClaims_dbo_AspNetUsers_UserId">
           <End Type="IFB299Model.AspNetUser" Role="AspNetUser" Multiplicity="1">
@@ -314,16 +322,7 @@
           <End Type="IFB299Model.AspNetRole" Role="AspNetRole" Multiplicity="*" />
           <End Type="IFB299Model.AspNetUser" Role="AspNetUser" Multiplicity="*" />
         </Association>
-        <EntityType Name="Request">
-          <Key>
-            <PropertyRef Name="Id" />
-          </Key>
-          <Property Name="Id" Type="Int32" Nullable="false" />
-          <Property Name="UserID" Type="String" Nullable="false" MaxLength="Max" FixedLength="false" Unicode="true" />
-          <Property Name="RequestFrom" Type="String" Nullable="false" MaxLength="Max" FixedLength="false" Unicode="true" />
-          <Property Name="RequestText" Type="String" Nullable="false" MaxLength="Max" FixedLength="false" Unicode="true" />
-        </EntityType>
-      </Schema>
+        </Schema>
     </edmx:ConceptualModels>
     <!-- C-S mapping content -->
     <edmx:Mappings>
@@ -405,14 +404,6 @@
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
-          <AssociationSetMapping Name="AspNetUserRoles" TypeName="IFB299Model.AspNetUserRoles" StoreEntitySet="AspNetUserRoles">
-            <EndProperty Name="AspNetUser">
-              <ScalarProperty Name="Id" ColumnName="UserId" />
-            </EndProperty>
-            <EndProperty Name="AspNetRole">
-              <ScalarProperty Name="Id" ColumnName="RoleId" />
-            </EndProperty>
-          </AssociationSetMapping>
           <EntitySetMapping Name="Requests">
             <EntityTypeMapping TypeName="IFB299Model.Request">
               <MappingFragment StoreEntitySet="Requests">
@@ -423,6 +414,14 @@
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
+          <AssociationSetMapping Name="AspNetUserRoles" TypeName="IFB299Model.AspNetUserRoles" StoreEntitySet="AspNetUserRoles">
+            <EndProperty Name="AspNetUser">
+              <ScalarProperty Name="Id" ColumnName="UserId" />
+            </EndProperty>
+            <EndProperty Name="AspNetRole">
+              <ScalarProperty Name="Id" ColumnName="RoleId" />
+            </EndProperty>
+          </AssociationSetMapping>
         </EntityContainerMapping>
       </Mapping>
     </edmx:Mappings>

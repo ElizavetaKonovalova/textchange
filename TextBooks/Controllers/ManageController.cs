@@ -413,8 +413,8 @@ namespace TextBooks.Controllers
             {
                 request = new RequestsToBorrowView
                 {
-                    message = newRequest.Select(x => x.RequestText).Single(),
-                    RequestsAll = newRequest.AsEnumerable()
+                    //message = newRequest.Select(x => x.RequestText).Single(),
+                    //RequestsAll = newRequest.AsEnumerable()
                 };
             }
             else

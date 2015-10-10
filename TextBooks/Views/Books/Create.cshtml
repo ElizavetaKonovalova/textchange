@@ -17,11 +17,11 @@
 
         @Html.ValidationSummary(true, "", new { @class = "text-danger" })
 
-        <div class="form-group">
-            @Html.Label(" ", htmlAttributes: new { @class = "control-label col-xs-5 spinner"})
-            @Html.LabelFor(model => model.Title, htmlAttributes: new { @class = "control-label col-xs-5 auto-hidden", @style = "display: none", @id = "textLabel" })
-            <div class="col-md-6">
-                @Html.EditorFor(model => model.Title, new { htmlAttributes = new { @class = "form-control", @id = "titleTextBox", @placeholder = "Enter the title of the textbook."} })
+        <div class="container form-group">
+            @Html.Label(" ", htmlAttributes: new { @class = "control-label col-md-5 spinner"})
+            @Html.LabelFor(model => model.Title, htmlAttributes: new { @class = "control-label col-md-5 auto-hidden", @style = "display: none", @id = "textLabel" })
+            <div class="col-md-4">
+                @Html.EditorFor(model => model.Title, new { htmlAttributes = new { @class = "form-control center", @id = "titleTextBox", @placeholder = "Enter the title of the textbook."} })
                 @Html.ValidationMessageFor(model => model.Title, "", new { @class = "text-danger" })
             </div>
         </div>
