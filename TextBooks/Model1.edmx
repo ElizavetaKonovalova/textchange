@@ -94,6 +94,7 @@
           <Property Name="UserID" Type="nvarchar(max)" Nullable="false" />
           <Property Name="RequestFrom" Type="nvarchar(max)" Nullable="false" />
           <Property Name="RequestText" Type="nvarchar(max)" Nullable="false" />
+          <Property Name="BookId" Type="int" Nullable="false" />
         </EntityType>
         <Association Name="FK_dbo_AspNetUserClaims_dbo_AspNetUsers_UserId">
           <End Role="AspNetUsers" Type="Self.AspNetUsers" Multiplicity="1">
@@ -289,6 +290,7 @@
           <Property Name="UserID" Type="String" Nullable="false" MaxLength="Max" FixedLength="false" Unicode="true" />
           <Property Name="RequestFrom" Type="String" Nullable="false" MaxLength="Max" FixedLength="false" Unicode="true" />
           <Property Name="RequestText" Type="String" Nullable="false" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="BookId" Type="Int32" Nullable="false" />
         </EntityType>
         <Association Name="FK_dbo_AspNetUserClaims_dbo_AspNetUsers_UserId">
           <End Type="IFB299Model.AspNetUser" Role="AspNetUser" Multiplicity="1">
@@ -407,6 +409,7 @@
           <EntitySetMapping Name="Requests">
             <EntityTypeMapping TypeName="IFB299Model.Request">
               <MappingFragment StoreEntitySet="Requests">
+                <ScalarProperty Name="BookId" ColumnName="BookId" />
                 <ScalarProperty Name="RequestText" ColumnName="RequestText" />
                 <ScalarProperty Name="RequestFrom" ColumnName="RequestFrom" />
                 <ScalarProperty Name="UserID" ColumnName="UserID" />

@@ -393,38 +393,62 @@ namespace TextBooks.Controllers
             return new AccountController.ChallengeResult(provider, Url.Action("LinkLoginCallback", "Manage"), User.Identity.GetUserId());
         }
 
-        public void setMessage(string message)
-        {
-            messageFromUser = message;
-        }
-
-        public string getMessage()
-        {
-            return messageFromUser;
-        }
-
         public ActionResult RequestsToBorrow(RequestsToBorrowView request)
         {
             var userId = db.AspNetUsers.Where(x=>x.UserName == User.Identity.Name).Select(x=>x.Id).FirstOrDefault();
             var newRequest = db.Requests.Where(x => x.UserID == userId )
-                .Select(x => new RequestsToBorrowView { message = x.RequestText, sender = x.RequestFrom});
+                .Select(x => 
+                    new RequestsToBorrowView { 
+                        message = x.RequestText, 
+                        sender = x.RequestFrom, 
+                        bookID = x.BookId, 
+                        borrower = x.RequestFrom,
+                        requestID = x.Id
+                    });
 
-            if (newRequest.ToList().Count() >=1 )
+            if (newRequest.ToList().Count() < 1 )
             {
-                request = new RequestsToBorrowView
-                {
-                    RequestsAll = newRequest.AsEnumerable()
-                };
+                newRequest = db.Requests.Select(
+                    x => new RequestsToBorrowView
+                    {
+                        message = "Currently, you have no requests.",
+                        sender = ""
+                    });
             }
-            else
+
+            request = new RequestsToBorrowView
             {
-                request = new RequestsToBorrowView
-                {
-                    message = "You don't have any requests!"
-                };
-            }
+                RequestsAll = newRequest.AsEnumerable()
+            };
 
             return View(request);
+        }
+
+        [HttpPost]
+        public ActionResult RequestsToBorrow(int bookValue, string borrower, int requestID)
+        {
+            //var result;
+            //switch (buttonValue)
+            //{
+            //    case "Accept":
+            //        result = db.Books.Where()
+            //        break;
+            //    case "Decline":
+            //        break;
+            //}
+            var results = db.Books.Find(bookValue);
+            results.BrwdBy = borrower;
+            db.SaveChanges();
+
+            var requests = db.Requests.Find(requestID);
+            
+            if(requests != null)
+            {
+                db.Requests.Remove(requests);
+                db.SaveChanges();
+            }
+
+            return Redirect("../Manage/RequestsToBorrow");
         }
 
         //

@@ -304,7 +304,6 @@ namespace TextBooks.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Details(ViewMyBooks model, string toUsername, int bookID)
         {
-            ManageController manage = new ManageController();
             // Check that the model has been passed in with a valid mail message
             Email mailMessage = model.contactEmail;
             if (mailMessage.message == null)
@@ -363,9 +362,9 @@ namespace TextBooks.Controllers
                     request.RequestFrom = fromUser.UserName;
                     request.UserID = toUser.Id;
                     request.RequestText = "Request to borrow "+bookDetails.Title+", "+bookDetails.Author+", "+bookDetails.Year+".";
+                    request.BookId = bookDetails.B_ID;
                     db.Requests.Add(request);
                     db.SaveChanges();
-                    manage.setMessage(mailMessage.message);
                     return RedirectToAction("PublicProfile", "Account", new { username = toUsername, emailsent = "success" });
                 }
             }
