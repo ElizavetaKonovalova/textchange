@@ -692,6 +692,74 @@ namespace TextBooks.Controllers
         }
 
         [HttpPost]
+        [AllowAnonymous]
+        public ActionResult ContactAdmin(string message)
+        {
+            var mailMessage = new Email();
+            mailMessage.message = message;
+            // Check that the model has been passed in with a valid mail message
+            if (mailMessage.message == null)
+            {
+                // No email content to send, return to home.
+                return RedirectToAction("Index", "Home");
+            }
+
+            // Get the currently logged in user (if there is one)
+            
+            if (ClaimsPrincipal.Current.Identity.IsAuthenticated)
+            {
+                string fromUsername = ClaimsPrincipal.Current.Identity.GetUserName();
+                // Get required details about the user sending the email
+                AspNetUser fromUser = (from table in db.AspNetUsers
+                                       where table.UserName == fromUsername
+                                       select table).FirstOrDefault();
+
+                // Check the user was received successfully
+                if (fromUser == null)
+                {
+                    return View("Error");
+                }
+
+                // Setup the Email with all the required info
+                mailMessage.fromName = fromUser.FirstName + " " + fromUser.LastName;
+                mailMessage.fromAddress = fromUser.Email;
+
+                // Wrap the message in a default template
+                mailMessage.message = "Contact from: "
+                    + fromUser.FirstName + " " + fromUser.LastName + ":<br /><br /><em>"
+                    + "Hi Admin," + "<br/><br />" + mailMessage.message;
+            }
+            else
+            {
+                // Setup the Email with all the required info
+                mailMessage.fromName = "Anonymous User";
+                mailMessage.fromAddress = "ifb299books@gmail.com";
+
+                // Wrap the message in a default template
+                mailMessage.message = "Contact from: Anonymous User"
+                    + ":<br /><br/><em>"
+                    + "Hi Admin," + "<br/><br />" + mailMessage.message;
+            }
+
+            mailMessage.toName = "Admin";
+            mailMessage.toAddress = "ifb299books@gmail.com";
+            mailMessage.subject = "Admin Contact";
+
+            // Swap out our new lines chars for html line breaks in order to preserve formatting.
+            mailMessage.message = mailMessage.message.Replace(Environment.NewLine, "<br />");
+
+            // Send the email
+            bool result = shared.SendEmailMessage(mailMessage);
+            if (result)
+            {
+                // TODO: return success
+                return RedirectToAction("Index", "Home");
+            }
+
+            return RedirectToAction("Index", "Home");
+        }
+
+        [HttpPost]
         //[ValidateAntiForgeryToken]
         public ActionResult ContactUser(PublicProfileViewModel model, string toUsername)
         {
@@ -754,6 +822,7 @@ namespace TextBooks.Controllers
             // Let's go to the home page and start again.
             return RedirectToAction("Index", "Home");
         }
+
         public IEnumerable<ViewAccounts> GetAllAccounts()
         {
             return db.AspNetUsers.Select(x => new ViewAccounts 
