@@ -236,6 +236,17 @@ namespace TextBooks.Controllers
             return View();
         }
 
+        bool IsDigitsOnly(string str)
+        {
+            foreach (char c in str)
+            {
+                if (c < '0' || c > '9')
+                    return false;
+            }
+
+            return true;
+        }
+
         //
         // POST: /Account/Register
         [HttpPost]
@@ -245,16 +256,88 @@ namespace TextBooks.Controllers
         {
             if (ModelState.IsValid)
             {
-                var user = new ApplicationUser { UserName = model.Email.Split('@')[0], Email = model.Email };
+                
+                string password = model.Password;
+                string confirmPassword = model.ConfirmPassword;
+                string fName = model.FirstName;
+                string lName = model.LastName;
+                string email = model.Email;
+                string number = model.ContactNumber;
+                // Check fields are ok
 
-                // Check email address is okay
-                string addressSuffix = user.Email.Split('@')[1];
-                if (!addressSuffix.Equals("connect.qut.edu.au") || user.Email == "ifb299books@gmail.com")
+                bool failed = false;
+                if (email == null)
                 {
-                    shared.AddErrors("The email address is not valid! Use @connect.qut.edu.au");
-                    return View(model);
+                    ModelState.AddModelError("", "Email field may not be empty.");
+                    failed = true;
+                }
+
+                if (email != null && !email.Contains('@'))
+                {
+                    ModelState.AddModelError("", "Please use a valid email format.");
+                    failed = true;
+                }
+
+                if (email != null && email.Contains('@'))
+                {
+                    string addressSuffix = email.Split('@')[1];
+                    if (!addressSuffix.Equals("connect.qut.edu.au") || email == "ifb299books@gmail.com")
+                    {
+                        ModelState.AddModelError("", "Please use valid email (@connect.qut.edu.au)");
+                        failed = true;
+                    }
+                }
+
+                if (password == null)
+                {
+                    ModelState.AddModelError("", "Password field may not be empty.");
+                    failed = true;
+                }
+
+                if (confirmPassword == null)
+                {
+                    ModelState.AddModelError("", "Confirm password field may not be empty.");
+                    failed = true;
+                }
+
+                if (fName == null)
+                {
+                    ModelState.AddModelError("", "First name field may not be empty.");
+                    failed = true;
+                }
+
+                if (lName == null)
+                {
+                    ModelState.AddModelError("", "Last name field may not be empty.");
+                    failed = true;
+                }
+
+                if (password != null && password.Length < 6)
+                {
+                    ModelState.AddModelError("", "Password must be longer than 6 characters.");
+                    failed = true;
+                }
+                if (password != confirmPassword)
+                {
+                    ModelState.AddModelError("", "Passwords do not match.");
+                    failed = true;
+                }
+
+                if (number != null)
+                {
+                    if (!IsDigitsOnly(number))
+                    {
+                        ModelState.AddModelError("", "The contact number may only be digits.");
+                        failed = true;
+                    }
                 }
                 
+                if (failed == true)
+                {
+                    return View();
+                }
+
+                var user = new ApplicationUser { UserName = model.Email.Split('@')[0], Email = model.Email};
                 // Create the account
                 var result = await UserManager.CreateAsync(user, model.Password);
                 if (result.Succeeded)
@@ -690,6 +773,74 @@ namespace TextBooks.Controllers
         }
 
         [HttpPost]
+        [AllowAnonymous]
+        public ActionResult ContactAdmin(string message)
+        {
+            var mailMessage = new Email();
+            mailMessage.message = message;
+            // Check that the model has been passed in with a valid mail message
+            if (mailMessage.message == null)
+            {
+                // No email content to send, return to home.
+                return RedirectToAction("Index", "Home");
+            }
+
+            // Get the currently logged in user (if there is one)
+            
+            if (ClaimsPrincipal.Current.Identity.IsAuthenticated)
+            {
+                string fromUsername = ClaimsPrincipal.Current.Identity.GetUserName();
+                // Get required details about the user sending the email
+                AspNetUser fromUser = (from table in db.AspNetUsers
+                                       where table.UserName == fromUsername
+                                       select table).FirstOrDefault();
+
+                // Check the user was received successfully
+                if (fromUser == null)
+                {
+                    return View("Error");
+                }
+
+                // Setup the Email with all the required info
+                mailMessage.fromName = fromUser.FirstName + " " + fromUser.LastName;
+                mailMessage.fromAddress = fromUser.Email;
+
+                // Wrap the message in a default template
+                mailMessage.message = "Contact from: "
+                    + fromUser.FirstName + " " + fromUser.LastName + ":<br /><br /><em>"
+                    + "Hi Admin," + "<br/><br />" + mailMessage.message;
+            }
+            else
+            {
+                // Setup the Email with all the required info
+                mailMessage.fromName = "Anonymous User";
+                mailMessage.fromAddress = "ifb299books@gmail.com";
+
+                // Wrap the message in a default template
+                mailMessage.message = "Contact from: Anonymous User"
+                    + ":<br /><br/><em>"
+                    + "Hi Admin," + "<br/><br />" + mailMessage.message;
+            }
+
+            mailMessage.toName = "Admin";
+            mailMessage.toAddress = "ifb299books@gmail.com";
+            mailMessage.subject = "Admin Contact";
+
+            // Swap out our new lines chars for html line breaks in order to preserve formatting.
+            mailMessage.message = mailMessage.message.Replace(Environment.NewLine, "<br />");
+
+            // Send the email
+            bool result = shared.SendEmailMessage(mailMessage);
+            if (result)
+            {
+                // TODO: return success
+                return RedirectToAction("Index", "Home");
+            }
+
+            return RedirectToAction("Index", "Home");
+        }
+
+        [HttpPost]
         //[ValidateAntiForgeryToken]
         public ActionResult ContactUser(PublicProfileViewModel model, string toUsername)
         {
@@ -752,6 +903,7 @@ namespace TextBooks.Controllers
             // Let's go to the home page and start again.
             return RedirectToAction("Index", "Home");
         }
+
         public IEnumerable<ViewAccounts> GetAllAccounts()
         {
             return db.AspNetUsers.Select(x => new ViewAccounts 

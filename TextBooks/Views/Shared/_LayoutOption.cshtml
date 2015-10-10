@@ -37,12 +37,12 @@
                 <div class="navbar-collapse collapse">
                     <ul class="nav navbar-nav">
                         <li>@Html.ActionLink("Submit A Book", "Create", "Books")</li>
-                        <li><a href="mailto:ifb299books@gmail.com?subject=Support%20Request">Contact Us</a></li>
+                        <!--Trigger for Email Modal-->
+                        <li><a href="#" data-toggle="modal" data-target="#myModal">Contact Us</a></li>
                     </ul>
                     @Html.Partial("_LoginPartial")
                 </div>
             }
-
         </div>
     </div>
     <div class="container body-content">
@@ -50,6 +50,41 @@
         <footer>
             <p>&copy; @DateTime.Now.Year - Texchange</p>
         </footer>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <!--Get the user's name so that it can show up the top of the modal-->
+                    @{
+                        TextBooks.Models.Email mail = new TextBooks.Models.Email();
+                    }
+                    <h4 class="modal-title modal-text" id="myModalLabel">Contact Admin</h4>
+                </div>
+                <div class="modal-body">
+                    @using (Html.BeginForm("ContactAdmin", "Account", FormMethod.Post, new { id = "modal-form" }))
+                    {
+                        <p class="modal-text">Hi Admin,</p>
+                        <!--This is where the user types in their message-->
+                    }
+                    <textarea form="modal-form" name="message" type="text" class="form-control col-md-12" style="min-width: 100%" placeholder="Type your message here." rows="8"></textarea>
+                </div>
+                <div class="modal-footer modal-text">
+                    <!--Cancel and submit buttons. Not sure if it should be a button or just input-->
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                    <input id="btn-submit" class="btn btn-primary" type="submit" value="Send Message" />
+                    <script type="text/javascript">
+                        document.getElementById("btn-submit").onclick = function () {
+                            var form = document.getElementById("modal-form");
+                            form.submit();
+                        }
+                    </script>
+                </div>
+            </div>
+        </div>
     </div>
 
     @Scripts.Render("~/bundles/jquery")
