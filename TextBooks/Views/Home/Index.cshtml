@@ -21,7 +21,10 @@
 </div>
 </header>
 
+<script src="~/Scripts/jquery.js"></script>
+
 <script type="text/javascript">
+    // Default search examples
     searchExamples = [
         "A Brief History of the Universe",
         "A Brief History of Time",
@@ -38,15 +41,35 @@
         "Essential Business Process Modelling",
         "Publication Manual of the American Psychological Association"
     ];
+
+    // Update search examples to match actual available books
+    $.post('@Url.Action("ListAllBookTitles", "Books")',
+        {
+            quantity: 0
+        },
+        function (data, status) {
+            searchExamples = data;
+        }
+    );
+
+    // Generate a random number within the range of the examples array
     var randomNumber = function () {
         return Math.floor(Math.random() * searchExamples.length);
     }
+
+    // Select a new example title to display
     var newSelection = function () {
         return "eg, " + searchExamples[randomNumber()];
     }
+    
+    // Start with an example title
     document.getElementById("indexSearchControl").placeholder = newSelection();
+
+    // Variables for animation 
     currentSuggestion = newSelection();
     index = 0;
+
+    // Animate "typing" the title one character at a time
     addLetter = function () {
         index++;
         if (index < 35) {
@@ -68,5 +91,7 @@
             }
         }
     }
-    window.setTimeout(addLetter, 3000);
+
+    // Start the animation
+    window.setTimeout(addLetter, 2000);
 </script>

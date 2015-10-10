@@ -10,19 +10,6 @@
 
 </head>
 
-@{
-    List<string> searchExamples = new List<string>(new string[] {
-        "A Brief History of the Universe",
-        "Calculus 101",
-        "Economics for the New Student",
-        "Networks and Their Uses",
-        "The Mysteries of Human Anatomy"
-    });
-    int sizeOfList = searchExamples.Count;
-    Random rnd = new Random();
-    string example = "eg, " + searchExamples[rnd.Next(sizeOfList)];
-}
-
 <body>
     <div class="navbar navbar-inverse navbar-fixed-top">
         <div class="container">

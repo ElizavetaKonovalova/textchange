@@ -16,25 +16,37 @@
             <ul class="nav navbar-nav navbar-right">
 
                 @{
-            string tokenTip = ("Tokens are used to borrow books on Texchange. " +
-                               "One is given automatically when you first sign up " +
-                               "so that you can get started borrowing books.\n\n " + 
-                                                              
-                               "One token is used every time you borrow a book.\n " +
-                                                         
-                               "When one of your books is successfully borrrowed you will be granted a token.\n " +
-                               
-                               "Tokens are a one time use so hoose which book you borrow carefully."
-                );
-                    }
+                    string tokenTip = ("Tokens are used to borrow books on Texchange. " +
+                                   "One is given automatically when you first sign up " +
+                                   "so that you can get started borrowing books.\n\n " +
+
+                                   "One token is used every time you borrow a book.\n " +
+
+                                   "When one of your books is successfully borrrowed you will be granted a token.\n " +
+
+                                   "Tokens are a one time use so hoose which book you borrow carefully."
+                    );
+                }
 
                 <li>
                     @Html.ActionLink(
-                    "Hi " + TextBooks.Controllers.AccountController.GetFirstNameForUsername(User.Identity.GetUserName())+"!",
-                    "Index", "Manage", routeValues: null, htmlAttributes: new { title = "Manage" })
+     "Hi " + TextBooks.Controllers.AccountController.GetFirstNameForUsername(User.Identity.GetUserName()) + "!",
+     "Index", "Manage", routeValues: null, htmlAttributes: new { title = "Manage" })
                 </li>
 
-                <li><a data-toggle="tooltip" title="@tokenTip">You have @TextBooks.Controllers.AccountController.getTokens(User.Identity.GetUserId()) tokens.</a></li>
+                <li>
+                    @{
+                        string tokens = TextBooks.Controllers.AccountController.getTokens(User.Identity.GetUserId());
+                        if (tokens == "1")
+                        {
+                        <a data-toggle="tooltip" title="@tokenTip">@TextBooks.Controllers.AccountController.getTokens(User.Identity.GetUserId()) Token</a>
+                        }
+                        else
+                        {
+                        <a data-toggle="tooltip" title="@tokenTip">@TextBooks.Controllers.AccountController.getTokens(User.Identity.GetUserId()) Tokens</a>
+                        }
+                    }
+                </li>
 
                 
                 
