@@ -457,7 +457,7 @@ namespace TextBooks.Controllers
                 .Select(x => x).FirstOrDefault();
 
             //Get borrower information of the book from the database.
-            AspNetUser borrow = db.AspNetUsers.Where(x => x.UserName == results.BrwdBy)
+            AspNetUser borrow = db.AspNetUsers.Where(x => x.UserName == borrower)
                 .Select(x => x).FirstOrDefault();
 
             if (responce.Equals("Accept"))
