@@ -7,6 +7,7 @@ using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.Owin;
 using Microsoft.Owin.Security;
 using TextBooks.Models;
+using TextBooks.App_Start;
 using System.Security.Claims;
 using System.Data.Entity;
 using System.Data.Entity.Validation;
@@ -20,7 +21,7 @@ namespace TextBooks.Controllers
         private IFB299Entities db = new IFB299Entities();
         private ApplicationSignInManager _signInManager;
         private ApplicationUserManager _userManager;
-        private string messageFromUser;
+        private SharedMethods shared;
 
         public ManageController()
         {
@@ -425,20 +426,52 @@ namespace TextBooks.Controllers
         }
 
         [HttpPost]
-        public ActionResult RequestsToBorrow(int bookValue, string borrower, int requestID)
+        public ActionResult RequestsToBorrow(string responce, int bookValue, string borrower, int requestID)
         {
-            //var result;
-            //switch (buttonValue)
-            //{
-            //    case "Accept":
-            //        result = db.Books.Where()
-            //        break;
-            //    case "Decline":
-            //        break;
-            //}
+            Email confirmation = new Email();
+            shared = new SharedMethods();
+            AccountController account = new AccountController();
+
             var results = db.Books.Find(bookValue);
-            results.BrwdBy = borrower;
-            db.SaveChanges();
+
+            AspNetUser owner = db.AspNetUsers.Where(x => x.UserName == results.Owner)
+                .Select(x => x).FirstOrDefault();
+
+            AspNetUser borrow = db.AspNetUsers.Where(x => x.UserName == results.BrwdBy)
+                .Select(x => x).FirstOrDefault();
+
+            if (responce.Equals("Accept"))
+            {
+                results.BrwdBy = borrower;
+                db.SaveChanges();                
+
+                confirmation.message = "Hello, " + borrow.FirstName + " " + borrow.LastName+
+                    ",<br /><br/> You have recently sent a request to "+owner.FirstName+
+                    " "+owner.LastName+" to borrow this book:<br/><br/><b>Title</b>:"+results.Title+"<br/><b>Author</b>: "
+                    + results.Author + "<br/><b>Year:</b> " + results.Year + 
+                    "<br/><br/>Congratulations! Your request has been <b>accepted</b>"
+                    + "<br/><br/>Enjoy the book!<br/>Kind regards,<br/><b>Texchange</b>.";
+
+                account.incrementTokens(owner.Id);
+                account.decrementTokens(borrow.Id);
+            }
+            else
+            {
+                confirmation.message = "Hello, " + borrow.FirstName + " " + borrow.LastName 
+                    + ",<br /><br/> You have recently sent a request to " + owner.FirstName +" " + owner.LastName 
+                    + " to borrow this book:<br/><br/><b>Title</b>:" + results.Title + "<br/><b>Author</b>: "
+                    + results.Author + "<br/><b>Year:</b> " + results.Year +
+                    "<br/><br/>We are sorry, but your request was <b>regected</b><br/><br/>Good luck!<br/>Kind regards,<br/>"
+                    + "<b>Texchange</b>.";
+            }
+
+            confirmation.fromAddress = owner.Email;
+            confirmation.fromName = owner.FirstName;
+            confirmation.toAddress = borrow.Email;
+            confirmation.toName = borrow.FirstName;
+            confirmation.subject = "Texchange: Book request confirmation";
+
+            shared.SendEmailMessage(confirmation);
 
             var requests = db.Requests.Find(requestID);
             

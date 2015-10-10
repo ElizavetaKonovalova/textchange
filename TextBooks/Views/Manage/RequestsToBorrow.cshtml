@@ -31,11 +31,11 @@
                 </td>
                 <td>
                     <div class="form-group">
-                       @using (Html.BeginForm("RequestsToBorrow", "Manage", new { bookValue = messages.bookID, borrower = messages.borrower, requestID = messages.requestID }, FormMethod.Post))
+                       @using (Html.BeginForm("RequestsToBorrow", "Manage", new {bookValue = messages.bookID, borrower = messages.borrower, requestID = messages.requestID }, FormMethod.Post))
                        {
                              @Html.AntiForgeryToken()
-                            <button type="submit" value ="Accept" class="btn btn-default btn-transparent">Accept</button>
-                            <button type="submit" class="btn btn-default btn-transparent">Decline</button>
+                            <button name ="responce" type="submit" id="accept" value="Accept" class="btn btn-default btn-transparent">Accept</button>
+                            <button name ="responce" type="submit" id="decline" value ="Decline" class="btn btn-default btn-transparent">Decline</button>
                        }
                     </div>
                 </td>

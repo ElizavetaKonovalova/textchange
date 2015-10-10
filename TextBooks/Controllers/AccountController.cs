@@ -628,18 +628,16 @@ namespace TextBooks.Controllers
         }
 
         //Adds one to the users tokens
-        public static void incrementTokens(string id)
+        public void incrementTokens(string id)
         {
-            IFB299Entities db = new IFB299Entities();
             var user = db.AspNetUsers.Find(id);
             user.Tokens += 1;
             db.SaveChanges();
         }
 
         //Subtracts one from the users tokens
-        public static void decrementTokens(string id)
+        public void decrementTokens(string id)
         {
-            IFB299Entities db = new IFB299Entities();
             var user = db.AspNetUsers.Find(id);
             user.Tokens -= 1;
             db.SaveChanges();

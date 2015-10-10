@@ -19,5 +19,6 @@ namespace TextBooks
         public string RequestFrom { get; set; }
         public string RequestText { get; set; }
         public int BookId { get; set; }
+        public string Status_ { get; set; }
     }
 }
