@@ -1,4 +1,5 @@
 ﻿@model TextBooks.Models.ViewMyBooks
+
 @{
     ViewBag.Title = "View My Books Borrowed";
 }
@@ -8,6 +9,9 @@
 </div>
 <table class="table table-hover">
     <tr>
+        <th>
+            @Html.DisplayNameFor(model => model.ISBN)
+        </th>
         <th>
             @Html.DisplayNameFor(model => model.BookTitle)
         </th>
@@ -21,10 +25,7 @@
             @Html.DisplayNameFor(model => model.Year)
         </th>
         <th>
-            @Html.DisplayNameFor(model => model.Borrower)
-        </th>
-        <th>
-            Returned?
+            Borrower
         </th>
     </tr>
 
@@ -47,7 +48,7 @@
                 @Html.DisplayFor(modelItem => item.Year)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.Borrower)
+                @Html.ActionLink(item.Borrower, "../Account/PublicProfile", new { username = item.Borrower })
             </td>
         </tr>
     }

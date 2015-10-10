@@ -440,6 +440,8 @@ namespace TextBooks.Controllers
             return View(request);
         }
 
+        //
+        //POST: Manage/RequestsToBorrow/
         [HttpPost]
         public ActionResult RequestsToBorrow(string responce, int bookValue, string borrower, int requestID)
         {
@@ -447,19 +449,24 @@ namespace TextBooks.Controllers
             shared = new SharedMethods();
             AccountController account = new AccountController();
 
+            //Find requested book in the database.
             var results = db.Books.Find(bookValue);
 
+            //Get owner information of the book from the database.
             AspNetUser owner = db.AspNetUsers.Where(x => x.UserName == results.Owner)
                 .Select(x => x).FirstOrDefault();
 
+            //Get borrower information of the book from the database.
             AspNetUser borrow = db.AspNetUsers.Where(x => x.UserName == results.BrwdBy)
                 .Select(x => x).FirstOrDefault();
 
             if (responce.Equals("Accept"))
             {
+                //Assign book's borrower
                 results.BrwdBy = borrower;
-                db.SaveChanges();                
+                db.SaveChanges();
 
+                //Create message body for request reply on a successful application.
                 confirmation.message = "Hello " + borrow.FirstName + " " + borrow.LastName+
                     ",<br /><br/> You have recently sent a request to "+owner.FirstName+
                     " "+owner.LastName+" to borrow this book:<br/><br/><b>Title</b>:"+results.Title+"<br/><b>Author</b>: "
@@ -467,16 +474,21 @@ namespace TextBooks.Controllers
                     "<br/><br/>Congratulations! Your request has been <b>accepted</b>"
                     + "<br/><br/>Enjoy the book!<br/>Kind regards,<br/><b>Texchange</b>.";
 
+                //Increase number of tokens of the book's owner.
                 account.incrementTokens(owner.Id);
+
+                //Decrease number of tokens the book's borrower.
                 account.decrementTokens(borrow.Id);
 
                 if (owner.Notified >= 1)
                 {
+                    //Decrease owner's number of notifications sent.
                     owner.Notified -= 1;
                 }
             }
             else
             {
+                //Create message body for request reply on an unsuccessful application.
                 confirmation.message = "Hello " + borrow.FirstName + " " + borrow.LastName 
                     + ",<br /><br/> You have recently sent a request to " + owner.FirstName +" " + owner.LastName 
                     + " to borrow this book:<br/><br/><b>Title</b>:" + results.Title + "<br/><b>Author</b>: "
@@ -491,12 +503,15 @@ namespace TextBooks.Controllers
             confirmation.toName = borrow.FirstName;
             confirmation.subject = "Texchange: Book request confirmation";
 
+            //Send request reply to the borrower.
             shared.SendEmailMessage(confirmation);
 
+            //Find this request in the database.
             var requests = db.Requests.Find(requestID);
             
             if(requests != null)
             {
+                //Remove the found request from the database.
                 db.Requests.Remove(requests);
                 db.SaveChanges();
             }

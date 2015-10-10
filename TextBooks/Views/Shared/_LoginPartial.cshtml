@@ -37,7 +37,7 @@
      "Hi " + TextBooks.Controllers.AccountController.GetFirstNameForUsername(User.Identity.GetUserName()) + "!",
      "Index", "Manage", routeValues: null, htmlAttributes: new { title = "Manage" })
                 </li>
-                <li>@Html.ActionLink(account.getUserRequests(User.Identity.Name).ToString(),"RequestsToBorrow","Manage")</li>
+                <li>@Html.ActionLink(account.getUserRequests(User.Identity.Name),"RequestsToBorrow","Manage")</li>
                 <li>
                     @{
                         string tokens = TextBooks.Controllers.AccountController.getTokens(User.Identity.GetUserId());

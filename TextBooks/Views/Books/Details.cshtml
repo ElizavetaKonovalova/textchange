@@ -11,7 +11,7 @@
 @Html.AntiForgeryToken()
 
 <h2>Book Details</h2>
-
+    @Html.ValidationSummary("", new { @class = "text-danger" })
 <div class="container">
 
     @if (Model.contactEmail != null)

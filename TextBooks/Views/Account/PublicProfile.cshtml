@@ -4,6 +4,7 @@
     ViewBag.Title = "PublicProfile";
 }
 <br />
+@Html.ValidationSummary("", new { @class = "text-danger" })
 <div class="container">
 
     @if (Model.contactEmail != null)

@@ -304,6 +304,7 @@ namespace TextBooks.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Details(ViewMyBooks model, string toUsername, int bookID)
         {
+            bool failed = false;
             // Check that the model has been passed in with a valid mail message
             Email mailMessage = model.contactEmail;
             if (mailMessage.message == null)
@@ -317,55 +318,63 @@ namespace TextBooks.Controllers
             //&& !toUsername.Equals(fromUsername)
             if (fromUsername != "" && fromUsername != null)
             {
-                // Get required details about the user sending the email
-                AspNetUser fromUser = (from table in db.AspNetUsers
-                                       where table.UserName == fromUsername
-                                       select table).FirstOrDefault();
-
-                // Get required details about the user receiving the email
-                AspNetUser toUser = (from table in db.AspNetUsers
-                                     where table.UserName == toUsername
-                                     select table).FirstOrDefault();
-
-                // Check the users were received successfully
-                if (fromUser == null || toUser == null)
+                if (!fromUsername.Equals(toUsername))
                 {
-                    return View("Error");
+                    // Get required details about the user sending the email
+                    AspNetUser fromUser = (from table in db.AspNetUsers
+                                           where table.UserName == fromUsername
+                                           select table).FirstOrDefault();
+
+                    // Get required details about the user receiving the email
+                    AspNetUser toUser = (from table in db.AspNetUsers
+                                         where table.UserName == toUsername
+                                         select table).FirstOrDefault();
+
+                    // Check the users were received successfully
+                    if (fromUser == null || toUser == null)
+                    {
+                        return View("Error");
+                    }
+
+                    var bookDetails = db.Books.Find(bookID);
+                    // Setup the Email with all the required info
+                    mailMessage.fromName = fromUser.FirstName + " " + fromUser.LastName;
+                    mailMessage.fromAddress = fromUser.Email;
+                    mailMessage.toName = toUser.FirstName + " " + toUser.LastName;
+                    mailMessage.toAddress = toUser.Email;
+                    mailMessage.subject = "Contact from Texchange";
+
+                    // Swap out our new lines chars for html line breaks in order to preserve formatting.
+                    mailMessage.message = mailMessage.message.Replace(System.Environment.NewLine, "<br />");
+
+                    // Wrap the message in a default template
+                    mailMessage.message = "Hi " + toUser.FirstName + ",<br /><br />You've received a request from "
+                        + fromUser.FirstName + " " + fromUser.LastName + " to borrow your book: <br/><br/> <strong>Title:</strong> "
+                        + bookDetails.Title + "<br/> <strong>Year:</strong> " + bookDetails.Year
+                        + "<br/><strong> Author: </strong>" + bookDetails.Author + "<br/><br/> on Texchange:<br /><br /><em>"
+                        + "Hi " + toUser.FirstName + ",<br/>" + mailMessage.message
+                        + "</em><br /><br />" + "You may <button class='btn btn-default '>Accept</button> the request or <button>Decline</button> it. <br/><b>You can reply to this email to contact "
+                        + fromUser.FirstName + ".</b><br /><br />" + "Kind Regards,<br />The Texchange Team";
+
+                    // Send the email
+                    bool result = shared.SendEmailMessage(mailMessage);
+                    if (result)
+                    {
+                        toUser.Notified += 1;
+                        var request = new Request();
+                        request.RequestFrom = fromUser.UserName;
+                        request.UserID = toUser.Id;
+                        request.RequestText = "Request to borrow " + bookDetails.Title + ", " + bookDetails.Author + ", " + bookDetails.Year + ".";
+                        request.BookId = bookDetails.B_ID;
+                        db.Requests.Add(request);
+                        db.SaveChanges();
+                        return RedirectToAction("PublicProfile", "Account", new { username = toUsername, emailsent = "success" });
+                    }
                 }
-
-                var bookDetails = db.Books.Find(bookID);
-                // Setup the Email with all the required info
-                mailMessage.fromName = fromUser.FirstName + " " + fromUser.LastName;
-                mailMessage.fromAddress = fromUser.Email;
-                mailMessage.toName = toUser.FirstName + " " + toUser.LastName;
-                mailMessage.toAddress = toUser.Email;
-                mailMessage.subject = "Contact from Texchange";
-
-                // Swap out our new lines chars for html line breaks in order to preserve formatting.
-                mailMessage.message = mailMessage.message.Replace(System.Environment.NewLine, "<br />");
-
-                // Wrap the message in a default template
-                mailMessage.message = "Hi " + toUser.FirstName + ",<br /><br />You've received a request from "
-                    + fromUser.FirstName + " " + fromUser.LastName + " to borrow your book: <br/><br/> <strong>Title:</strong> "
-                    + bookDetails.Title + "<br/> <strong>Year:</strong> " + bookDetails.Year
-                    + "<br/><strong> Author: </strong>" + bookDetails.Author + "<br/><br/> on Texchange:<br /><br /><em>"
-                    + "Hi " + toUser.FirstName + ",<br/>" + mailMessage.message
-                    + "</em><br /><br />" + "You may <button class='btn btn-default '>Accept</button> the request or <button>Decline</button> it. <br/><b>You can reply to this email to contact "
-                    + fromUser.FirstName + ".</b><br /><br />" + "Kind Regards,<br />The Texchange Team";
-
-                // Send the email
-                bool result = shared.SendEmailMessage(mailMessage);
-                if (result)
+                else
                 {
-                    toUser.Notified += 1;
-                    var request = new Request();
-                    request.RequestFrom = fromUser.UserName;
-                    request.UserID = toUser.Id;
-                    request.RequestText = "Request to borrow "+bookDetails.Title+", "+bookDetails.Author+", "+bookDetails.Year+".";
-                    request.BookId = bookDetails.B_ID;
-                    db.Requests.Add(request);
-                    db.SaveChanges();
-                    return RedirectToAction("PublicProfile", "Account", new { username = toUsername, emailsent = "success" });
+                    ModelState.AddModelError("", "Test Success!");
+                    failed = true;
                 }
             }
             // One of the user accounts wasn't able to be received, or something else went wrong

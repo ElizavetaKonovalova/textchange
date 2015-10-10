@@ -173,7 +173,7 @@ namespace TextBooks.Controllers
                     case "youself":
                         result.contactEmail = new Email();
                         result.contactEmail.success = false;
-                        shared.AddErrors("Do you really want to send a request to YOURSELF?!");
+                        ModelState.AddModelError("", "Test Success!");
                         break;
                 }
                 
@@ -934,10 +934,10 @@ namespace TextBooks.Controllers
             return View();
         }
 
-        public int getUserRequests(string userName)
+        public string getUserRequests(string userName)
         {
             var user = db.AspNetUsers.Where(x=>x.UserName == userName).Select(x=>x.Id).FirstOrDefault();
-            return db.Requests.Where(x=>x.UserID == user).Select(x=>x).Count();
+            return db.Requests.Where(x=>x.UserID == user).Select(x=>x).Count().ToString();
         }
 
         protected override void Dispose(bool disposing)
