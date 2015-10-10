@@ -814,6 +814,12 @@ namespace TextBooks.Controllers
             return RedirectToAction("Index", "Home");
         }
 
+        public static string GetFirstNameForUsername(string username)
+        {
+
+            return "name";
+        }
+
         internal class ChallengeResult : HttpUnauthorizedResult
         {
             public ChallengeResult(string provider, string redirectUri)
