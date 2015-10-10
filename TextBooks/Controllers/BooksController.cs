@@ -374,6 +374,14 @@ namespace TextBooks.Controllers
             return RedirectToAction("PublicProfile", "Account", new { username = toUsername, emailsent = "yourself" });
         }
 
+        public ActionResult ListAllBookTitles(int quantity)
+        {
+            List<string> titles = (from table in db.Books
+                                   select table.Title).ToList();
+            if (quantity != 0) titles.RemoveRange(quantity, titles.Count - quantity);
+            return Json(titles.ToArray());
+        }
+
         protected override void Dispose(bool disposing)
         {
             if (disposing)
