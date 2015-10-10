@@ -11,16 +11,20 @@
     <div class="form-horizontal">
         <h4>Requests</h4>
         <hr />
-        
-        @Html.DisplayFor(model=>Model.message)
-
-        <div class="form-group">
-            <div class="col-md-offset-5 col-xs-6">
-                <button type="submit" value="Accept" class="btn btn-default btn-transparent" >Accept</button>
-                <button type="submit" value="Decline" class="btn btn-default btn-transparent">Decline</button>
-                @Html.ActionLink("Back to List", "Index", null, new { @class = "btn btn-default btn-transparent" })
+            
+        @foreach(var messages in Model.RequestsAll)
+        {
+            @Html.DisplayFor(model=>messages.message)
+            @Html.DisplayFor(model=>messages.sender)
+            <div class="form-group">
+                <div class="col-md-offset-5 col-xs-6">
+                    <button type="submit" value="Accept" class="btn btn-default btn-transparent">Accept</button>
+                    <button type="submit" value="Decline" class="btn btn-default btn-transparent">Decline</button>
+                </div>
             </div>
-        </div>
+        }
+
+        @Html.ActionLink("Back to List", "Index", null, new { @class = "btn btn-default btn-transparent" })
     </div>
 }
 

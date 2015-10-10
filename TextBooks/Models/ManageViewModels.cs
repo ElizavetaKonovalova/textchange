@@ -87,7 +87,7 @@ namespace TextBooks.Models
     public class RequestsToBorrowView
     {
         public string message { get; set; }
-
+        public string sender { get; set; }
         public IEnumerable<RequestsToBorrowView> RequestsAll { get; set; }
     }
 

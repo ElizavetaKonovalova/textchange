@@ -14,11 +14,7 @@
         else
         {
             <ul class="nav navbar-nav navbar-right">
-                <li>
-                    <div style="color:#ffffff; padding-top:15px; padding: 20px; line-height:10px; position: relative; display: block;">
-                        Hello @User.Identity.GetUserName().Split('@')[0].Split('.')[0]!                        
-                    </div>
-                </li>
+
                 @{
             string tokenTip = ("Tokens are used to borrow books on Texchange. " +
                                "One is given automatically when you first sign up " +
@@ -31,9 +27,17 @@
                                "Tokens are a one time use so hoose which book you borrow carefully."
                 );
                     }
+
+                <li>
+                    @Html.ActionLink(
+                    "Hi " + TextBooks.Controllers.AccountController.GetFirstNameForUsername(User.Identity.GetUserName())+"!",
+                    "Index", "Manage", routeValues: null, htmlAttributes: new { title = "Manage" })
+                </li>
+
                 <li><a data-toggle="tooltip" title="@tokenTip">You have @TextBooks.Controllers.AccountController.getTokens(User.Identity.GetUserId()) tokens.</a></li>
 
-                <li>@Html.ActionLink(User.Identity.Name, "Index", "Manage", routeValues: null, htmlAttributes: new { title = "Manage" })</li>
+                
+                
         <li><a href="javascript:document.getElementById('logoutForm').submit()">Log off</a></li>
     </ul>
     }

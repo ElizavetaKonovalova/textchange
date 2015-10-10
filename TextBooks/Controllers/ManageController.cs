@@ -407,14 +407,13 @@ namespace TextBooks.Controllers
         {
             var userId = db.AspNetUsers.Where(x=>x.UserName == User.Identity.Name).Select(x=>x.Id).FirstOrDefault();
             var newRequest = db.Requests.Where(x => x.UserID == userId )
-                .Select(x => new { x.RequestText, x.RequestFrom});
+                .Select(x => new RequestsToBorrowView { message = x.RequestText, sender = x.RequestFrom});
 
             if (newRequest.ToList().Count() >=1 )
             {
                 request = new RequestsToBorrowView
                 {
-                    //message = newRequest.Select(x => x.RequestText).Single(),
-                    //RequestsAll = newRequest.AsEnumerable()
+                    RequestsAll = newRequest.AsEnumerable()
                 };
             }
             else
