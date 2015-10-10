@@ -305,8 +305,17 @@ namespace TextBooks.Controllers
         public ActionResult Details(ViewMyBooks model, string toUsername, int bookID)
         {
             bool failed = false;
+
+            var bookDetails = db.Books.Find(bookID);
+
             // Check that the model has been passed in with a valid mail message
             Email mailMessage = model.contactEmail;
+
+            // Get required details about the user receiving the email
+            AspNetUser toUser = (from table in db.AspNetUsers
+                                 where table.UserName == toUsername
+                                 select table).FirstOrDefault();
+
             if (mailMessage.message == null)
             {
                 // No email content to send, don't send it empty and let the view know it wasn't sent.
@@ -318,17 +327,13 @@ namespace TextBooks.Controllers
             //&& !toUsername.Equals(fromUsername)
             if (fromUsername != "" && fromUsername != null)
             {
-                if (!fromUsername.Equals(toUsername))
+                if ((!fromUsername.Equals(toUsername) && bookDetails.BrwdBy == null) || !fromUsername.Equals(toUsername) 
+                    || bookDetails.BrwdBy == null)
                 {
                     // Get required details about the user sending the email
                     AspNetUser fromUser = (from table in db.AspNetUsers
                                            where table.UserName == fromUsername
                                            select table).FirstOrDefault();
-
-                    // Get required details about the user receiving the email
-                    AspNetUser toUser = (from table in db.AspNetUsers
-                                         where table.UserName == toUsername
-                                         select table).FirstOrDefault();
 
                     // Check the users were received successfully
                     if (fromUser == null || toUser == null)
@@ -336,7 +341,6 @@ namespace TextBooks.Controllers
                         return View("Error");
                     }
 
-                    var bookDetails = db.Books.Find(bookID);
                     // Setup the Email with all the required info
                     mailMessage.fromName = fromUser.FirstName + " " + fromUser.LastName;
                     mailMessage.fromAddress = fromUser.Email;
@@ -375,6 +379,7 @@ namespace TextBooks.Controllers
                 {
                     ModelState.AddModelError("", "Test Success!");
                     failed = true;
+                    return RedirectToAction("Details", "Books", new { id = bookDetails.B_ID, username = toUser.UserName });
                 }
             }
             // One of the user accounts wasn't able to be received, or something else went wrong
