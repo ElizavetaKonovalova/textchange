@@ -88,6 +88,9 @@ namespace TextBooks.Models
     {
         public string message { get; set; }
         public string sender { get; set; }
+        public int bookID { get; set; }
+        public string borrower { get; set; }
+        public int requestID { get; set; }
         public IEnumerable<RequestsToBorrowView> RequestsAll { get; set; }
     }
 

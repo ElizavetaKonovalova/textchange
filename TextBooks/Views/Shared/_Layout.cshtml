@@ -10,19 +10,6 @@
 
 </head>
 
-@{
-    List<string> searchExamples = new List<string>(new string[] {
-        "A Brief History of the Universe",
-        "Calculus 101",
-        "Economics for the New Student",
-        "Networks and Their Uses",
-        "The Mysteries of Human Anatomy"
-    });
-    int sizeOfList = searchExamples.Count;
-    Random rnd = new Random();
-    string example = "eg, " + searchExamples[rnd.Next(sizeOfList)];
-}
-
 <body>
     <div class="navbar navbar-inverse navbar-fixed-top">
         <div class="container">
@@ -40,16 +27,6 @@
                 <div class="navbar-collapse collapse">
                     <ul class="nav navbar-nav">
                         <li>@Html.ActionLink("Accounts", "ViewAccounts", "Account")</li>
-                        <li>
-                            <div class="search-form">
-                                <form class="form-inline" role="form" action="/books" method="post" style="padding-top:8px;">
-                                    <div class="form-group">
-                                        @Html.TextBox("searchQuery", "", new { name = "name", @class = "form-control", placeholder = example, style = "width: 250px;" })
-                                    </div>
-                                    <button type="submit" class="btn btn-default btn-transparent">Search</button>
-                                </form>
-                                </div>
-</li>   
                     </ul>
                     @Html.Partial("_LoginPartial")
             </div>
@@ -60,15 +37,7 @@
             <div class="navbar-collapse collapse">
                 <ul class="nav navbar-nav">
                     <li>@Html.ActionLink("Submit A Book", "Create", "Books")</li>
-                    <li><a href="mailto:ifb299books@gmail.com?subject=Support%20Request">Contact Us</a></li>
-                    <li>
-                        <form class="form-inline" role="form" action="/books" method="post" style="padding-top:8px;">
-                            <div class="form-group">
-                                @Html.TextBox("searchQuery", "", new { name = "name", @class = "form-control", placeholder = example, style = "width: 250px;" })
-                            </div>
-                            <button type="submit" class="btn btn-default btn-transparent">Search</button>
-                        </form>
-                    </li>                    
+                    <li><a href="mailto:ifb299books@gmail.com?subject=Support%20Request">Contact Us</a></li>      
                 </ul>
                 @Html.Partial("_LoginPartial")
             </div>
