@@ -3,30 +3,48 @@
 @{
     ViewBag.Title = "Requests";
 }
-
-@using (Html.BeginForm())
-{
-    @Html.AntiForgeryToken()
     
     <div class="form-horizontal">
         <h4>Requests</h4>
         <hr />
-            
-        @foreach(var messages in Model.RequestsAll)
+        <table class="table-condensed">
+            <tr>
+                <th class="col-xs-6">
+                    Request
+                </th>
+                <th class="col-xs-4">
+                    Sender
+                </th>
+                <th class="col-xs-5">
+                    Request Management
+                </th>
+            </tr>
+
+        @foreach (var messages in Model.RequestsAll)
         {
-            @Html.DisplayFor(model=>messages.message)
-            @Html.DisplayFor(model=>messages.sender)
-            <div class="form-group">
-                <div class="col-md-offset-5 col-xs-6">
-                    <button type="submit" value="Accept" class="btn btn-default btn-transparent">Accept</button>
-                    <button type="submit" value="Decline" class="btn btn-default btn-transparent">Decline</button>
-                </div>
-            </div>
+            <tr>
+                <td>
+                    @Html.DisplayFor(model => messages.message)
+                </td>
+                <td>
+                    @Html.DisplayFor(model => messages.sender)
+                </td>
+                <td>
+                    <div class="form-group">
+                       @using (Html.BeginForm("RequestsToBorrow", "Manage", new { bookValue = messages.bookID, borrower = messages.borrower, requestID = messages.requestID }, FormMethod.Post))
+                       {
+                             @Html.AntiForgeryToken()
+                            <button type="submit" value ="Accept" class="btn btn-default btn-transparent">Accept</button>
+                            <button type="submit" class="btn btn-default btn-transparent">Decline</button>
+                       }
+                    </div>
+                </td>
+                </tr>
         }
+            </table>
 
         @Html.ActionLink("Back to List", "Index", null, new { @class = "btn btn-default btn-transparent" })
     </div>
-}
 
 @section Scripts {
     @Scripts.Render("~/bundles/jqueryval")
