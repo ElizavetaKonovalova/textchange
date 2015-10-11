@@ -710,6 +710,14 @@ namespace TextBooks.Controllers
             return tokenCount;
         }
 
+        //Sets the users tokens to the value given
+        public void setTokens(string id, int quantity)
+        {
+            var user = db.AspNetUsers.Find(id);
+            user.Tokens = quantity;
+            db.SaveChanges();
+        }
+
         //Adds one to the users tokens
         public void incrementTokens(string id)
         {
