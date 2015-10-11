@@ -967,8 +967,9 @@ namespace TextBooks.Controllers
             return View();
         }
 
-        public string getUserRequests(string userName)
+        public static string getUserRequests(string userName)
         {
+            IFB299Entities db = new IFB299Entities();
             var user = db.AspNetUsers.Where(x=>x.UserName == userName).Select(x=>x.Id).FirstOrDefault();
             return db.Requests.Where(x=>x.UserID == user).Select(x=>x).Count().ToString();
         }
