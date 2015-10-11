@@ -922,6 +922,7 @@ namespace TextBooks.Controllers
                     + "</em><br /><br />" + "<b>You can reply to this email to contact " + fromUser.FirstName
                     + ".</b><br /><br />" + "Kind Regards,<br />The Texchange Team";
 
+
                 // Send the email
                 bool result = shared.SendEmailMessage(mailMessage);
                 if (result)
