@@ -125,6 +125,7 @@ namespace TextBooks.Controllers
 
         //
         // GET: /Account/PublicProfile
+        [HttpGet]
         [AllowAnonymous]
         public ActionResult PublicProfile(string username, string emailsent)
         {
@@ -175,6 +176,8 @@ namespace TextBooks.Controllers
                         result.contactEmail.success = false;
                         ModelState.AddModelError("", "Test Success!");
                         break;
+                    default:
+                        break;
                 }
                 
                 // Done
@@ -183,6 +186,27 @@ namespace TextBooks.Controllers
             // There should be no links to users that don't exist!
             // If for some reason there is one, error so that we fix it.
             return View("Error");
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult PublicProfile(string userId, string thumbs, int something)
+        {
+            AspNetUser user = db.AspNetUsers.Find(userId);
+
+            switch(thumbs)
+            {
+                case "ThumbsUp":
+                    user.ThumbsUp += 1;
+                    break;
+                case "ThumbsDown":
+                    user.ThumbsDown += 1;
+                    break;
+            }
+
+            db.SaveChanges();
+
+            return RedirectToAction("PublicProfile", "Account", new { username = user.UserName, emailsent = ""});
         }
 
         //
