@@ -10,7 +10,7 @@
 {
     @Html.AntiForgeryToken()
 
-    <div class="form-horizontal" id="submitBookForm">
+    <div class="form-horizontal" id="submitBookForm" onsubmit="formSubmitted()">
         <hr />
         <div class="spacer" style="height: 50px">
         </div>
@@ -19,7 +19,7 @@
 
         <div class="container form-group">
             @Html.Label(" ", htmlAttributes: new { @class = "control-label col-md-5 spinner"})
-            @Html.LabelFor(model => model.Title, htmlAttributes: new { @class = "control-label col-md-5 auto-hidden", @style = "display: none", @id = "textLabel" })
+            <label class = "control-label col-md-5 auto-hidden" style = "display: none" id = "textLabel">Title</label>
             <div class="col-md-4">
                 @Html.EditorFor(model => model.Title, new { htmlAttributes = new { @class = "form-control center", @id = "titleTextBox", @placeholder = "Enter the title of the textbook."} })
                 @Html.ValidationMessageFor(model => model.Title, "", new { @class = "text-danger" })
@@ -70,62 +70,82 @@
     </div>
 }
 
-@section Scripts {
-    @Scripts.Render("~/bundles/jqueryval")
+@functions {
+        string modelStateValid()
+        {
+            if (ViewData.ModelState.IsValid)
+            {
+                return "false";
+            } else
+            {
+                return "true";
+            }
+        }
+    }
+
+    @section Scripts {
+        @Scripts.Render("~/bundles/jqueryval")
     @Styles.Render("~/Content/css")
     @Styles.Render("~/bundles/jqueryuicss")
     @Scripts.Render("~/bundles/jqueryui")
     <link href="@Url.Content("~/Content/Home.css")" rel="stylesheet" type="text/css" />
     
-    <!--Script for autocomplete. This has to be inline at the moment since it uses Razor 
-        commands to generate controller POST URLs.-->
+    <!--Script for autocomplete. This has to be inline at the moment since it uses Razor
+    commands to generate controller POST URLs.-->
     <script>
         var autocompleteData;
         var autocompleteTerm;
+        errors = @modelStateValid();
         $(document).ready(function () {
+
+            if (errors) {
+                $('.auto-hidden').show();
+                $('.spinner').hide();
+            }
+
             $('#titleTextBox').value = "";
             $('#titleTextBox').autocomplete(
                 {
-                    source: function (request, response) {
+            source: function (request, response) {
                         $('.auto-hidden').hide();
 
-                        var titles = new Array();
-                        autocompleteTerm = request.term;
+                    var titles = new Array();
+                    autocompleteTerm = request.term;
                         $.post('@Url.Action("GoogleBooksQuery", "Books")',
-                        {
-                            term: request.term
-                        },
+                                {
+                    term: request.term
+                                },
                         function (data, status) {
-                            autocompleteData = data;
-                            for (var i = 0; i < data[0].length; i++) {
-                                titles[i] = data[0][i];
-                            }
-                            titles[data[0].length] = "None of these...";
-                            response(titles);
-                        });
-                        response(["..."]);
-                    },
+                        autocompleteData = data;
+                        for (var i = 0; i < data[0].length; i++) {
+                            titles[i] = data[0][i];
+                        }
+                        titles[data[0].length] = "None of these...";
+                        response(titles);
+                    });
+                    response(["..."]);
+                },
                     select: function (event, ui) {
                         $('.auto-hidden').fadeIn();
                         $('.spinner').hide();
 
-                        if (ui.item.value == "None of these...") {
-                            ui.item.value = autocompleteTerm;
-                            document.getElementById("authorTextBox").value = "";
-                            document.getElementById("isbnTextBox").value = "";
-                            document.getElementById("yearTextBox").value = "";
-                            document.getElementById("editionTextBox").value = "";
-                        } else {
-                            var title = ui.item.value;
-                            var i = 0;
-                            for (; autocompleteData[0][i] != title; i++) { }
-                            document.getElementById("authorTextBox").value = autocompleteData[1][i];
-                            document.getElementById("isbnTextBox").value = autocompleteData[2][i];
-                            document.getElementById("yearTextBox").value = autocompleteData[3][i];
-                            document.getElementById("editionTextBox").value = "1st";
-                        }
+                    if (ui.item.value == "None of these...") {
+                        ui.item.value = autocompleteTerm;
+                        document.getElementById("authorTextBox").value = "";
+                        document.getElementById("isbnTextBox").value = "";
+                        document.getElementById("yearTextBox").value = "";
+                        document.getElementById("editionTextBox").value = "";
+                    } else {
+                        var title = ui.item.value;
+                        var i = 0;
+                        for (; autocompleteData[0][i] != title; i++) { }
+                        document.getElementById("authorTextBox").value = autocompleteData[1][i];
+                        document.getElementById("isbnTextBox").value = autocompleteData[2][i];
+                        document.getElementById("yearTextBox").value = autocompleteData[3][i];
+                        document.getElementById("editionTextBox").value = "1st";
                     }
-                })
+                }
+            })
             $('#titleTextBox').bind('input', function () {
                 if ($('#titleTextBox').value == null) {
                     $('.auto-hidden').fadeOut(200, function() {
@@ -143,5 +163,10 @@
                 return false;
             }
         });
+        document.getElementById("submitBookForm").onsubmit = function () {
+            alert("Hello");
+            return true;
+        };
+
     </script>
 }

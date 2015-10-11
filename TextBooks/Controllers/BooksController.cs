@@ -110,8 +110,8 @@ namespace TextBooks.Controllers
             query.MaxResults = 10;
             var results = query.Execute();
 
-
             // TODO Check for errors (here?)
+            // if results == null or results.Items == null
 
             // Get required details
             var titlesList = new List<string>();
