@@ -236,7 +236,7 @@ namespace TextBooks.Controllers
             return View();
         }
 
-        bool IsDigitsOnly(string str)
+        public static bool isDigitsOnly(string str)
         {
             foreach (char c in str)
             {
@@ -325,7 +325,7 @@ namespace TextBooks.Controllers
 
                 if (number != null)
                 {
-                    if (!IsDigitsOnly(number))
+                    if (!isDigitsOnly(number))
                     {
                         ModelState.AddModelError("", "The contact number may only be digits.");
                         failed = true;

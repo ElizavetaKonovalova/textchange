@@ -47,6 +47,51 @@ namespace TextBooks.Controllers
             return View(db.Books.Where(x=>x.BrwdBy.Equals(null)).OrderBy(x => x.Title).ToList());
         }
 
+        //Code that checks the validity of various fields relating to book adding/editing.
+        bool bookErrorCheck(Book book)
+        {
+            bool failed = false;
+            if (book.ISBN == null)
+            {
+                ModelState.AddModelError("", "Book ISBN field can't be empty.");
+                failed = true;
+            }
+            if (book.Title == null)
+            {
+                ModelState.AddModelError("", "Book Title field can't be empty.");
+                failed = true;
+            }
+            if (book.Author == null)
+            {
+                ModelState.AddModelError("", "Book Author field can't be empty.");
+                failed = true;
+            }
+            if (book.Year == null)
+            {
+                ModelState.AddModelError("", "Book Year field can't be empty.");
+                failed = true;
+            }
+            else
+            {
+                if (book.Year.Length != 4)
+                {
+                    ModelState.AddModelError("", "Book Year field must be four characters.");
+                    failed = true;
+                }
+                if (!AccountController.isDigitsOnly(book.Year))
+                {
+                    ModelState.AddModelError("", "Book Year field must be only numbers.");
+                    failed = true;
+                }
+            }
+            if (book.Edition == null)
+            {
+                ModelState.AddModelError("", "Book Edition field can't be empty.");
+                failed = true;
+            }
+            return failed;
+        }
+
         // GET: Books/Create
         public ActionResult Create()
         {
@@ -121,48 +166,17 @@ namespace TextBooks.Controllers
                 if (name != "")
                 {
 
-                    bool failed = false;
-
-                    if (book.ISBN == null)
+                    if (bookErrorCheck(book))
                     {
-                        ModelState.AddModelError("", "Book ISBN field can't be empty.");
-                        failed = true;
-                    }
-                    if (book.Title == null)
-                    {
-                        ModelState.AddModelError("", "Book Title field can't be empty.");
-                        failed = true;
-                    }
-                    if (book.Author == null)
-                    {
-                        ModelState.AddModelError("", "Book Author field can't be empty.");
-                        failed = true;
-                    }
-                    if (book.Year == null || book.Year.Length == 0|| book.Year.Length > 4)
-                    {
-                        ModelState.AddModelError("", "Book Year field can't be empty or contain more than 4 digits");
-                        failed = true;
-                    }
-                    if (book.Edition == null)
-                    {
-                        ModelState.AddModelError("", "Book Edition field can't be empty.");
-                        failed = true;
-                    }
-
-                    if (failed == true) {
                         return View();
                     }
+                }
 
-                    db.Books.Add(book);
-                    book.Owner = name;
-                    db.SaveChanges();
-                    return RedirectToAction("Index");
-                }
-                else
-                {
-                    ModelState.AddModelError("", "You must be logged in to submit books.");
-                    return View();
-                }
+                db.Books.Add(book);
+                book.Owner = name;
+                db.SaveChanges();
+                return RedirectToAction("Index");
+
             }
 
             return View(book);
@@ -183,6 +197,8 @@ namespace TextBooks.Controllers
             return View(book);
         }
 
+        
+
         // POST: Books/Edit/5
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
@@ -195,40 +211,13 @@ namespace TextBooks.Controllers
             {
                 if (name != "")
                 {
-
-                    bool failed = false;
-
-                    if (book.ISBN == null)
-                    {
-                        ModelState.AddModelError("", "Book ISBN field can't be empty.");
-                        failed = true;
-                    }
-                    if (book.Title == null)
-                    {
-                        ModelState.AddModelError("", "Book Title field can't be empty.");
-                        failed = true;
-                    }
-                    if (book.Author == null)
-                    {
-                        ModelState.AddModelError("", "Book Author field can't be empty.");
-                        failed = true;
-                    }
-                    if (book.Year == null || book.Year.Length == 0 || book.Year.Length > 4)
-                    {
-                        ModelState.AddModelError("", "Book Year field can't be empty or contain more than 4 digits");
-                        failed = true;
-                    }
-                    if (book.Edition == null)
-                    {
-                        ModelState.AddModelError("", "Book Edition field can't be empty.");
-                        failed = true;
-                    }
-
-                    if (failed == true)
+                       
+                    if (bookErrorCheck(book))
                     {
                         return View();
                     }
                 }
+
                 db.Entry(book).State = EntityState.Modified;
                 db.SaveChanges();
                 return RedirectToAction("../Manage/ViewMyBooks");
