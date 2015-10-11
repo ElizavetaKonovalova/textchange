@@ -84,8 +84,10 @@
                 @Html.DisplayFor(modelItem => item.Year)
             </td>
             <td>
-
-                @Html.ActionLink((item.Owner), "PublicProfile", "Account", new { username = item.Owner }, null)
+                @{ 
+                    var ownerName = TextBooks.Controllers.AccountController.GetNameForUsername(item.Owner);
+                }
+                @Html.ActionLink(ownerName, "PublicProfile", "Account", new { username = item.Owner }, null)
 
             </td>
             @*<td>

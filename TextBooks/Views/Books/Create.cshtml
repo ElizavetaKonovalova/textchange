@@ -10,7 +10,7 @@
 {
     @Html.AntiForgeryToken()
 
-    <div class="form-horizontal">
+    <div class="form-horizontal" id="submitBookForm">
         <hr />
         <div class="spacer" style="height: 50px">
         </div>
@@ -60,7 +60,7 @@
 
         <div class="form-group auto-hidden" style="display: none">
             <div class="col-md-offset-5 col-xs-6">
-                <input type="submit" value="Submit Book" class="btn btn-default btn-transparent" />
+                <input id="submitButton" type="submit" value="Submit Book" class="btn btn-default btn-transparent" />
                 @Html.ActionLink("Cancel", "Index", "Home", null, new { @class = "btn btn-default btn-transparent" })
             </div>
         </div>
@@ -133,6 +133,15 @@
                     })
                 }
             });
+        });
+    </script>
+
+    <script>
+        $("#submitBookForm").bind("keypress", function (e) {
+            if (e.keyCode == 13) {
+                $("#submitButton").attr('value');
+                return false;
+            }
         });
     </script>
 }

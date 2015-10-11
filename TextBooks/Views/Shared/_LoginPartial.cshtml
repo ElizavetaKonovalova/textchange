@@ -37,18 +37,11 @@
      "Hi " + TextBooks.Controllers.AccountController.GetFirstNameForUsername(User.Identity.GetUserName()) + "!",
      "Index", "Manage", routeValues: null, htmlAttributes: new { title = "Manage" })
                 </li>
-                <li>@Html.ActionLink(account.getUserRequests(User.Identity.Name),"RequestsToBorrow","Manage")</li>
+                <li>@Html.ActionLink("Notifications: " + account.getUserRequests(User.Identity.Name),"RequestsToBorrow","Manage")</li>
                 <li>
                     @{
                         string tokens = TextBooks.Controllers.AccountController.getTokens(User.Identity.GetUserId());
-                        if (tokens == "1")
-                        {
-                        <a data-toggle="tooltip" title="@tokenTip">@TextBooks.Controllers.AccountController.getTokens(User.Identity.GetUserId()) Token</a>
-                        }
-                        else
-                        {
-                        <a data-toggle="tooltip" title="@tokenTip">@TextBooks.Controllers.AccountController.getTokens(User.Identity.GetUserId()) Tokens</a>
-                        }
+                        <a data-toggle="tooltip" title="@tokenTip">Tokens: @TextBooks.Controllers.AccountController.getTokens(User.Identity.GetUserId())</a>                      
                     }
                 </li>
         <li><a href="javascript:document.getElementById('logoutForm').submit()">Log off</a></li>

@@ -236,7 +236,7 @@ namespace TextBooks.Controllers
             return View();
         }
 
-        bool IsDigitsOnly(string str)
+        public static bool isDigitsOnly(string str)
         {
             foreach (char c in str)
             {
@@ -325,7 +325,7 @@ namespace TextBooks.Controllers
 
                 if (number != null)
                 {
-                    if (!IsDigitsOnly(number))
+                    if (!isDigitsOnly(number))
                     {
                         ModelState.AddModelError("", "The contact number may only be digits.");
                         failed = true;
@@ -710,6 +710,14 @@ namespace TextBooks.Controllers
             return tokenCount;
         }
 
+        //Sets the users tokens to the value given
+        public void setTokens(string id, int quantity)
+        {
+            var user = db.AspNetUsers.Find(id);
+            user.Tokens = quantity;
+            db.SaveChanges();
+        }
+
         //Adds one to the users tokens
         public void incrementTokens(string id)
         {
@@ -995,11 +1003,33 @@ namespace TextBooks.Controllers
             string firstName = (from table in db.AspNetUsers
                            where table.UserName == userid
                            select table.FirstName).FirstOrDefault();
-            if (firstName == null)
+            if (nullOrEmpty(firstName))
             {
-                return ""; // Something is very wrong, should logout immediately.
+                return ""; // Something is very wrong, should logout immediately. TODO.
             }
             return firstName;
+        }
+
+        public static string GetNameForUsername(string userid)
+        {
+            IFB299Entities db = new IFB299Entities();
+            var user = (from table in db.AspNetUsers
+                                where table.UserName == userid
+                                select table).FirstOrDefault();
+            if (user == null || nullOrEmpty(user.FirstName) || nullOrEmpty(user.LastName))
+            {
+                return ""; // Something is very wrong, should logout immediately. TODO>
+            }
+            return user.FirstName + " " + user.LastName;
+        }
+
+        private static bool nullOrEmpty(string stringToTest)
+        {
+            if (stringToTest == null || stringToTest.Equals(""))
+            {
+                return true;
+            }
+            return false;
         }
 
         internal class ChallengeResult : HttpUnauthorizedResult
