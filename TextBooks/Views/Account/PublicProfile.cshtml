@@ -25,6 +25,9 @@
         }
     }
 
+@using (Html.BeginForm("PublicProfile", "Account", new{ userId = Model.targetUser.Id,something = 0}, FormMethod.Post))
+{
+    @Html.AntiForgeryToken()
     <h1>
         @Html.DisplayFor(model => model.targetUser.FirstName)
         @Html.DisplayFor(model => model.targetUser.LastName)
@@ -36,10 +39,10 @@
     <div>
         <b>Rating:</b>
         <span class="thumbs-up">
-            @Model.targetUser.ThumbsUp <button class="glyphicon glyphicon-thumbs-up"></button>
+            @Model.targetUser.ThumbsUp <button class="glyphicon glyphicon-thumbs-up" value="ThumbsUp" name="thumbs"></button>
         </span>
         <span class="thumbs-down">
-            @Model.targetUser.ThumbsDown <buton class="glyphicon glyphicon-thumbs-down"></buton>
+            @Model.targetUser.ThumbsDown <button class="glyphicon glyphicon-thumbs-down" value="ThumbsDown" name="thumbs"></button>
         </span>
     </div>
 
@@ -116,7 +119,8 @@
     </table>
     <br />
     </div>
-    
+}
+
     <!-- Modal -->
     <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
         <div class="modal-dialog" role="document">
