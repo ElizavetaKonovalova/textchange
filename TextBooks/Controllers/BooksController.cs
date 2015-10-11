@@ -306,6 +306,7 @@ namespace TextBooks.Controllers
         public ActionResult Details(ViewMyBooks model, string toUsername, int bookID)
         {
             bool failed = false;
+            var request = new Request();
 
             var bookDetails = db.Books.Find(bookID);
 
@@ -358,7 +359,9 @@ namespace TextBooks.Controllers
                         + bookDetails.Title + "<br/> <strong>Year:</strong> " + bookDetails.Year
                         + "<br/><strong> Author: </strong>" + bookDetails.Author + "<br/><br/> on Texchange:<br /><br /><em>"
                         + "Hi " + toUser.FirstName + ",<br/>" + mailMessage.message
-                        + "</em><br /><br />" + "You may <button class='btn btn-danger '>Accept</button> the request or <button>Decline</button> it. <br/><b>You can reply to this email to contact "
+                        + "</em><br /><br />" + "You may Accept or Decline the request <a href =\"" + Url.Action("Accepted", "Manage",
+                        new { bookValue = bookDetails.B_ID, borrower = fromUsername, requestID = request.Id }, protocol: Request.Url.Scheme)
+                        + "\">here</a>.<br/><b>You can reply to this email to contact "
                         + fromUser.FirstName + ".</b><br /><br />" + "Kind Regards,<br />The Texchange Team";
 
                     // Send the email
@@ -366,7 +369,7 @@ namespace TextBooks.Controllers
                     if (result)
                     {
                         toUser.Notified += 1;
-                        var request = new Request();
+                        
                         request.RequestFrom = fromUser.UserName;
                         request.UserID = toUser.Id;
                         request.RequestText = "Request to borrow " + bookDetails.Title + ", " + bookDetails.Author + ", " + bookDetails.Year + ".";
