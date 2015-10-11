@@ -305,7 +305,6 @@ namespace TextBooks.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Details(ViewMyBooks model, string toUsername, int bookID)
         {
-            bool failed = false;
 
             var bookDetails = db.Books.Find(bookID);
 
@@ -379,7 +378,6 @@ namespace TextBooks.Controllers
                 else
                 {
                     ModelState.AddModelError("", "Test Success!");
-                    failed = true;
                     return RedirectToAction("Details", "Books", new { id = bookDetails.B_ID, username = toUser.UserName });
                 }
             }
