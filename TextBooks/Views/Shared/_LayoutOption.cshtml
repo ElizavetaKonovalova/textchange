@@ -48,7 +48,7 @@
     <div class="container body-content">
         @RenderBody()
         <footer>
-            <p>&copy; @DateTime.Now.Year - Texchange | <a href="Home/terms">Terms and Conditions</a></p>
+            <p>&copy; @DateTime.Now.Year - Texchange | <a style="color: white" href="~/Home/terms">Terms and Conditions</a></p>
         </footer>
     </div>
 
@@ -92,5 +92,6 @@
     @Scripts.Render("~/bundles/jquery")
     @Scripts.Render("~/bundles/bootstrap")
     @RenderSection("scripts", required: false)
+    <link href="@Url.Content("~/Content/Home.css")" rel="stylesheet" type="text/css" />
 </body>
 </html>

@@ -29,7 +29,7 @@
                 <li>
                     @Html.ActionLink(
      "Hi " + AccountController.GetFirstNameForUsername(User.Identity.GetUserName()) + "!",
-     "Index", "Manage", routeValues: null, htmlAttributes: new { title = "Manage" })
+     "PublicProfile", "Account", routeValues: new { username = User.Identity.GetUserName()}, htmlAttributes: new { title = "Manage" })
                 </li>
                 <li>
                     <a href="@Url.Action("RequestsToBorrow", "Manage")">
@@ -40,6 +40,11 @@
                     <a data-container="body" data-toggle="popover" data-title="Tokens" data-placement="bottom" data-content="@tokenTip" data-html="true" href="#">
                         <span class="glyphicon glyphicon-piggy-bank"></span>
                         @AccountController.getTokens(User.Identity.GetUserId())
+                    </a>
+                </li>
+                <li>
+                    <a href="@Url.Action("Index", "Manage")">
+                        <span class="glyphicon glyphicon-cog"></span>
                     </a>
                 </li>
         <li><a href="javascript:document.getElementById('logoutForm').submit()">Log off</a></li>

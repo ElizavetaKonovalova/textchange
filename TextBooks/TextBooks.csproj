@@ -382,7 +382,7 @@
     <Content Include="Views\Manage\RequestsToBorrow.cshtml" />
     <Content Include="Views\Manage\ViewMyBooksBorrower.cshtml" />
     <Content Include="Views\Manage\Accepted.cshtml" />
-    <Content Include="Views\Home\terms.cshtml" />
+    <Content Include="Views\Home\Terms.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
