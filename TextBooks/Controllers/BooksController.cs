@@ -378,7 +378,6 @@ namespace TextBooks.Controllers
                 else
                 {
                     ModelState.AddModelError("", "Test Success!");
-                    failed = true;
                     return RedirectToAction("Details", "Books", new { id = bookDetails.B_ID, username = toUser.UserName });
                 }
             }
