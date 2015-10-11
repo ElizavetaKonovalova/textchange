@@ -305,7 +305,6 @@ namespace TextBooks.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Details(ViewMyBooks model, string toUsername, int bookID)
         {
-            bool failed = false;
 
             var bookDetails = db.Books.Find(bookID);
 
