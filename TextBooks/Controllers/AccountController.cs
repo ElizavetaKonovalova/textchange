@@ -1003,11 +1003,33 @@ namespace TextBooks.Controllers
             string firstName = (from table in db.AspNetUsers
                            where table.UserName == userid
                            select table.FirstName).FirstOrDefault();
-            if (firstName == null)
+            if (nullOrEmpty(firstName))
             {
-                return ""; // Something is very wrong, should logout immediately.
+                return ""; // Something is very wrong, should logout immediately. TODO.
             }
             return firstName;
+        }
+
+        public static string GetNameForUsername(string userid)
+        {
+            IFB299Entities db = new IFB299Entities();
+            var user = (from table in db.AspNetUsers
+                                where table.UserName == userid
+                                select table).FirstOrDefault();
+            if (user == null || nullOrEmpty(user.FirstName) || nullOrEmpty(user.LastName))
+            {
+                return ""; // Something is very wrong, should logout immediately. TODO>
+            }
+            return user.FirstName + " " + user.LastName;
+        }
+
+        private static bool nullOrEmpty(string stringToTest)
+        {
+            if (stringToTest == null || stringToTest.Equals(""))
+            {
+                return true;
+            }
+            return false;
         }
 
         internal class ChallengeResult : HttpUnauthorizedResult
