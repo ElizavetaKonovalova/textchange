@@ -26,6 +26,13 @@ namespace TextBooks.Controllers
             return View();
         }
 
+        public ActionResult Terms()
+        {
+            ViewBag.Message = "Terms and Conditions";
+
+            return View();
+        }
+
         public ActionResult Contact()
         {
             return Redirect("mailto:ifb299books@gmail.com?subject=Support%20request");
