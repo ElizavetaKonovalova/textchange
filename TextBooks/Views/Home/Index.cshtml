@@ -21,7 +21,11 @@
 </div>
 </header>
 
-<script src="~/Scripts/jquery.js"></script>
+@section Scripts {
+@Scripts.Render("~/bundles/jqueryval")
+@Styles.Render("~/Content/css")
+@Styles.Render("~/bundles/jqueryuicss")
+@Scripts.Render("~/bundles/jqueryui")
 
 <script type="text/javascript">
     // Default search examples
@@ -95,3 +99,25 @@
     // Start the animation
     window.setTimeout(addLetter, 2000);
 </script>
+
+<script>
+    // Autocomplete available book titles
+    $(document).ready(function () {
+        $('#indexSearchControl').autocomplete(
+            {
+                source: function (request, response) {
+                    var titles = searchExamples.filter(function (value, index, ar) {
+                        if (value.toLowerCase().search(request.term.toLowerCase()) == -1) {
+                            return false;
+                        }
+                        return true;
+                    });
+                    if (titles.length > 5) {
+                        titles = titles.slice(0, 5);
+                    }
+                    response(titles);
+                }
+            });
+    });
+</script>
+}
