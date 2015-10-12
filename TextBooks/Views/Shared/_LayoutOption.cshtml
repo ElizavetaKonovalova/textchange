@@ -4,10 +4,12 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@ViewBag.Title - Texchange</title>
-    @Styles.Render("~/Content/css")
-    @Styles.Render("~/Content/Home.css")
-    @Scripts.Render("~/bundles/modernizr")
-
+    <!--Bootstrap CSS--><link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+    <!--Texchange CSS--><link rel="stylesheet" href="~/Content/Home.css">
+    <!--jQuery UI CSS--><link rel="stylesheet" href="~/Content/jquery-ui.css">
+    <!--jQuery js    --><script src="~/Scripts/jquery-1.10.2.min.js"></script>
+    <!--jQuery UI js --><script src="~/Scripts/jquery-ui.js"></script>
+    <!--Bootstrap js --><script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
 </head>
 
 <body>
@@ -88,10 +90,6 @@
             </div>
         </div>
     </div>
-
-    @Scripts.Render("~/bundles/jquery")
-    @Scripts.Render("~/bundles/bootstrap")
     @RenderSection("scripts", required: false)
-    <link href="@Url.Content("~/Content/Home.css")" rel="stylesheet" type="text/css" />
 </body>
 </html>
