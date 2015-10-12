@@ -1,8 +1,8 @@
 ﻿@{
-    ViewBag.Title = "Terms";
+    ViewBag.Title = "Terms and Conditions";
 }
 
-<h1>Terms of Service ("Terms")</h1>
+<h2>@ViewBag.Title.</h2>
 <div class="container">
     <div class="row">
         <div class="col-md-3"></div>
@@ -76,3 +76,9 @@
         <div class="col-md-3"></div>
     </div>
 </div>
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+    @Styles.Render("~/Content/css")
+    <link href="@Url.Content("~/Content/Home.css")" rel="stylesheet" type="text/css" />
+}
