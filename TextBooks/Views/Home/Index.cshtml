@@ -8,7 +8,7 @@
         <div class="header-content-inner">
     <h1 class="text-center">Texchange</h1>
             <hr />
-            <p class="lead text-center">Borrow & lend text books at QUT.</p>
+            <p class="lead text-center">Borrow & lend textbooks at QUT.</p>
         </div>
         <div class="search-form">
             <form class="form-inline" role="form" action="/books" method="post" style="padding-top:8px;">
@@ -21,7 +21,9 @@
 </div>
 </header>
 
+@section scripts {
 <script type="text/javascript">
+    // Default search examples
     searchExamples = [
         "A Brief History of the Universe",
         "A Brief History of Time",
@@ -32,21 +34,41 @@
         "Economics for the New Student",
         "All About Water",
         "Networks and Their Uses",
-        "The Mysteries of Human Anatomy",
+        "Mysteries of Human Anatomy",
         "Calculus - Early Transcendentals",
         "Anton Bivens Davis",
         "Essential Business Process Modelling",
         "Publication Manual of the American Psychological Association"
     ];
+
+    // Update search examples to match actual available books
+    $.post('@Url.Action("ListAllBookTitles", "Books")',
+        {
+            quantity: 0
+        },
+        function (data, status) {
+            searchExamples = data;
+        }
+    );
+
+    // Generate a random number within the range of the examples array
     var randomNumber = function () {
         return Math.floor(Math.random() * searchExamples.length);
     }
+
+    // Select a new example title to display
     var newSelection = function () {
         return "eg, " + searchExamples[randomNumber()];
     }
+    
+    // Start with an example title
     document.getElementById("indexSearchControl").placeholder = newSelection();
+
+    // Variables for animation 
     currentSuggestion = newSelection();
     index = 0;
+
+    // Animate "typing" the title one character at a time
     addLetter = function () {
         index++;
         if (index < 35) {
@@ -59,7 +81,7 @@
         if (index >= currentSuggestion.length) {
             currentSuggestion = newSelection();
             index = 0;
-            window.setTimeout(addLetter, 11000);
+            window.setTimeout(addLetter, 7000);
         } else {
             if (currentSubstring.substring(index-1, index) == " ") {
                 window.setTimeout(addLetter, 150);
@@ -68,5 +90,29 @@
             }
         }
     }
-    window.setTimeout(addLetter, 3000);
+
+    // Start the animation
+    window.setTimeout(addLetter, 2000);
 </script>
+
+<script>
+    // Autocomplete available book titles
+    $(document).ready(function () {
+        $('#indexSearchControl').autocomplete(
+            {
+                source: function (request, response) {
+                    var titles = searchExamples.filter(function (value, index, ar) {
+                        if (value.toLowerCase().search(request.term.toLowerCase()) == -1) {
+                            return false;
+                        }
+                        return true;
+                    });
+                    if (titles.length > 5) {
+                        titles = titles.slice(0, 5);
+                    }
+                    response(titles);
+                }
+            });
+    });
+</script>
+}

@@ -1,21 +1,56 @@
 ﻿@using Microsoft.AspNet.Identity
+@using TextBooks.Controllers
+
 @if (Request.IsAuthenticated)
 {
     using (Html.BeginForm("LogOff", "Account", FormMethod.Post, new { id = "logoutForm", @class = "navbar-right" }))
     {
     @Html.AntiForgeryToken()
 
+        if (User.Identity.Name.Equals("ifb299books"))
+        {
     <ul class="nav navbar-nav navbar-right">
-        
-        <li>
-            <div style="color:#ffffff; padding-top:15px; padding: 15px; line-height:20px; position: relative; display: block;">
-                Hello @User.Identity.GetUserName().Split('@')[0]!
-            </div>
-        </li>
-        <li>@Html.ActionLink("My Account", "Index", "Manage", routeValues: null, htmlAttributes: new { title = "Manage" })</li>
+                <li><a href="javascript:document.getElementById('logoutForm').submit()">Log off</a></li>
+            </ul>
+        }
+        else
+        {
+            <ul class="nav navbar-nav navbar-right">
+                @{
+                    string tokenTip = "<p id='tokensPopover' style='color:black'>Tokens are used to borrow books on Texchange. " +
+                                       "One is given automatically when you first sign up " +
+                                       "so that you can get started borrowing books.<br/><br/>" +
+                                       "One token is used every time you borrow a book." +
+                                       "Tokens are a one time use so choose which books you borrow carefully.<br/><br/>" +
+                                       "When one of your books is successfully borrrowed you will be granted a token!" +
+                                       "</p>";
+                }
+
+                <li>
+                    @Html.ActionLink(
+     "Hi " + AccountController.GetFirstNameForUsername(User.Identity.GetUserName()) + "!",
+     "PublicProfile", "Account", routeValues: new { username = User.Identity.GetUserName()}, htmlAttributes: new { title = "Manage" })
+                </li>
+                <li>
+                    <a href="@Url.Action("RequestsToBorrow", "Manage")">
+                    <span class="glyphicon glyphicon-envelope"></span>
+                    @AccountController.getUserRequests(User.Identity.Name)</a>
+                </li>
+                <li>
+                    <a data-container="body" data-toggle="popover" data-title="Tokens" data-placement="bottom" data-content="@tokenTip" data-html="true" href="#">
+                        <span class="glyphicon glyphicon-piggy-bank"></span>
+                        @AccountController.getTokens(User.Identity.GetUserId())
+                    </a>
+                </li>
+                <li>
+                    <a href="@Url.Action("Index", "Manage")">
+                        <span class="glyphicon glyphicon-cog"></span>
+                    </a>
+                </li>
         <li><a href="javascript:document.getElementById('logoutForm').submit()">Log off</a></li>
     </ul>
     }
+}
 }
 else
 {
@@ -24,3 +59,9 @@ else
         <li>@Html.ActionLink("Log in", "Login", "Account", routeValues: null, htmlAttributes: new { id = "loginLink" })</li>
     </ul>
 }
+
+<script type="text/javascript">
+    $(function () {
+        $('[data-toggle="popover"]').popover()
+    })
+</script>

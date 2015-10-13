@@ -70,6 +70,8 @@
           <Property Name="ContactNumber" Type="nvarchar" MaxLength="15" />
           <Property Name="ThumbsUp" Type="int" Nullable="false" />
           <Property Name="ThumbsDown" Type="int" Nullable="false" />
+          <Property Name="Tokens" Type="int" Nullable="false" />
+          <Property Name="Notified" Type="int" Nullable="false" />
         </EntityType>
         <EntityType Name="Books">
           <Key>
@@ -83,6 +85,17 @@
           <Property Name="Year" Type="nvarchar" MaxLength="255" />
           <Property Name="Owner" Type="nvarchar" MaxLength="255" />
           <Property Name="BrwdBy" Type="nvarchar" MaxLength="255" />
+        </EntityType>
+        <EntityType Name="Requests">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="UserID" Type="nvarchar(max)" Nullable="false" />
+          <Property Name="RequestFrom" Type="nvarchar(max)" Nullable="false" />
+          <Property Name="RequestText" Type="nvarchar(max)" Nullable="false" />
+          <Property Name="BookId" Type="int" Nullable="false" />
+          <Property Name="Status " Type="nvarchar" MaxLength="50" />
         </EntityType>
         <Association Name="FK_dbo_AspNetUserClaims_dbo_AspNetUsers_UserId">
           <End Role="AspNetUsers" Type="Self.AspNetUsers" Multiplicity="1">
@@ -148,6 +161,7 @@
           <EntitySet Name="AspNetUserRoles" EntityType="Self.AspNetUserRoles" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="AspNetUsers" EntityType="Self.AspNetUsers" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Books" EntityType="Self.Books" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Requests" EntityType="Self.Requests" Schema="dbo" store:Type="Tables" />
           <AssociationSet Name="FK_dbo_AspNetUserClaims_dbo_AspNetUsers_UserId" Association="Self.FK_dbo_AspNetUserClaims_dbo_AspNetUsers_UserId">
             <End Role="AspNetUsers" EntitySet="AspNetUsers" />
             <End Role="AspNetUserClaims" EntitySet="AspNetUserClaims" />
@@ -176,6 +190,7 @@
           <EntitySet Name="AspNetUserLogins" EntityType="IFB299Model.AspNetUserLogin" />
           <EntitySet Name="AspNetUsers" EntityType="IFB299Model.AspNetUser" />
           <EntitySet Name="Books" EntityType="IFB299Model.Book" />
+          <EntitySet Name="Requests" EntityType="IFB299Model.Request" />
           <AssociationSet Name="FK_dbo_AspNetUserClaims_dbo_AspNetUsers_UserId" Association="IFB299Model.FK_dbo_AspNetUserClaims_dbo_AspNetUsers_UserId">
             <End Role="AspNetUser" EntitySet="AspNetUsers" />
             <End Role="AspNetUserClaim" EntitySet="AspNetUserClaims" />
@@ -249,6 +264,8 @@
           <Property Name="ContactNumber" Type="String" MaxLength="15" FixedLength="false" Unicode="true" />
           <Property Name="ThumbsUp" Type="Int32" Nullable="false" />
           <Property Name="ThumbsDown" Type="Int32" Nullable="false" />
+          <Property Name="Tokens" Type="Int32" Nullable="false" />
+          <Property Name="Notified" Type="Int32" Nullable="false" />
           <NavigationProperty Name="AspNetUserClaims" Relationship="IFB299Model.FK_dbo_AspNetUserClaims_dbo_AspNetUsers_UserId" FromRole="AspNetUser" ToRole="AspNetUserClaim" />
           <NavigationProperty Name="AspNetUserLogins" Relationship="IFB299Model.FK_dbo_AspNetUserLogins_dbo_AspNetUsers_UserId" FromRole="AspNetUser" ToRole="AspNetUserLogin" />
           <NavigationProperty Name="AspNetRoles" Relationship="IFB299Model.AspNetUserRoles" FromRole="AspNetUser" ToRole="AspNetRole" />
@@ -265,6 +282,17 @@
           <Property Name="Year" Type="String" MaxLength="255" FixedLength="false" Unicode="true" />
           <Property Name="Owner" Type="String" MaxLength="255" FixedLength="false" Unicode="true" />
           <Property Name="BrwdBy" Type="String" MaxLength="255" FixedLength="false" Unicode="true" />
+        </EntityType>
+        <EntityType Name="Request">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" />
+          <Property Name="UserID" Type="String" Nullable="false" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="RequestFrom" Type="String" Nullable="false" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="RequestText" Type="String" Nullable="false" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="BookId" Type="Int32" Nullable="false" />
+          <Property Name="Status_" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
         </EntityType>
         <Association Name="FK_dbo_AspNetUserClaims_dbo_AspNetUsers_UserId">
           <End Type="IFB299Model.AspNetUser" Role="AspNetUser" Multiplicity="1">
@@ -298,7 +326,7 @@
           <End Type="IFB299Model.AspNetRole" Role="AspNetRole" Multiplicity="*" />
           <End Type="IFB299Model.AspNetUser" Role="AspNetUser" Multiplicity="*" />
         </Association>
-      </Schema>
+        </Schema>
     </edmx:ConceptualModels>
     <!-- C-S mapping content -->
     <edmx:Mappings>
@@ -344,6 +372,8 @@
           <EntitySetMapping Name="AspNetUsers">
             <EntityTypeMapping TypeName="IFB299Model.AspNetUser">
               <MappingFragment StoreEntitySet="AspNetUsers">
+                <ScalarProperty Name="Notified" ColumnName="Notified" />
+                <ScalarProperty Name="Tokens" ColumnName="Tokens" />
                 <ScalarProperty Name="ThumbsDown" ColumnName="ThumbsDown" />
                 <ScalarProperty Name="ThumbsUp" ColumnName="ThumbsUp" />
                 <ScalarProperty Name="ContactNumber" ColumnName="ContactNumber" />
@@ -375,6 +405,18 @@
                 <ScalarProperty Name="Title" ColumnName="Title" />
                 <ScalarProperty Name="ISBN" ColumnName="ISBN" />
                 <ScalarProperty Name="B_ID" ColumnName="B_ID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Requests">
+            <EntityTypeMapping TypeName="IFB299Model.Request">
+              <MappingFragment StoreEntitySet="Requests">
+                <ScalarProperty Name="Status_" ColumnName="Status " />
+                <ScalarProperty Name="BookId" ColumnName="BookId" />
+                <ScalarProperty Name="RequestText" ColumnName="RequestText" />
+                <ScalarProperty Name="RequestFrom" ColumnName="RequestFrom" />
+                <ScalarProperty Name="UserID" ColumnName="UserID" />
+                <ScalarProperty Name="Id" ColumnName="Id" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>

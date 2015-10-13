@@ -84,8 +84,19 @@ namespace TextBooks.Models
         public ICollection<System.Web.Mvc.SelectListItem> Providers { get; set; }
     }
 
+    public class RequestsToBorrowView
+    {
+        public string message { get; set; }
+        public string sender { get; set; }
+        public int bookID { get; set; }
+        public string borrower { get; set; }
+        public int requestID { get; set; }
+        public IEnumerable<RequestsToBorrowView> RequestsAll { get; set; }
+    }
+
     public class ViewMyBooks
     {
+        [Display(Name = "Title")]
         public string BookTitle { get; set; }
         public string Author { get; set; }
         public string Edition { get; set; }
@@ -93,6 +104,10 @@ namespace TextBooks.Models
         public string ISBN { get; set; }
         public int B_ID { get; set; }
         public string Owner { get; set; }
+        [Display(Name = "Borrower")]
+        public string Borrower { get; set; }
+        public AspNetUser targetUser { get; set; }
+        public Email contactEmail { get; set; }
 
         public IEnumerable<ViewMyBooks> BookDetails { get; set; }
     }

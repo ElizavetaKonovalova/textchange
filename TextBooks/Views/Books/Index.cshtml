@@ -42,7 +42,7 @@
 <br />
 <br />
 
-<table class="table table-hover" style="color:#0094ff;">
+<table class="table table-hover">
     <tr>
         <th>
             @Html.DisplayNameFor(model => model.ISBN)
@@ -72,7 +72,7 @@
                 @Html.DisplayFor(modelItem => item.ISBN)
             </td>
             <td>
-                @Html.ActionLink((item.Title), "Details", new { id = item.B_ID })
+                @Html.ActionLink((item.Title), "Details", new { id = item.B_ID, username = item.Owner })
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.Author)
@@ -84,8 +84,10 @@
                 @Html.DisplayFor(modelItem => item.Year)
             </td>
             <td>
-
-                @Html.ActionLink((item.Owner), "PublicProfile", "Account", new { username = item.Owner }, null)
+                @{ 
+                    var ownerName = TextBooks.Controllers.AccountController.GetNameForUsername(item.Owner);
+                }
+                @Html.ActionLink(ownerName, "PublicProfile", "Account", new { username = item.Owner }, null)
 
             </td>
             @*<td>

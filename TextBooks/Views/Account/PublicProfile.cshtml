@@ -4,6 +4,7 @@
     ViewBag.Title = "PublicProfile";
 }
 <br />
+@Html.ValidationSummary("", new { @class = "text-danger" })
 <div class="container">
 
     @if (Model.contactEmail != null)
@@ -24,6 +25,9 @@
         }
     }
 
+@using (Html.BeginForm("PublicProfile", "Account", new{ userId = Model.targetUser.Id,something = 0}, FormMethod.Post))
+{
+    @Html.AntiForgeryToken()
     <h1>
         @Html.DisplayFor(model => model.targetUser.FirstName)
         @Html.DisplayFor(model => model.targetUser.LastName)
@@ -35,10 +39,10 @@
     <div>
         <b>Rating:</b>
         <span class="thumbs-up">
-            @Model.targetUser.ThumbsUp <span class="glyphicon glyphicon-thumbs-up"></span>
+            @Model.targetUser.ThumbsUp <button class="glyphicon glyphicon-thumbs-up" value="ThumbsUp" name="thumbs"></button>
         </span>
         <span class="thumbs-down">
-            @Model.targetUser.ThumbsDown <span class="glyphicon glyphicon-thumbs-down"></span>
+            @Model.targetUser.ThumbsDown <button class="glyphicon glyphicon-thumbs-down" value="ThumbsDown" name="thumbs"></button>
         </span>
     </div>
 
@@ -80,7 +84,7 @@
             {
                 <tr>
                     <td>
-                        @Html.ActionLink((item.Title), "Details", "Books", new { id = item.B_ID }, null)
+                        @Html.ActionLink((item.Title), "Details", "Books", new { id = item.B_ID, username = item.Owner }, null)
                     </td>
                 </tr>
             }
@@ -115,7 +119,8 @@
     </table>
     <br />
     </div>
-    
+}
+
     <!-- Modal -->
     <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
         <div class="modal-dialog" role="document">
@@ -137,7 +142,8 @@
                             new { @class = "form-control col-md-12",
                                 @style = "min-width: 100%",
                                 @placeholder = "Type your message for " + Model.targetUser.FirstName + " here.",
-                                @rows ="8"})
+                                @rows ="8"
+                            })
                     }
                 </div>
                 <div class="modal-footer modal-text">

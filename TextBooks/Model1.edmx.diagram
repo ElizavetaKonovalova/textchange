@@ -5,12 +5,13 @@
     <!-- Diagram content (shape and connector positions) -->
     <edmx:Diagrams>
       <Diagram DiagramId="626b8e55b3844b7db687a430bb19528f" Name="Diagram1" ZoomLevel="80">
-        <EntityTypeShape EntityType="IFB299Model.C__MigrationHistory" Width="1.5" PointX="0.75" PointY="6.75" />
-        <EntityTypeShape EntityType="IFB299Model.AspNetRole" Width="1.5" PointX="0.75" PointY="2.75" />
-        <EntityTypeShape EntityType="IFB299Model.AspNetUserClaim" Width="1.5" PointX="5.25" PointY="3.75" />
-        <EntityTypeShape EntityType="IFB299Model.AspNetUserLogin" Width="1.5" PointX="5.25" PointY="1.25" />
+        <EntityTypeShape EntityType="IFB299Model.C__MigrationHistory" Width="1.5" PointX="5.75" PointY="6.75" />
+        <EntityTypeShape EntityType="IFB299Model.AspNetRole" Width="1.5" PointX="0.75" PointY="2.875" />
+        <EntityTypeShape EntityType="IFB299Model.AspNetUserClaim" Width="1.5" PointX="5.25" PointY="1.5" />
+        <EntityTypeShape EntityType="IFB299Model.AspNetUserLogin" Width="1.5" PointX="5.25" PointY="4.125" />
         <EntityTypeShape EntityType="IFB299Model.AspNetUser" Width="1.5" PointX="3" PointY="1.125" />
-        <EntityTypeShape EntityType="IFB299Model.Book" Width="1.5" PointX="2.75" PointY="6.75" />
+        <EntityTypeShape EntityType="IFB299Model.Book" Width="1.5" PointX="7.75" PointY="0.75" />
+        <EntityTypeShape EntityType="IFB299Model.Request" Width="1.5" PointX="0.75" PointY="7.75" />
         <AssociationConnector Association="IFB299Model.FK_dbo_AspNetUserClaims_dbo_AspNetUsers_UserId" />
         <AssociationConnector Association="IFB299Model.FK_dbo_AspNetUserLogins_dbo_AspNetUsers_UserId" />
         <AssociationConnector Association="IFB299Model.AspNetUserRoles" />

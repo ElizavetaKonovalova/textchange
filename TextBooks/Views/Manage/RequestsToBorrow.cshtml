@@ -1,0 +1,57 @@
+﻿@model TextBooks.Models.RequestsToBorrowView
+
+@{
+    ViewBag.Title = "Requests";
+}
+        <h4>Requests</h4>
+        <hr />
+        <div class ="col-offset-md-10" style="margin:5px;">
+            @Html.ActionLink("Back to My Account", "Index", null, new { @class = "btn btn-default btn-transparent" })
+        </div>
+        
+        <table class=" table table-hover">
+            <tr>
+                <th class="col-xs-6">
+                    Request
+                </th>
+                <th class="col-xs-4">
+                    Sender
+                </th>
+                <th class="col-xs-5">
+                    Request Management
+                </th>
+            </tr>
+
+        @foreach (var messages in Model.RequestsAll)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(model => messages.message)
+                </td>
+                <td>
+                    @Html.DisplayFor(model => messages.sender)
+                </td>
+                <td>
+                    @if (messages.message.Equals("Currently, you have no requests.")) 
+                    {
+                    }else
+                    {
+                    <div class="form-group">
+                       @using (Html.BeginForm("RequestsToBorrow", "Manage", new {bookValue = messages.bookID, borrower = messages.borrower, requestID = messages.requestID }, FormMethod.Post))
+                       {
+                             @Html.AntiForgeryToken()
+                            <button name="responce" type="submit" id="accept" value="Accept" class="btn btn-default btn-transparent">Accept</button>
+                            <button name="responce" type="submit" id="decline" value="Decline" class="btn btn-default btn-transparent">Decline</button>
+                       }
+                    </div>
+                    }
+                </td>
+                </tr>
+        }
+    </table>
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+    @Styles.Render("~/Content/css")
+    <link href="@Url.Content("~/Content/Home.css")" rel="stylesheet" type="text/css" />
+}

@@ -11,6 +11,7 @@ using Microsoft.Owin.Security;
 using TextBooks.Models;
 using System.Net.Mail;
 using System.Net;
+using TextBooks.App_Start;
 using System.Collections.Generic;
 using System.Net.Mime;
 using System.Data.Entity;
@@ -21,6 +22,7 @@ namespace TextBooks.Controllers
     public class AccountController : Controller
     {
         private IFB299Entities db = new IFB299Entities();
+        private SharedMethods shared = new SharedMethods();
         private ApplicationSignInManager _signInManager;
         private ApplicationUserManager _userManager;
 
@@ -32,6 +34,11 @@ namespace TextBooks.Controllers
         public ActionResult VerifyEmail()
         {
             return View();
+        }
+
+        public static string TokensCount()
+        {
+            return "123";
         }
 
         public AccountController(ApplicationUserManager userManager, ApplicationSignInManager signInManager )
@@ -118,6 +125,7 @@ namespace TextBooks.Controllers
 
         //
         // GET: /Account/PublicProfile
+        [HttpGet]
         [AllowAnonymous]
         public ActionResult PublicProfile(string username, string emailsent)
         {
@@ -127,9 +135,6 @@ namespace TextBooks.Controllers
             {
                 return View("Register");
             }
-
-            // Create instance of Entities object for database access
-            IFB299Entities db = new IFB299Entities();
 
             // Create emtpy model
             PublicProfileViewModel result = new PublicProfileViewModel();
@@ -156,15 +161,23 @@ namespace TextBooks.Controllers
 
                 // If we've already tried to send a contact email, save this into 
                 // the model so the view can display an appropriate message
-                if (emailsent == "success")
+                switch (emailsent)
                 {
-                    result.contactEmail = new Email();
-                    result.contactEmail.success = true;
-                }
-                if (emailsent == "error")
-                {
-                    result.contactEmail = new Email();
-                    result.contactEmail.success = false;
+                    case "success":
+                        result.contactEmail = new Email();
+                        result.contactEmail.success = true;
+                        break;
+                    case "error":
+                        result.contactEmail = new Email();
+                        result.contactEmail.success = false;
+                        break;
+                    case "youself":
+                        result.contactEmail = new Email();
+                        result.contactEmail.success = false;
+                        ModelState.AddModelError("", "Test Success!");
+                        break;
+                    default:
+                        break;
                 }
                 
                 // Done
@@ -173,6 +186,27 @@ namespace TextBooks.Controllers
             // There should be no links to users that don't exist!
             // If for some reason there is one, error so that we fix it.
             return View("Error");
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult PublicProfile(string userId, string thumbs, int something)
+        {
+            AspNetUser user = db.AspNetUsers.Find(userId);
+
+            switch(thumbs)
+            {
+                case "ThumbsUp":
+                    user.ThumbsUp += 1;
+                    break;
+                case "ThumbsDown":
+                    user.ThumbsDown += 1;
+                    break;
+            }
+
+            db.SaveChanges();
+
+            return RedirectToAction("PublicProfile", "Account", new { username = user.UserName, emailsent = ""});
         }
 
         //
@@ -226,6 +260,17 @@ namespace TextBooks.Controllers
             return View();
         }
 
+        public static bool isDigitsOnly(string str)
+        {
+            foreach (char c in str)
+            {
+                if (c < '0' || c > '9')
+                    return false;
+            }
+
+            return true;
+        }
+
         //
         // POST: /Account/Register
         [HttpPost]
@@ -235,16 +280,88 @@ namespace TextBooks.Controllers
         {
             if (ModelState.IsValid)
             {
-                var user = new ApplicationUser { UserName = model.Email.Split('@')[0], Email = model.Email };
+                
+                string password = model.Password;
+                string confirmPassword = model.ConfirmPassword;
+                string fName = model.FirstName;
+                string lName = model.LastName;
+                string email = model.Email;
+                string number = model.ContactNumber;
+                // Check fields are ok
 
-                // Check email address is okay
-                string addressSuffix = user.Email.Split('@')[1];
-                if (!addressSuffix.Equals("connect.qut.edu.au") || user.Email == "ifb299books@gmail.com")
+                bool failed = false;
+                if (email == null)
                 {
-                    AddErrors("The email address is not valid! Use @connect.qut.edu.au");
-                    return View(model);
+                    ModelState.AddModelError("", "Email field may not be empty.");
+                    failed = true;
+                }
+
+                if (email != null && !email.Contains('@'))
+                {
+                    ModelState.AddModelError("", "Please use a valid email format.");
+                    failed = true;
+                }
+
+                if (email != null && email.Contains('@'))
+                {
+                    string addressSuffix = email.Split('@')[1];
+                    if (!addressSuffix.Equals("connect.qut.edu.au") || email == "ifb299books@gmail.com")
+                    {
+                        ModelState.AddModelError("", "Please use valid email (@connect.qut.edu.au)");
+                        failed = true;
+                    }
+                }
+
+                if (password == null)
+                {
+                    ModelState.AddModelError("", "Password field may not be empty.");
+                    failed = true;
+                }
+
+                if (confirmPassword == null)
+                {
+                    ModelState.AddModelError("", "Confirm password field may not be empty.");
+                    failed = true;
+                }
+
+                if (fName == null)
+                {
+                    ModelState.AddModelError("", "First name field may not be empty.");
+                    failed = true;
+                }
+
+                if (lName == null)
+                {
+                    ModelState.AddModelError("", "Last name field may not be empty.");
+                    failed = true;
+                }
+
+                if (password != null && password.Length < 6)
+                {
+                    ModelState.AddModelError("", "Password must be longer than 6 characters.");
+                    failed = true;
+                }
+                if (password != confirmPassword)
+                {
+                    ModelState.AddModelError("", "Passwords do not match.");
+                    failed = true;
+                }
+
+                if (number != null)
+                {
+                    if (!isDigitsOnly(number))
+                    {
+                        ModelState.AddModelError("", "The contact number may only be digits.");
+                        failed = true;
+                    }
                 }
                 
+                if (failed == true)
+                {
+                    return View();
+                }
+
+                var user = new ApplicationUser { UserName = model.Email.Split('@')[0], Email = model.Email};
                 // Create the account
                 var result = await UserManager.CreateAsync(user, model.Password);
                 if (result.Succeeded)
@@ -261,6 +378,7 @@ namespace TextBooks.Controllers
                         currentUser.FirstName = model.FirstName;
                         currentUser.LastName = model.LastName;
                         currentUser.PhoneNumber = model.ContactNumber;
+                        currentUser.Tokens = 1;
                         db.SaveChanges();
 
                         // Send an email with link to a confirmation code, used to verify their account
@@ -286,39 +404,6 @@ namespace TextBooks.Controllers
             }
             // If we got this far, something failed. Let's redisplay the Register form (with errors).
             return View(model);
-        }
-        
-        private bool SendEmailMessage(Email model)
-        {
-            try
-            {
-                // Get message from Email class
-                string body = model.message;
-
-                // Setup a new MailMessage to send to target user
-                var message = new MailMessage();
-                message.To.Add(new MailAddress(model.toAddress, model.toName));
-                message.From = new MailAddress(model.fromAddress, model.fromName);
-                message.Subject = model.subject;
-                message.Body = string.Format(body);
-                message.IsBodyHtml = true;
-
-                // Init SmtpClient with credentials for the SendGrid Account
-                SmtpClient smtpClient = new SmtpClient("smtp.sendgrid.net", Convert.ToInt32(587));
-                NetworkCredential credentials = new NetworkCredential("ifb299", "IFB299Password");
-                smtpClient.Credentials = credentials;
-
-                // Send the email
-                smtpClient.Send(message);
-
-                // If we got this far, the email has been sent. 
-                return true;
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-                return false;
-            }
         }
 
         private void SendVerificationEmail(string code, string callbackURL, string firstName, string email)
@@ -427,7 +512,7 @@ namespace TextBooks.Controllers
                 }
                 else 
                 {
-                    AddErrors("You have typed the wrong email! Use @connect.qut.edu.au");
+                    shared.AddErrors("You have typed the wrong email! Use @connect.qut.edu.au");
                 }
             }
 
@@ -620,9 +705,15 @@ namespace TextBooks.Controllers
         public ActionResult ViewAccounts(ViewAccounts model, string id)
         {
             var findUser = db.AspNetUsers.Find(id);
+            var findBook = db.Books.Where(x => x.Owner.Equals(findUser.UserName)).Select(x => x);
+
             if (!findUser.UserName.Equals("ifb299books")) 
             {
-                var delete = db.AspNetUsers.Remove(findUser);
+                var deleteUser = db.AspNetUsers.Remove(findUser);
+                if (findBook != null) 
+                {
+                    var deleteBook = db.Books.RemoveRange(findBook);
+                }
                 db.SaveChanges();
             }
 
@@ -632,6 +723,39 @@ namespace TextBooks.Controllers
             };
 
             return View(model);
+        }
+
+        //Gets how many tokens the user has from the database
+        public static string getTokens(string id)
+        {
+            IFB299Entities db = new IFB299Entities();
+            var user = db.AspNetUsers.Find(id);
+            string tokenCount = user.Tokens.ToString();
+            return tokenCount;
+        }
+
+        //Sets the users tokens to the value given
+        public void setTokens(string id, int quantity)
+        {
+            var user = db.AspNetUsers.Find(id);
+            user.Tokens = quantity;
+            db.SaveChanges();
+        }
+
+        //Adds one to the users tokens
+        public void incrementTokens(string id)
+        {
+            var user = db.AspNetUsers.Find(id);
+            user.Tokens += 1;
+            db.SaveChanges();
+        }
+
+        //Subtracts one from the users tokens
+        public void decrementTokens(string id)
+        {
+            var user = db.AspNetUsers.Find(id);
+            user.Tokens -= 1;
+            db.SaveChanges();
         }
 
         public ActionResult Edit(ViewAccounts model, string id)
@@ -681,9 +805,78 @@ namespace TextBooks.Controllers
         }
 
         [HttpPost]
+        [AllowAnonymous]
+        public ActionResult ContactAdmin(string message)
+        {
+            var mailMessage = new Email();
+            mailMessage.message = message;
+            // Check that the model has been passed in with a valid mail message
+            if (mailMessage.message == null)
+            {
+                // No email content to send, return to home.
+                return RedirectToAction("Index", "Home");
+            }
+
+            // Get the currently logged in user (if there is one)
+            
+            if (ClaimsPrincipal.Current.Identity.IsAuthenticated)
+            {
+                string fromUsername = ClaimsPrincipal.Current.Identity.GetUserName();
+                // Get required details about the user sending the email
+                AspNetUser fromUser = (from table in db.AspNetUsers
+                                       where table.UserName == fromUsername
+                                       select table).FirstOrDefault();
+
+                // Check the user was received successfully
+                if (fromUser == null)
+                {
+                    return View("Error");
+                }
+
+                // Setup the Email with all the required info
+                mailMessage.fromName = fromUser.FirstName + " " + fromUser.LastName;
+                mailMessage.fromAddress = fromUser.Email;
+
+                // Wrap the message in a default template
+                mailMessage.message = "Contact from: "
+                    + fromUser.FirstName + " " + fromUser.LastName + ":<br /><br /><em>"
+                    + "Hi Admin," + "<br/><br />" + mailMessage.message;
+            }
+            else
+            {
+                // Setup the Email with all the required info
+                mailMessage.fromName = "Anonymous User";
+                mailMessage.fromAddress = "ifb299books@gmail.com";
+
+                // Wrap the message in a default template
+                mailMessage.message = "Contact from: Anonymous User"
+                    + ":<br /><br/><em>"
+                    + "Hi Admin," + "<br/><br />" + mailMessage.message;
+            }
+
+            mailMessage.toName = "Admin";
+            mailMessage.toAddress = "ifb299books@gmail.com";
+            mailMessage.subject = "Admin Contact";
+
+            // Swap out our new lines chars for html line breaks in order to preserve formatting.
+            mailMessage.message = mailMessage.message.Replace(Environment.NewLine, "<br />");
+
+            // Send the email
+            bool result = shared.SendEmailMessage(mailMessage);
+            if (result)
+            {
+                // TODO: return success
+                return RedirectToAction("Index", "Home");
+            }
+
+            return RedirectToAction("Index", "Home");
+        }
+
+        [HttpPost]
         //[ValidateAntiForgeryToken]
         public ActionResult ContactUser(PublicProfileViewModel model, string toUsername)
         {
+
             // Check that the model has been passed in with a valid mail message
             Email mailMessage = model.contactEmail;
             if (mailMessage.message == null)
@@ -696,9 +889,6 @@ namespace TextBooks.Controllers
             string fromUsername = ClaimsPrincipal.Current.Identity.GetUserName();
             if (fromUsername != "" && fromUsername != null)
             {
-                // Create Entity object for database access
-                IFB299Entities db = new IFB299Entities();
-
                 // Get required details about the user sending the email
                 AspNetUser fromUser = (from table in db.AspNetUsers
                                  where table.UserName == fromUsername
@@ -732,8 +922,9 @@ namespace TextBooks.Controllers
                     + "</em><br /><br />" + "<b>You can reply to this email to contact " + fromUser.FirstName
                     + ".</b><br /><br />" + "Kind Regards,<br />The Texchange Team";
 
+
                 // Send the email
-                bool result = SendEmailMessage(mailMessage);
+                bool result = shared.SendEmailMessage(mailMessage);
                 if (result)
                 {
                     return RedirectToAction("PublicProfile", "Account", new { username = toUsername, emailsent = "success" });
@@ -776,6 +967,13 @@ namespace TextBooks.Controllers
             return View();
         }
 
+        public static string getUserRequests(string userName)
+        {
+            IFB299Entities db = new IFB299Entities();
+            var user = db.AspNetUsers.Where(x=>x.UserName == userName).Select(x=>x.Id).FirstOrDefault();
+            return db.Requests.Where(x=>x.UserID == user).Select(x=>x).Count().ToString();
+        }
+
         protected override void Dispose(bool disposing)
         {
             if (disposing)
@@ -816,11 +1014,6 @@ namespace TextBooks.Controllers
             }
         }
 
-        private void AddErrors(string customError)
-        {
-            ModelState.AddModelError("", customError);
-        }
-
         private ActionResult RedirectToLocal(string returnUrl)
         {
             if (Url.IsLocalUrl(returnUrl))
@@ -828,6 +1021,41 @@ namespace TextBooks.Controllers
                 return Redirect(returnUrl);
             }
             return RedirectToAction("Index", "Home");
+        }
+
+        public static string GetFirstNameForUsername(string userid)
+        {
+            IFB299Entities db = new IFB299Entities();
+            string firstName = (from table in db.AspNetUsers
+                           where table.UserName == userid
+                           select table.FirstName).FirstOrDefault();
+            if (nullOrEmpty(firstName))
+            {
+                return ""; // Something is very wrong, should logout immediately. TODO.
+            }
+            return firstName;
+        }
+
+        public static string GetNameForUsername(string userid)
+        {
+            IFB299Entities db = new IFB299Entities();
+            var user = (from table in db.AspNetUsers
+                                where table.UserName == userid
+                                select table).FirstOrDefault();
+            if (user == null || nullOrEmpty(user.FirstName) || nullOrEmpty(user.LastName))
+            {
+                return ""; // Something is very wrong, should logout immediately. TODO>
+            }
+            return user.FirstName + " " + user.LastName;
+        }
+
+        private static bool nullOrEmpty(string stringToTest)
+        {
+            if (stringToTest == null || stringToTest.Equals(""))
+            {
+                return true;
+            }
+            return false;
         }
 
         internal class ChallengeResult : HttpUnauthorizedResult

@@ -1,4 +1,4 @@
-﻿@model TextBooks.Book
+﻿@model TextBooks.Models.ViewMyBooks
 
 
 
@@ -6,62 +6,135 @@
     ViewBag.Title = "Details";
 }
 
+@using (Html.BeginForm("Details", "Books", new { toUsername = Model.targetUser.UserName, bookID = Model.B_ID }, FormMethod.Post, new { id = "modal-form" }))
+{
+@Html.AntiForgeryToken()
+
 <h2>Book Details</h2>
+<div class="container">
 
-<div>
+    @if (Model.contactEmail != null)
+    {
+        if (Model.contactEmail.success == true)
+        {
+            <div class="alert alert-success alert-dismissible" role="alert">
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <strong>Success!</strong> Your message has been sent.
+            </div>
+        }
+        else
+        {
+            <div class="alert alert-warning alert-dismissible" role="alert">
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <strong>Oops!</strong> Your message wasn't sent. Was it empty?
+            </div>
+        }
+    }
     <hr />
-    <dl class="dl-horizontal">
+    @Html.ValidationSummary("", new { @class = "text-danger" })
+    <div>
+    @foreach (var book in Model.BookDetails)
+    {
+        <dl class="dl-horizontal">
 
-        <dt>
-            @Html.DisplayNameFor(model => model.ISBN)
-        </dt>
+            <dt>
+                @Html.DisplayNameFor(model => book.ISBN)
+            </dt>
 
-        <dd>
-            @Html.DisplayFor(model => model.ISBN)
-        </dd>
+            <dd>
+                @Html.DisplayFor(model => book.ISBN)
+            </dd>
 
-        <dt>
-            @Html.DisplayNameFor(model => model.Title)
-        </dt>
+            <dt>
+                @Html.DisplayNameFor(model => book.BookTitle)
+            </dt>
 
-        <dd>
-            @Html.DisplayFor(model => model.Title)
-        </dd>
+            <dd>
+                @Html.DisplayFor(model => book.BookTitle)
+            </dd>
 
-        <dt>
-            @Html.DisplayNameFor(model => model.Author)
-        </dt>
+            <dt>
+                @Html.DisplayNameFor(model => book.Year)
+            </dt>
 
-        <dd>
-            @Html.DisplayFor(model => model.Author)
-        </dd>
+            <dd>
+                @Html.DisplayFor(model => book.Year)
+            </dd>
 
-        <dt>
-            @Html.DisplayNameFor(model => model.Edition)
-        </dt>
+            <dt>
+                @Html.DisplayNameFor(model => book.Edition)
+            </dt>
 
-        <dd>
-            @Html.DisplayFor(model => model.Edition)
-        </dd>
+            <dd>
+                @Html.DisplayFor(model => book.Edition)
+            </dd>
 
-        <dt>
-            @Html.DisplayNameFor(model => model.Year)
-        </dt>
+            <dt>
+                @Html.DisplayNameFor(model => book.Author)
+            </dt>
 
-        <dd>
-            @Html.DisplayFor(model => model.Year)
-        </dd>
+            <dd>
+                @Html.DisplayFor(model => book.Author)
+            </dd>
 
-        <br>
+            <br />
 
-        <dt>
-            Owner profile:
-        </dt>
-        <!-- This will link to the user's public profile page when done -->
-        <dd>
-            @Html.ActionLink(Model.Owner, "PublicProfile", "Account", new { username = Model.Owner }, null)
-        </dd>
+            <dt>
+                Owner profile:
+            </dt>
+            <!-- This will link to the user's public profile page when done -->
+            <dd>
+                @Html.ActionLink(book.Owner, "PublicProfile", "Account", new { username = book.Owner }, null)
+            </dd>
+   
+        </dl>
+    }
+        </div>
 
-    </dl>
-    @Html.ActionLink("Back to List", "Index", null, new { @class = "btn btn-default" })
-</div>
+    <div style="margin-left:20px;">
+        <button type="button" class="btn btn-default btn-transparent" data-toggle="modal" data-target="#myModal">
+            Borrow this book
+        </button>
+        @Html.ActionLink("Back to List", "Index", null, new { @class = "btn btn-default btn-transparent" })
+    </div>
+
+    <!-- Modal -->
+    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <!--Get the user's name so that it can show up the top of the modal-->
+                    @{
+                        string toUserFullName = Model.targetUser.FirstName + " " + Model.targetUser.LastName;
+                    }
+                    <h4 class="modal-title modal-text" id="myModalLabel">Send request to @toUserFullName</h4>
+                </div>
+                <div class="modal-body">
+                        <p class="modal-text">Hi @Model.targetUser.FirstName,</p>
+                        <!--This is where the user types in their message-->
+                        @Html.TextAreaFor(model => model.contactEmail.message,
+                            new
+                            {
+                                @class = "form-control col-md-12",
+                                @style = "min-width: 100%",
+                                @placeholder = "Type your message for " + Model.targetUser.FirstName + " here.",
+                                @rows = "8"
+                            })
+                </div>
+                <div class="modal-footer modal-text">
+                    <!--Cancel and submit buttons. Not sure if it should be a button or just input-->
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                    <input id="btn-submit" class="btn btn-primary" type="submit" value="Send Message" />
+                    <script type="text/javascript">
+                        document.getElementById("btn-submit").onclick = function () {
+                            var form = document.getElementById("modal-form");
+                            form.submit();
+                        }
+                    </script>
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+}

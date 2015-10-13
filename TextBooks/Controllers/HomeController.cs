@@ -19,19 +19,12 @@ namespace TextBooks.Controllers
             return View();
         }
 
-        public ActionResult About()
+
+        public ActionResult Terms()
         {
-            ViewBag.Message = "Your application description page.";
+            ViewBag.Message = "Terms and Conditions";
 
             return View();
-        }
-
-        public ActionResult Contact()
-        {
-            return Redirect("mailto:ifb299books@gmail.com?subject=Support%20request");
-            //ViewBag.Message = "Your contact page.";
-
-            //return View();
         }
     }
 }

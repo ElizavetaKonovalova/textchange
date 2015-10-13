@@ -10,18 +10,18 @@
     <h4 style="text-align:center;">Change your account settings</h4>
     <table class="table">
         <tr>
-            <th>
+            <th style="text-align:center">
                 Password
             </th>
-            <th>
+            <th style="text-align:center">
                 Books
             </th>
-            <th>
+            <th style="text-align:center">
                 Phone
             </th>
         </tr>
         <tr>
-            <td class="col-xs-4">
+            <td class="col-xs-3">
             @if (Model.HasPassword)
             {
                     @Html.ActionLink("Change your password", "ChangePassword", null, new { @class = "btn btn-default btn-transparent" })
@@ -32,9 +32,12 @@
                 }
             </td>
             <td class="col-xs-4">
-                @Html.ActionLink("View", "ViewMyBooks", null, new { @class = "btn btn-default btn-transparent" })
+                @Html.ActionLink("My books", "ViewMyBooks", null, new { @class = "btn btn-default btn-transparent" })
+                @Html.ActionLink("Borrowed from me", "ViewMyBooksBorrowed", null, new { @class = "btn btn-default btn-transparent" })
+                @Html.ActionLink("Borrowed by me", "ViewMyBooksBorrower", null, new { @class = "btn btn-default btn-transparent" })
+                @Html.ActionLink("Requests", "RequestsToBorrow", null, new { @class = "btn btn-default btn-transparent" })
             </td>
-            <td class="col-xs-4">
+            <td class="col-xs-2">
                 @if (Model.PhoneNumber != null)
                 {
                     <div class="form-inline">
