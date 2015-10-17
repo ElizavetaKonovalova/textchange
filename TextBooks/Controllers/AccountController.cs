@@ -223,7 +223,7 @@ namespace TextBooks.Controllers
 
             if (ratedBook == true)
             {
-                return RedirectToAction("tempMethod", "Manage", new { id = bookId, rated = ratedBook });
+                return RedirectToAction("RateBorrower", "Manage", new { id = bookId, rated = ratedBook });
             }
             else
             {

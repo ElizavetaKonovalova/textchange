@@ -29,7 +29,7 @@
                 <li>
                     @Html.ActionLink(
      "Hi " + AccountController.GetFirstNameForUsername(User.Identity.GetUserName()) + "!",
-     "PublicProfile", "Account", routeValues: new { username = User.Identity.GetUserName()}, htmlAttributes: new { title = "Manage" })
+        "Index", "Manage", routeValues: null, htmlAttributes: new { title = "Manage" })
                 </li>
                 <li>
                     <a href="@Url.Action("RequestsToBorrow", "Manage")">

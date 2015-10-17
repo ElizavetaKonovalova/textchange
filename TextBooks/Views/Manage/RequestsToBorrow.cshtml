@@ -40,8 +40,15 @@
                        @using (Html.BeginForm("RequestsToBorrow", "Manage", new {bookValue = messages.bookID, borrower = messages.borrower, requestID = messages.requestID }, FormMethod.Post))
                        {
                              @Html.AntiForgeryToken()
+                           if (messages.message.Contains("Please, rate"))
+                           {
+                             <button name="responce" type="submit" id="accept" value="Rate" class="btn btn-default btn-transparent">Rate</button>
+                           }
+                           else
+                           {
                             <button name="responce" type="submit" id="accept" value="Accept" class="btn btn-default btn-transparent">Accept</button>
                             <button name="responce" type="submit" id="decline" value="Decline" class="btn btn-default btn-transparent">Decline</button>
+                           }
                        }
                     </div>
                     }

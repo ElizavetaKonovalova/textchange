@@ -327,9 +327,9 @@ namespace TextBooks.Controllers
         public ActionResult Details(ViewMyBooks model, string toUsername, int bookID)
         {
             bool failed = false;
-            var request = new Request();
-
             var bookDetails = db.Books.Find(bookID);
+
+
 
             // Check that the model has been passed in with a valid mail message
             Email mailMessage = model.contactEmail;
@@ -365,6 +365,9 @@ namespace TextBooks.Controllers
                         return View("Error");
                     }
 
+                    var request = shared.SendRequest(fromUser.UserName, toUser.Id, "Request to borrow "
+                            + bookDetails.Title + ", " + bookDetails.Author + ", " + bookDetails.Year + ".", bookDetails.B_ID);
+
                     // Setup the Email with all the required info
                     mailMessage.fromName = fromUser.FirstName + " " + fromUser.LastName;
                     mailMessage.fromAddress = fromUser.Email;
@@ -391,14 +394,10 @@ namespace TextBooks.Controllers
                     if (result)
                     {
                         toUser.Notified += 1;
-                        
-                        request.RequestFrom = fromUser.UserName;
-                        request.UserID = toUser.Id;
-                        request.RequestText = "Request to borrow " + bookDetails.Title + ", " + bookDetails.Author + ", " + bookDetails.Year + ".";
-                        request.BookId = bookDetails.B_ID;
-                        db.Requests.Add(request);
-                        db.SaveChanges();
-                        return RedirectToAction("PublicProfile", "Account", new { username = toUsername, emailsent = "success", 
+                        return RedirectToAction("PublicProfile", "Account", new
+                        {
+                            username = toUsername,
+                            emailsent = "success", 
                             returnedBorrower = false, bookId = 0 });
                     }
                 }
