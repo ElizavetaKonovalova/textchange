@@ -4,9 +4,12 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@ViewBag.Title - Texchange</title>
-    @Styles.Render("~/Content/css")
+    @*@Styles.Render("~/Content/css")
     @Styles.Render("~/Content/Home.css")
-    @Scripts.Render("~/bundles/modernizr")
+    @Scripts.Render("~/bundles/modernizr")*@
+    <script>
+        alert("Incorrect _Layout, please update this view to use _LayoutOption");
+    </script>
 
 </head>
 
@@ -37,6 +40,7 @@
                 <div class="navbar-collapse collapse">
                     <ul class="nav navbar-nav">
                         <li>@Html.ActionLink("Submit A Book", "Create", "Books")</li>
+                        <li>@Html.ActionLink("Find A Book", "Index", "Books")</li>
                         <!--Trigger for Email Modal-->
                         <li><a href="#" data-toggle="modal" data-target="#myModal">Contact Us</a></li>
                     </ul>
@@ -48,7 +52,8 @@
     <div class="container body-content">
         @RenderBody()
         <footer>
-            <p>&copy; @DateTime.Now.Year - Texchange</p>
+            <p>&copy; @DateTime.Now.Year - Texchange | <a style="color: white" href="~/Home/terms">Terms and Conditions</a></p>
+            
         </footer>
     </div>
 
@@ -90,5 +95,6 @@
     @Scripts.Render("~/bundles/jquery")
     @Scripts.Render("~/bundles/bootstrap")
     @RenderSection("scripts", required: false)
+    <link href="@Url.Content("~/Content/Home.css")" rel="stylesheet" type="text/css" />
 </body>
 </html>

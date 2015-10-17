@@ -945,6 +945,7 @@ namespace TextBooks.Controllers
                     + "</em><br /><br />" + "<b>You can reply to this email to contact " + fromUser.FirstName
                     + ".</b><br /><br />" + "Kind Regards,<br />The Texchange Team";
 
+
                 // Send the email
                 bool result = shared.SendEmailMessage(mailMessage);
                 if (result)
@@ -989,8 +990,9 @@ namespace TextBooks.Controllers
             return View();
         }
 
-        public string getUserRequests(string userName)
+        public static string getUserRequests(string userName)
         {
+            IFB299Entities db = new IFB299Entities();
             var user = db.AspNetUsers.Where(x=>x.UserName == userName).Select(x=>x.Id).FirstOrDefault();
             return db.Requests.Where(x=>x.UserID == user).Select(x=>x).Count().ToString();
         }

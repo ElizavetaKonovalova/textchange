@@ -126,3 +126,16 @@ div .modal-footer {
     border: 2px solid white;
     background: white;
 }
+
+div.popover-content p {
+    background: white;
+    text-align: left;
+}
+
+h3.popover-title {
+    color: black;
+}
+
+p#tokensPopover {
+    text-align: left;
+}
