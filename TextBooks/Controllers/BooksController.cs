@@ -310,7 +310,8 @@ namespace TextBooks.Controllers
             if (mailMessage.message == null)
             {
                 // No email content to send, don't send it empty and let the view know it wasn't sent.
-                return RedirectToAction("PublicProfile", "Account", new { username = toUsername, emailsent = "error" });
+                return RedirectToAction("PublicProfile", "Account", new { username = toUsername, emailsent = "error", 
+                    returnedBorrower = false, bookId = 0 });
             }
 
             // Get the currently logged in user
@@ -365,19 +366,21 @@ namespace TextBooks.Controllers
                         request.BookId = bookDetails.B_ID;
                         db.Requests.Add(request);
                         db.SaveChanges();
-                        return RedirectToAction("PublicProfile", "Account", new { username = toUsername, emailsent = "success" });
+                        return RedirectToAction("PublicProfile", "Account", new { username = toUsername, emailsent = "success", 
+                            returnedBorrower = false, bookId = 0 });
                     }
-                }
-                else
-                {
-                    ModelState.AddModelError("", "Test Success!");
-                    return RedirectToAction("Details", "Books", new { id = bookDetails.B_ID, username = toUser.UserName });
                 }
             }
             // One of the user accounts wasn't able to be received, or something else went wrong
             // Perhaps a user account was deleted while an message was being written?
             // Let's go to the home page and start again.
-            return RedirectToAction("PublicProfile", "Account", new { username = toUsername, emailsent = "yourself" });
+            return RedirectToAction("PublicProfile", "Account", new
+            {
+                username = toUsername,
+                emailsent = "",
+                returnedBorrower = false,
+                bookId = 0
+            });
         }
 
         public ActionResult ListAllBookTitles(int quantity)

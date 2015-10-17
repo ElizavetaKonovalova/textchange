@@ -20,12 +20,16 @@ namespace TextBooks.Models
         // The User for the Profile page
         public AspNetUser targetUser { get; set; }
 
+        public int bookID { get; set; }
+
         // Associated Books
         public List<Book> booksOwned { get; set; }
         public List<Book> booksBorrowed { get; set; }
 
         // Contact the user through email
         public Email contactEmail { get; set; }
+
+        public bool returned { get; set; } 
     }
 
     public class Email

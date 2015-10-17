@@ -84,7 +84,7 @@
             </dt>
             <!-- This will link to the user's public profile page when done -->
             <dd>
-                @Html.ActionLink(book.Owner, "PublicProfile", "Account", new { username = book.Owner }, null)
+                @Html.ActionLink(book.Owner, "PublicProfile", "Account", new { username = book.Owner, emailsent = "", returnedBorrower = false, bookId = 0 }, null)
             </dd>
    
         </dl>

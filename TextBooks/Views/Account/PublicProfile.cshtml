@@ -25,7 +25,7 @@
         }
     }
 
-@using (Html.BeginForm("PublicProfile", "Account", new{ userId = Model.targetUser.Id,something = 0}, FormMethod.Post))
+@using (Html.BeginForm("PublicProfile", "Account", new{ userId = Model.targetUser.Id, something = 0, bookId = Model.bookID}, FormMethod.Post))
 {
     @Html.AntiForgeryToken()
     <h1>
@@ -38,12 +38,24 @@
     <div class="col-md-3">
     <div>
         <b>Rating:</b>
+        @if(Model.returned == true)
+        {
         <span class="thumbs-up">
-            @Model.targetUser.ThumbsUp <button class="glyphicon glyphicon-thumbs-up" value="ThumbsUp" name="thumbs"></button>
+            @Model.targetUser.ThumbsUp <button class="glyphicon glyphicon-thumbs-up " value="ThumbsUp" name="thumbs"></button>
         </span>
         <span class="thumbs-down">
-            @Model.targetUser.ThumbsDown <button class="glyphicon glyphicon-thumbs-down" value="ThumbsDown" name="thumbs"></button>
+            @Model.targetUser.ThumbsDown <button class="glyphicon glyphicon-thumbs-up " value="ThumbsDown" name="thumbs"></button>
         </span>
+        }
+        else
+        {
+        <span class="thumbs-up">
+            @Model.targetUser.ThumbsUp <span class="glyphicon glyphicon-thumbs-up" value="ThumbsUp" name="thumbs"></span>
+        </span>
+        <span class="thumbs-down">
+            @Model.targetUser.ThumbsDown <span class="glyphicon glyphicon-thumbs-down" value="ThumbsDown" name="thumbs"></span>
+        </span>
+        }
     </div>
 
     <br />

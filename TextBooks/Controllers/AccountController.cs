@@ -127,7 +127,7 @@ namespace TextBooks.Controllers
         // GET: /Account/PublicProfile
         [HttpGet]
         [AllowAnonymous]
-        public ActionResult PublicProfile(string username, string emailsent)
+        public ActionResult PublicProfile(string username, string emailsent, bool returnedBorrower, int bookID)
         {
             // Check user is logged in. If not, send them to the Register page.
             var loggedIn = ClaimsPrincipal.Current.Identity.IsAuthenticated;
@@ -139,49 +139,55 @@ namespace TextBooks.Controllers
             // Create emtpy model
             PublicProfileViewModel result = new PublicProfileViewModel();
 
-            // Get the target user
-            result.targetUser = (from table in db.AspNetUsers
-                        where table.UserName == username
-                        select table).FirstOrDefault();
+                // Get the target user
+                result.targetUser = (from table in db.AspNetUsers
+                                     where table.UserName == username
+                                     select table).FirstOrDefault();
 
-            // Check the user was found
-            if (result.targetUser != null)
-            {
-                // List all the books owned by the target user
-                result.booksOwned = (from table in db.Books
-                              where table.Owner == username
-                              select table).ToList();
-                if (result.booksOwned.Count == 0) result.booksOwned = null;
-
-                // List all the books being borrowed by the target user
-                result.booksBorrowed = (from table in db.Books
-                                         where table.BrwdBy == username
-                                         select table).ToList();
-                if (result.booksBorrowed.Count == 0) result.booksBorrowed = null;
-
-                // If we've already tried to send a contact email, save this into 
-                // the model so the view can display an appropriate message
-                switch (emailsent)
+                if (returnedBorrower == true)
                 {
-                    case "success":
-                        result.contactEmail = new Email();
-                        result.contactEmail.success = true;
-                        break;
-                    case "error":
-                        result.contactEmail = new Email();
-                        result.contactEmail.success = false;
-                        break;
-                    case "youself":
-                        result.contactEmail = new Email();
-                        result.contactEmail.success = false;
-                        ModelState.AddModelError("", "Test Success!");
-                        break;
-                    default:
-                        break;
+                    result.returned = true;
+                    result.bookID = bookID;
                 }
-                
-                // Done
-                return View(result);
+
+                // Check the user was found
+                if (result.targetUser != null)
+                {
+                    // List all the books owned by the target user
+                    result.booksOwned = (from table in db.Books
+                                         where table.Owner == username
+                                         select table).ToList();
+                    if (result.booksOwned.Count == 0) result.booksOwned = null;
+
+                    // List all the books being borrowed by the target user
+                    result.booksBorrowed = (from table in db.Books
+                                            where table.BrwdBy == username
+                                            select table).ToList();
+                    if (result.booksBorrowed.Count == 0) result.booksBorrowed = null;
+
+                    // If we've already tried to send a contact email, save this into 
+                    // the model so the view can display an appropriate message
+                    switch (emailsent)
+                    {
+                        case "success":
+                            result.contactEmail = new Email();
+                            result.contactEmail.success = true;
+                            break;
+                        case "error":
+                            result.contactEmail = new Email();
+                            result.contactEmail.success = false;
+                            break;
+                        case "youself":
+                            result.contactEmail = new Email();
+                            result.contactEmail.success = false;
+                            ModelState.AddModelError("", "Test Success!");
+                            break;
+                        default:
+                            break;
+                    }
+
+                    // Done
+                    return View(result);
             }
             // There should be no links to users that don't exist!
             // If for some reason there is one, error so that we fix it.
@@ -190,23 +196,40 @@ namespace TextBooks.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult PublicProfile(string userId, string thumbs, int something)
+        public ActionResult PublicProfile(string userId, string thumbs, int bookId)
         {
-            AspNetUser user = db.AspNetUsers.Find(userId);
+            ManageController manage = new ManageController();
 
-            switch(thumbs)
+            bool ratedBook = false;
+
+            AspNetUser user = db.AspNetUsers.Find(userId);
+            if (!User.Identity.Name.Equals(user.UserName))
             {
-                case "ThumbsUp":
-                    user.ThumbsUp += 1;
-                    break;
-                case "ThumbsDown":
-                    user.ThumbsDown += 1;
-                    break;
+                switch (thumbs)
+                {
+                    case "ThumbsUp":
+                        user.ThumbsUp += 1;
+                        break;
+                    case "ThumbsDown":
+                        user.ThumbsDown += 1;
+                        break;
+                    default:
+                        break;
+                }
+
+                ratedBook = true;
+                db.SaveChanges();
             }
 
-            db.SaveChanges();
-
-            return RedirectToAction("PublicProfile", "Account", new { username = user.UserName, emailsent = ""});
+            if (ratedBook == true)
+            {
+                return RedirectToAction("tempMethod", "Manage", new { id = bookId, rated = ratedBook });
+            }
+            else
+            {
+                return RedirectToAction("PublicProfile", "Account", new { username = user.UserName, emailsent = "", 
+                    returnedBorrower = true, bookID = bookId });
+            }
         }
 
         //

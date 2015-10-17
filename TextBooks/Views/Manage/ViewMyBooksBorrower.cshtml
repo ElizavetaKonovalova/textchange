@@ -4,14 +4,14 @@
     ViewBag.Title = "View I'm borrowing";
 }
 
-<div style="margin:5px;">
-    @Html.ActionLink("Back To My Account", "Index", null, new { @class = "btn btn-default btn-transparent" })
-</div>
-
-@using (Html.BeginForm("ViewMyBooksBorrower", "Manage", FormMethod.Post))
+@using (Html.BeginForm("ViewMyBooksBorrower", "Manage", new{ rated = false}, FormMethod.Post))
 {
     @Html.AntiForgeryToken()
 
+<div style="margin:5px;">
+    @Html.ActionLink("Back To My Account", "Index", null, new { @class = "btn btn-default btn-transparent" })
+</div>
+    
 <table class="table table-hover">
     <tr>
         <th>
@@ -53,13 +53,15 @@
                 @Html.DisplayFor(modelItem => item.Year)
             </td>
             <td>
-                <button type ="submit" name="returnBtn" value=@item.B_ID class="btn btn-default btn-transparent">Return</button>
+
+                <button type="submit" class="btn btn-default btn-transparent" value=@item.B_ID
+                       name="id" style="color:#0094ff"> Return
+                </button>
             </td>
         </tr>
     }
 
 </table>
-
 }
 
 @section Scripts {
