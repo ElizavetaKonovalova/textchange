@@ -1,4 +1,6 @@
 ﻿/// <autosync enabled="true" />
+/// <reference path="animatesearchsuggestions.js" />
+/// <reference path="autocompletesearchsuggestions.js" />
 /// <reference path="bootstrap.js" />
 /// <reference path="createbooksautocomplete.js" />
 /// <reference path="jquery.js" />
