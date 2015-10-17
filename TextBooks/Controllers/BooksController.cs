@@ -412,11 +412,17 @@ namespace TextBooks.Controllers
             return RedirectToAction("PublicProfile", "Account", new { username = toUsername, emailsent = "yourself" });
         }
 
+        // Action result to list all the book titles currently in the database
         public ActionResult ListAllBookTitles(int quantity)
         {
+            // Query the database for a list of book titles
             List<string> titles = (from table in db.Books
                                    select table.Title).ToList();
+
+            // Only send back the requested number of books
             if (quantity != 0) titles.RemoveRange(quantity, titles.Count - quantity);
+
+            // Return the list of titles as a JSON object
             return Json(titles.ToArray());
         }
 
