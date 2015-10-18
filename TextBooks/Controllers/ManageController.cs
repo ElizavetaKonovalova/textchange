@@ -21,7 +21,7 @@ namespace TextBooks.Controllers
         private IFB299Entities db = new IFB299Entities();
         private ApplicationSignInManager _signInManager;
         private ApplicationUserManager _userManager;
-        private SharedMethods shared;
+        private SharedMethods shared = new SharedMethods();
         private static int requestID;
 
         public ManageController()
@@ -571,7 +571,7 @@ namespace TextBooks.Controllers
                         borrower = x.RequestFrom,
                         requestID = x.Id
                     });
-
+            
             if (newRequest.ToList().Count() < 1 )
             {
                 newRequest = db.Requests.Select(

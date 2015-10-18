@@ -28,67 +28,69 @@
 @using (Html.BeginForm("PublicProfile", "Account", new{ userId = Model.targetUser.Id, something = 0, bookId = Model.bookID}, FormMethod.Post))
 {
     @Html.AntiForgeryToken()
-    <h1>
-        @Html.DisplayFor(model => model.targetUser.FirstName)
-        @Html.DisplayFor(model => model.targetUser.LastName)
-    </h1>
+    <div style="padding-right:14%;">
+            <h1>
+                @Html.DisplayFor(model => model.targetUser.FirstName)
+                @Html.DisplayFor(model => model.targetUser.LastName)
+            </h1>
 
-    <hr />
-
-    <div class="col-md-3">
-    <div>
-        <b>Rating:</b>
-        @if(Model.returned == true)
+            <hr />
+        </div>
+    
+        <div class="col-xs-offset-4">
+            <div>
+                <b>Rating:</b>
+                @if(Model.returned == true)
         {
-        <span class="thumbs-up">
-            @Model.targetUser.ThumbsUp <button class="glyphicon glyphicon-thumbs-up " value="ThumbsUp" name="thumbs"></button>
-        </span>
-        <span class="thumbs-down">
-            @Model.targetUser.ThumbsDown <button class="glyphicon glyphicon-thumbs-up " value="ThumbsDown" name="thumbs"></button>
-        </span>
+                    <span class="thumbs-up">
+                        @Model.targetUser.ThumbsUp <button class="glyphicon glyphicon-thumbs-up " value="ThumbsUp" name="thumbs"></button>
+                    </span>
+                    <span class="thumbs-down">
+                        @Model.targetUser.ThumbsDown <button class="glyphicon glyphicon-thumbs-up " value="ThumbsDown" name="thumbs"></button>
+                    </span>
         }
         else
         {
-        <span class="thumbs-up">
-            @Model.targetUser.ThumbsUp <span class="glyphicon glyphicon-thumbs-up" value="ThumbsUp" name="thumbs"></span>
-        </span>
-        <span class="thumbs-down">
-            @Model.targetUser.ThumbsDown <span class="glyphicon glyphicon-thumbs-down" value="ThumbsDown" name="thumbs"></span>
-        </span>
+                    <span class="thumbs-up">
+                        @Model.targetUser.ThumbsUp <span class="glyphicon glyphicon-thumbs-up" value="ThumbsUp" name="thumbs"></span>
+                    </span>
+                    <span class="thumbs-down">
+                        @Model.targetUser.ThumbsDown <span class="glyphicon glyphicon-thumbs-down" value="ThumbsDown" name="thumbs"></span>
+                    </span>
         }
-    </div>
+            </div>
 
-    <br />
-    <b>Email: </b> @Html.DisplayFor(model => model.targetUser.Email)<br />
-    @if (Model.targetUser.PhoneNumber != null)
+            <br />
+            <b>Email: </b> @Html.DisplayFor(model => model.targetUser.Email)<br />
+            @if (Model.targetUser.PhoneNumber != null)
     {
-        <b>Phone: </b>@Html.DisplayFor(model => model.targetUser.PhoneNumber)<br />
+                <b>Phone: </b>@Html.DisplayFor(model => model.targetUser.PhoneNumber)<br />
     } else
     {
-        <em>No phone number listed.</em><br />
+                <em>No phone number listed.</em><br />
     }
-    <br />
+            <br />
 
-    <!-- Button trigger modal -->
-        <button type="button" class="btn btn-default btn-transparent" data-toggle="modal" data-target="#myModal">
-        Send Email
-    </button>
-        @Html.ActionLink("Back to books", "../Books", "Index", new { @class = "btn btn-default btn-transparent" })
-    <br />
-    <br />
-    <table>
-        <tr>
-            <th>
-                @Html.DisplayFor(model => model.targetUser.FirstName)'s Books:
-            </th>
-        </tr>
-        @if (Model.booksOwned == null)
+            <!-- Button trigger modal -->
+            <button type="button" class="btn btn-default btn-transparent" data-toggle="modal" data-target="#myModal">
+                Send Email
+            </button>
+            @Html.ActionLink("Back to books", "../Books", "Index", new { @class = "btn btn-default btn-transparent" })
+            <br />
+            <br />
+            <table>
+                <tr>
+                    <th>
+                        @Html.DisplayFor(model => model.targetUser.FirstName)'s Books:
+                    </th>
+                </tr>
+                @if (Model.booksOwned == null)
         {
-            <tr>
-                <td>
-                    No books to show.
-                </td>
-            </tr>
+                    <tr>
+                        <td>
+                            No books to show.
+                        </td>
+                    </tr>
         }
         else
         {
@@ -101,21 +103,21 @@
                 </tr>
             }
         }
-    </table>
-    <br />
-    <table>
-        <tr>
-            <th>
-                @Html.DisplayFor(model => model.targetUser.FirstName) is Borrowing:
-            </th>
-        </tr>
-        @if (Model.booksBorrowed == null)
+            </table>
+            <br />
+            <table>
+                <tr>
+                    <th>
+                        @Html.DisplayFor(model => model.targetUser.FirstName) is Borrowing:
+                    </th>
+                </tr>
+                @if (Model.booksBorrowed == null)
         {
-            <tr>
-                <td>
-                    No books at the moment.
-                </td>
-            </tr>
+                    <tr>
+                        <td>
+                            No books at the moment.
+                        </td>
+                    </tr>
             }
             else
         {
@@ -128,54 +130,54 @@
                 </tr>
             }
         }
-    </table>
-    <br />
-    </div>
-}
+            </table>
+            <br />
+        </div>
+        }
 
-    <!-- Modal -->
-    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                    <!--Get the user's name so that it can show up the top of the modal-->
-                    @{
+        <!-- Modal -->
+        <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        <!--Get the user's name so that it can show up the top of the modal-->
+                        @{
                     string toUserFullName = Model.targetUser.FirstName + " " + Model.targetUser.LastName;
-                    }
-                    <h4 class="modal-title modal-text" id="myModalLabel">Contact @toUserFullName</h4>
-                </div>
-                <div class="modal-body">
-                    @using (Html.BeginForm("ContactUser", "Account", new { toUsername = Model.targetUser.UserName }, FormMethod.Post, new { id = "modal-form" }))
+                        }
+                        <h4 class="modal-title modal-text" id="myModalLabel">Contact @toUserFullName</h4>
+                    </div>
+                    <div class="modal-body">
+                        @using (Html.BeginForm("ContactUser", "Account", new { toUsername = Model.targetUser.UserName }, FormMethod.Post, new { id = "modal-form" }))
                     {
-                        <p class="modal-text">Hi @Model.targetUser.FirstName,</p>
+                            <p class="modal-text">Hi @Model.targetUser.FirstName,</p>
                         <!--This is where the user types in their message-->
-                        @Html.TextAreaFor(model => model.contactEmail.message,
+                            @Html.TextAreaFor(model => model.contactEmail.message,
                             new { @class = "form-control col-md-12",
                                 @style = "min-width: 100%",
                                 @placeholder = "Type your message for " + Model.targetUser.FirstName + " here.",
                                 @rows ="8"
                             })
                     }
-                </div>
-                <div class="modal-footer modal-text">
-                    <!--Cancel and submit buttons. Not sure if it should be a button or just input-->
-                    <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-                    <input id="btn-submit" class="btn btn-primary" type="submit" value="Send Message" />
-                    <script type="text/javascript">
-                        document.getElementById("btn-submit").onclick = function () {
-                            var form = document.getElementById("modal-form");
-                            form.submit();
-                        }
-                    </script>
+                    </div>
+                    <div class="modal-footer modal-text">
+                        <!--Cancel and submit buttons. Not sure if it should be a button or just input-->
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                        <input id="btn-submit" class="btn btn-primary" type="submit" value="Send Message" />
+                        <script type="text/javascript">
+                            document.getElementById("btn-submit").onclick = function () {
+                                var form = document.getElementById("modal-form");
+                                form.submit();
+                            }
+                        </script>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-    <br />
+        <br />
 
-    <br />
-</div>
+        <br />
+    </div>
 
 
 @section Scripts {

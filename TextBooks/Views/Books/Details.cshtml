@@ -10,7 +10,6 @@
 {
 @Html.AntiForgeryToken()
 
-<h2>Book Details</h2>
 <div class="container">
 
     @if (Model.contactEmail != null)
@@ -30,9 +29,14 @@
             </div>
         }
     }
-    <hr />
     @Html.ValidationSummary("", new { @class = "text-danger" })
+
     <div>
+        <h1 style="padding-top:10%">Book Details</h1>
+        <hr />
+    </div>
+
+    <div class="col-xs-offset-4">
     @foreach (var book in Model.BookDetails)
     {
         <dl class="dl-horizontal">
@@ -91,7 +95,7 @@
     }
         </div>
 
-    <div style="margin-left:20px;">
+    <div style="margin-left:40%; padding-bottom:15px;">
         <button type="button" class="btn btn-default btn-transparent" data-toggle="modal" data-target="#myModal">
             Borrow this book
         </button>

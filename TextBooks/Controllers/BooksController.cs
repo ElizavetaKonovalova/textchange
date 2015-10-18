@@ -365,40 +365,45 @@ namespace TextBooks.Controllers
                         return View("Error");
                     }
 
-                    var request = shared.SendRequest(fromUser.UserName, toUser.Id, "Request to borrow "
-                            + bookDetails.Title + ", " + bookDetails.Author + ", " + bookDetails.Year + ".", bookDetails.B_ID);
-
-                    // Setup the Email with all the required info
-                    mailMessage.fromName = fromUser.FirstName + " " + fromUser.LastName;
-                    mailMessage.fromAddress = fromUser.Email;
-                    mailMessage.toName = toUser.FirstName + " " + toUser.LastName;
-                    mailMessage.toAddress = toUser.Email;
-                    mailMessage.subject = "Contact from Texchange";
-
-                    // Swap out our new lines chars for html line breaks in order to preserve formatting.
-                    mailMessage.message = mailMessage.message.Replace(System.Environment.NewLine, "<br />");
-
-                    // Wrap the message in a default template
-                    mailMessage.message = "Hi " + toUser.FirstName + ",<br /><br />You've received a request from "
-                        + fromUser.FirstName + " " + fromUser.LastName + " to borrow your book: <br/><br/> <strong>Title:</strong> "
-                        + bookDetails.Title + "<br/> <strong>Year:</strong> " + bookDetails.Year
-                        + "<br/><strong> Author: </strong>" + bookDetails.Author + "<br/><br/> on Texchange:<br /><br /><em>"
-                        + "Hi " + toUser.FirstName + ",<br/>" + mailMessage.message
-                        + "</em><br /><br />" + "You may Accept or Decline the request <a href =\"" + Url.Action("Accepted", "Manage",
-                        new { bookValue = bookDetails.B_ID, borrower = fromUsername, requestID = request.Id }, protocol: Request.Url.Scheme)
-                        + "\">here</a>.<br/><b>You can reply to this email to contact "
-                        + fromUser.FirstName + ".</b><br /><br />" + "Kind Regards,<br />The Texchange Team";
-
-                    // Send the email
-                    bool result = shared.SendEmailMessage(mailMessage);
-                    if (result)
+                    if (db.Requests.Where(x => x.RequestFrom.Equals(fromUser.UserName) && x.BookId == bookDetails.B_ID).Count() == 0)
                     {
-                        toUser.Notified += 1;
-                        return RedirectToAction("PublicProfile", "Account", new
+                        var request = shared.SendRequest(fromUser.UserName, toUser.Id, "Request to borrow "
+                                + bookDetails.Title + ", " + bookDetails.Author + ", " + bookDetails.Year + ".", bookDetails.B_ID);
+
+                        // Setup the Email with all the required info
+                        mailMessage.fromName = fromUser.FirstName + " " + fromUser.LastName;
+                        mailMessage.fromAddress = fromUser.Email;
+                        mailMessage.toName = toUser.FirstName + " " + toUser.LastName;
+                        mailMessage.toAddress = toUser.Email;
+                        mailMessage.subject = "Contact from Texchange";
+
+                        // Swap out our new lines chars for html line breaks in order to preserve formatting.
+                        mailMessage.message = mailMessage.message.Replace(System.Environment.NewLine, "<br />");
+
+                        // Wrap the message in a default template
+                        mailMessage.message = "Hi " + toUser.FirstName + ",<br /><br />You've received a request from "
+                            + fromUser.FirstName + " " + fromUser.LastName + " to borrow your book: <br/><br/> <strong>Title:</strong> "
+                            + bookDetails.Title + "<br/> <strong>Year:</strong> " + bookDetails.Year
+                            + "<br/><strong> Author: </strong>" + bookDetails.Author + "<br/><br/> on Texchange:<br /><br /><em>"
+                            + "Hi " + toUser.FirstName + ",<br/>" + mailMessage.message
+                            + "</em><br /><br />" + "You may Accept or Decline the request <a href =\"" + Url.Action("Accepted", "Manage",
+                            new { bookValue = bookDetails.B_ID, borrower = fromUsername, requestID = request.Id }, protocol: Request.Url.Scheme)
+                            + "\">here</a>.<br/><b>You can reply to this email to contact "
+                            + fromUser.FirstName + ".</b><br /><br />" + "Kind Regards,<br />The Texchange Team";
+
+                        // Send the email
+                        bool result = shared.SendEmailMessage(mailMessage);
+                        if (result)
                         {
-                            username = toUsername,
-                            emailsent = "success", 
-                            returnedBorrower = false, bookId = 0 });
+                            toUser.Notified += 1;
+                            return RedirectToAction("PublicProfile", "Account", new
+                            {
+                                username = toUsername,
+                                emailsent = "success",
+                                returnedBorrower = false,
+                                bookId = 0
+                            });
+                        }
                     }
                 }
             }
