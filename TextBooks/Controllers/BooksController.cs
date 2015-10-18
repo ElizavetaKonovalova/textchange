@@ -19,7 +19,7 @@ namespace TextBooks.Controllers
 
         public ActionResult Index()
         {
-            return View(db.Books.OrderBy(x=>x.Title).ToList());
+            return View(db.Books.Where(x => x.BrwdBy.Equals(null)).OrderBy(x => x.Title).ToList());
         }
 
         [HttpPost]

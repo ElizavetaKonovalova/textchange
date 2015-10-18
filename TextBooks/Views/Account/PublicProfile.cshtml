@@ -124,8 +124,8 @@
             foreach (var item in Model.booksBorrowed)
             {
                 <tr>
-                    <td>
-                        @Html.ActionLink((item.Title), "Details", "Books", new { id = item.B_ID }, null)
+                    <td style="color:#0094ff">
+                        @Html.DisplayFor(model=>item.Title)
                     </td>
                 </tr>
             }
