@@ -735,7 +735,7 @@ namespace TextBooks.Controllers
             db.Comments.Add(userComment);
             db.SaveChanges();
 
-            return RedirectToAction("Index", "Home");
+            return RedirectToAction("PublicProfile", "Account", new { username = toUsername, emailsent = "", returnedBorrower = true, bookId = 0 });
         }
 
         //
