@@ -168,6 +168,18 @@ namespace TextBooks.Controllers
                     var allComments = db.Comments.Where(x => x.Receiver.Equals(result.targetUser.UserName)).Select(x =>
                         new Commenting { Comment = x.CommentText, Date = x.Date.ToString(), Sender = x.Sender }).ToList();
 
+                    if (allComments.Count == 0)
+                    {
+                        Commenting comments = new Commenting
+                        {
+                            Comment = "There are currently no comments....",
+                            Date = "",
+                            Sender=""
+                        };
+
+                        allComments.Add(comments);
+                    }
+
                     result.AllComments = allComments;
                     // If we've already tried to send a contact email, save this into 
                     // the model so the view can display an appropriate message
