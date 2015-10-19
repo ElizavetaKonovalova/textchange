@@ -214,8 +214,6 @@ namespace TextBooks.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult PublicProfile(string userId, string thumbs, int bookId)
         {
-            ManageController manage = new ManageController();
-
             bool ratedBook = false;
 
             AspNetUser user = db.AspNetUsers.Find(userId);
@@ -727,10 +725,12 @@ namespace TextBooks.Controllers
 
         public ActionResult LeaveAComment(PublicProfileViewModel model,string fromUser, string toUsername )
         {
+            string senderFirstName = db.AspNetUsers.Where(x => x.UserName.Equals(fromUser)).Select(x => x.FirstName).FirstOrDefault();
+            string senderLastName = db.AspNetUsers.Where(x => x.UserName.Equals(fromUser)).Select(x => x.LastName).FirstOrDefault();
             Comment userComment = new Comment();
             userComment.CommentText = model.comment;
             userComment.Date = DateTime.Now;
-            userComment.Sender = fromUser;
+            userComment.Sender = senderFirstName + " "+senderLastName;
             userComment.Receiver = toUsername;
             db.Comments.Add(userComment);
             db.SaveChanges();
