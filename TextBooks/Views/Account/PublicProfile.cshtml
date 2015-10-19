@@ -28,7 +28,15 @@
 @using (Html.BeginForm("PublicProfile", "Account", new{ userId = Model.targetUser.Id, something = 0, bookId = Model.bookID}, FormMethod.Post))
 {
     @Html.AntiForgeryToken()
-    <div style="padding-right:14%;">
+
+    <div class="form-group">
+        <div class="panel panel-info col-xs-4" style="height:300px;">
+            <div class="panel-body" style="color:black;">
+                Basic panel example
+            </div>
+        </div>
+
+        <div style="padding-right:30%;">
             <h1>
                 @Html.DisplayFor(model => model.targetUser.FirstName)
                 @Html.DisplayFor(model => model.targetUser.LastName)
@@ -36,39 +44,42 @@
 
             <hr />
         </div>
-    
-        <div class="col-xs-offset-4">
+
+        <div class="col-xs-offset-5">
             <div>
                 <b>Rating:</b>
-                @if(Model.returned == true)
-        {
+                @if (Model.returned == true)
+                {
                     <span class="thumbs-up">
                         @Model.targetUser.ThumbsUp <button class="glyphicon glyphicon-thumbs-up " value="ThumbsUp" name="thumbs"></button>
                     </span>
                     <span class="thumbs-down">
                         @Model.targetUser.ThumbsDown <button class="glyphicon glyphicon-thumbs-up " value="ThumbsDown" name="thumbs"></button>
                     </span>
-        }
-        else
-        {
+                    
+                    <button class="btn btn-transparent" name="comment" value="Leave a comment"></button>
+                }
+                else
+                {
                     <span class="thumbs-up">
                         @Model.targetUser.ThumbsUp <span class="glyphicon glyphicon-thumbs-up" value="ThumbsUp" name="thumbs"></span>
                     </span>
                     <span class="thumbs-down">
                         @Model.targetUser.ThumbsDown <span class="glyphicon glyphicon-thumbs-down" value="ThumbsDown" name="thumbs"></span>
                     </span>
-        }
+                }
             </div>
 
             <br />
             <b>Email: </b> @Html.DisplayFor(model => model.targetUser.Email)<br />
             @if (Model.targetUser.PhoneNumber != null)
-    {
+            {
                 <b>Phone: </b>@Html.DisplayFor(model => model.targetUser.PhoneNumber)<br />
-    } else
-    {
+            }
+            else
+            {
                 <em>No phone number listed.</em><br />
-    }
+            }
             <br />
 
             <!-- Button trigger modal -->
@@ -85,24 +96,24 @@
                     </th>
                 </tr>
                 @if (Model.booksOwned == null)
-        {
+                {
                     <tr>
                         <td>
                             No books to show.
                         </td>
                     </tr>
-        }
-        else
-        {
-            foreach (var item in Model.booksOwned)
-            {
-                <tr>
-                    <td>
-                        @Html.ActionLink((item.Title), "Details", "Books", new { id = item.B_ID, username = item.Owner }, null)
-                    </td>
-                </tr>
-            }
-        }
+                }
+                else
+                {
+                    foreach (var item in Model.booksOwned)
+                    {
+                        <tr>
+                            <td>
+                                @Html.ActionLink((item.Title), "Details", "Books", new { id = item.B_ID, username = item.Owner }, null)
+                            </td>
+                        </tr>
+                    }
+                }
             </table>
             <br />
             <table>
@@ -112,28 +123,30 @@
                     </th>
                 </tr>
                 @if (Model.booksBorrowed == null)
-        {
+                {
                     <tr>
                         <td>
                             No books at the moment.
                         </td>
                     </tr>
-            }
-            else
-        {
-            foreach (var item in Model.booksBorrowed)
-            {
-                <tr>
-                    <td style="color:#0094ff">
-                        @Html.DisplayFor(model=>item.Title)
-                    </td>
-                </tr>
-            }
-        }
+                }
+                else
+                {
+                    foreach (var item in Model.booksBorrowed)
+                    {
+                        <tr>
+                            <td style="color:#0094ff">
+                                @Html.DisplayFor(model => item.Title)
+                            </td>
+                        </tr>
+                    }
+                }
             </table>
             <br />
         </div>
-        }
+    </div>
+}
+        
 
         <!-- Modal -->
         <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
