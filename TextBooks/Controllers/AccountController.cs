@@ -165,6 +165,22 @@ namespace TextBooks.Controllers
                                             select table).ToList();
                     if (result.booksBorrowed.Count == 0) result.booksBorrowed = null;
 
+                    var allComments = db.Comments.Where(x => x.Receiver.Equals(result.targetUser.UserName)).Select(x =>
+                        new Commenting { Comment = x.CommentText, Date = x.Date.ToString(), Sender = x.Sender }).ToList();
+
+                    if (allComments.Count == 0)
+                    {
+                        Commenting comments = new Commenting
+                        {
+                            Comment = "There are currently no comments....",
+                            Date = "",
+                            Sender=""
+                        };
+
+                        allComments.Add(comments);
+                    }
+
+                    result.AllComments = allComments;
                     // If we've already tried to send a contact email, save this into 
                     // the model so the view can display an appropriate message
                     switch (emailsent)
@@ -707,6 +723,19 @@ namespace TextBooks.Controllers
 
             ViewBag.ReturnUrl = returnUrl;
             return View(model);
+        }
+
+        public ActionResult LeaveAComment(PublicProfileViewModel model,string fromUser, string toUsername )
+        {
+            Comment userComment = new Comment();
+            userComment.CommentText = model.comment;
+            userComment.Date = DateTime.Now;
+            userComment.Sender = fromUser;
+            userComment.Receiver = toUsername;
+            db.Comments.Add(userComment);
+            db.SaveChanges();
+
+            return RedirectToAction("PublicProfile", "Account", new { username = toUsername, emailsent = "", returnedBorrower = true, bookId = 0 });
         }
 
         //

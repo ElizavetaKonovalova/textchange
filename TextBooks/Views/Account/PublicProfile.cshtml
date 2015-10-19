@@ -30,9 +30,23 @@
         @Html.AntiForgeryToken()
 
         <div class="form-group">
-            <div class="panel panel-info col-xs-4" style="height:300px;">
+            <div class="panel panel-transparent col-xs-4" style="height:400px;">
                 <div class="panel-body" style="color:black;">
-                    Basic panel example
+                    @foreach (var comment in Model.AllComments)
+                    {
+                        <div class="jumbotron" style="background-color:#55b259;">
+
+                            <div style="font:bold 14px arial;">
+                                @Html.DisplayFor(model => comment.Comment)
+                            </div>
+                            <hr/>
+                            <div style="font:bold 12px arial;">
+                                Date: @Html.DisplayFor(model => comment.Date)
+                                <br/>
+                                From: @Html.DisplayFor(model => comment.Sender)
+                            </div>
+                        </div>
+                    }
                 </div>
             </div>
 
@@ -57,7 +71,7 @@
                             @Model.targetUser.ThumbsDown <button class="glyphicon glyphicon-thumbs-up " value="ThumbsDown" name="thumbs"></button>
                         </span>
                         <div style="padding-top:10px;">
-                            <button type="button" class="btn btn-default btn-transparent" data-toggle="modal" data-target="#commentsModal">
+                            <button type="button" class="btn btn-default btn-danger" data-toggle="modal" data-target="#commentsModal">
                                 Leave a comment
                             </button>
                         </div>
@@ -207,17 +221,17 @@
                     <h4 class="modal-title modal-text" id="commentsModalLabel">Contact @toUserFullName</h4>
                 </div>
                 <div class="modal-body">
-                    @using (Html.BeginForm("ContactUser", "Account", new { toUsername = Model.targetUser.UserName }, FormMethod.Post, new { id = "form" }))
+                    @using (Html.BeginForm("LeaveAComment", "Account", new { fromUser = User.Identity.Name, toUsername = Model.targetUser.UserName }, FormMethod.Post, new { id = "form" }))
                     {
                         <p class="modal-text">Hi @Model.targetUser.FirstName,</p>
                         <!--This is where the user types in their message-->
-                        @Html.TextAreaFor(model => model.contactEmail.message,
+                        @Html.TextAreaFor(model => model.comment,
                             new
                             {
                                 @class = "form-control col-md-12",
                                 @style = "min-width: 100%; resize:none; max-height:80px;",
                                 @placeholder = "Type your comments here.",
-                                @rows = "8"
+                                @rows = "4"
                             })
                     }
                 </div>
