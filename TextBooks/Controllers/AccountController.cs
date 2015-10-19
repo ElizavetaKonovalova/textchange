@@ -463,6 +463,9 @@ namespace TextBooks.Controllers
                 NetworkCredential credentials = new NetworkCredential("ifb299", "IFB299Password");
                 smtpClient.Credentials = credentials;
 
+                string templatesJson = "{\"filters\": {\"templates\": {\"settings\": {\"enable\": 1, \"template_id\": \"1f7bf5b2-1ad2-4c63-b0b4-b9898905ea4d\"}}}}";
+                message.Headers.Add("X-SMTPAPI", templatesJson);
+
                 // Send the email
                 smtpClient.Send(message);
             }
