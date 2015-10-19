@@ -2,13 +2,13 @@
 
 @{
     ViewBag.Title = "Requests";
+    
 }
         <h4>Requests</h4>
         <hr />
         <div class ="col-offset-md-10" style="margin:5px;">
             @Html.ActionLink("Back to My Account", "Index", null, new { @class = "btn btn-default btn-transparent" })
         </div>
-        
         <table class=" table table-hover">
             <tr>
                 <th class="col-xs-6">
@@ -37,21 +37,23 @@
                     }else
                     {
                     <div class="form-group">
-                       @using (Html.BeginForm("RequestsToBorrow", "Manage", new {bookValue = messages.bookID, borrower = messages.borrower, requestID = messages.requestID }, FormMethod.Post))
+                       @using (Html.BeginForm("RequestsToBorrow", "Manage", new { bookValue = messages.bookID, borrower = messages.borrower, requestID = messages.requestID }, FormMethod.Post, new { id = "form"}))
                        {
                              @Html.AntiForgeryToken()
                            if (messages.message.Contains("Please, rate"))
                            {
-                             <button name="responce" type="submit" id="accept" value="Rate" class="btn btn-default btn-transparent">Rate</button>
+                             <button name="responce" type="submit" id="rate" value="Rate" class="btn btn-default btn-transparent">Rate</button>
                            }
                            else if (messages.message.Equals(""))
                            {
-                               
+
                            }
                            else
                            {
-                            <button name="responce" type="submit" id="accept" value="Accept" class="btn btn-default btn-transparent">Accept</button>
-                            <button name="responce" type="submit" id="decline" value="Decline" class="btn btn-default btn-transparent">Decline</button>
+                            <button name="responce" type="submit" id="accept" value="Accept" class="btn btn-default btn-transparent" onclick="this.disabled = 'true';
+                                document.getelementbyid('decline').disabled = true;">Accept</button>
+                            <button name="responce" type="submit" id="decline" value="Decline" class="btn btn-default btn-transparent" onclick="this.disabled = 'true';
+                                document.getElementById('accept').disabled = true;">Decline</button>
                            }
                        }
                     </div>

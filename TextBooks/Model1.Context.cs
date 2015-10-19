@@ -32,5 +32,6 @@ namespace TextBooks
         public virtual DbSet<AspNetUser> AspNetUsers { get; set; }
         public virtual DbSet<Book> Books { get; set; }
         public virtual DbSet<Request> Requests { get; set; }
+        public virtual DbSet<Comment> Comments { get; set; }
     }
 }
