@@ -96,7 +96,11 @@ namespace TextBooks.Controllers
             return View();
         }
 
-        // Get list of books for Autocomplete of Create Books view
+        // ActionResult GetAutocompleteList(string term)
+        // This method gets the list of books for Autocomplete of the
+        // "Create Books" form. It includes lists of titles, authors, ISBNs,
+        // and Years of books. This data is attained by querying the Google
+        // Books API with the private GoogleBooksQuery() method.
         public ActionResult GetAutocompleteList(string term)
         {
             // Check search term exists
@@ -109,7 +113,10 @@ namespace TextBooks.Controllers
             return Json(dataLists, JsonRequestBehavior.AllowGet);
         }
 
-        // Extract required data from Google Books API Volumes data structure
+        // List<string>[] ExtraBookData(Volumes volumes)
+        // This method extracts the required data from Google Books API Volumes
+        // data structure, for use in the Create view. In the case that this method
+        // fails, it will return a list array of empty lists.
         List<string>[] ExtractBookData(Google.Apis.Books.v1.Data.Volumes volumes)
         {
             // Check volumes object is valid
@@ -157,7 +164,10 @@ namespace TextBooks.Controllers
             return resultsObj;
         }
 
-        // Query the GoogleBooksAPI for volumes relating to searchTerm
+        // Volumes GoogleBooksQuery(string searchTerm)
+        // This method queries the GoogleBooksAPI for volumes relating to searchTerm,
+        // and returns the resulting Volumes object. In the case that the query fails,
+        // this method will return null.
         Google.Apis.Books.v1.Data.Volumes GoogleBooksQuery(string searchTerm)
         {
             // Create a service object for the Google Books API
