@@ -570,17 +570,7 @@ namespace TextBooks.Controllers
                         bookID = x.BookId, 
                         borrower = x.RequestFrom,
                         requestID = x.Id
-                    });
-            
-            if (newRequest.ToList().Count() < 1 )
-            {
-                newRequest = db.Requests.Select(
-                    x => new RequestsToBorrowView
-                    {
-                        message = "",
-                        sender = ""
-                    });
-            }
+                    }).ToList();
 
             request = new RequestsToBorrowView
             {
@@ -604,6 +594,8 @@ namespace TextBooks.Controllers
 
                 if (responce.Equals("Rate"))
                 {
+                    setRequestID(requestID);
+
                     return RedirectToAction("PublicProfile", "Account", new
                     {
                         username = borrow.UserName,
