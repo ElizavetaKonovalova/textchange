@@ -750,6 +750,39 @@ namespace TextBooks.Controllers
             return View(returnView);
         }
 
+        private bool Delete(string userName)
+        {
+            bool deleted = false;
+
+            var findUser = db.AspNetUsers.Where(x=>x.UserName.Equals(userName)).Select(x=>x).FirstOrDefault();
+            var findUploadedBook = db.Books.Where(x => x.Owner.Equals(userName)).Select(x => x).ToList();
+            var findBorrowedBook = db.Books.Where(x => x.BrwdBy.Equals(userName)).Select(x => x).ToList();
+
+            if (!findUser.UserName.Equals("ifb299books"))
+            {
+                if (findUploadedBook.Count == 0)
+                {
+                    if (findBorrowedBook.Count == 0)
+                    {
+                        var deleteUser = db.AspNetUsers.Remove(findUser);
+                        db.SaveChanges();
+                        deleted = true;
+                    }
+                }
+            }
+            return deleted;
+        }
+
+        public ActionResult DeleteAccount(string userName)
+        {
+            if (Delete(userName))
+            {
+                LogOff();
+            }
+            
+            return Redirect("../Home/Index");
+        }
+
         //
         //POST: /Account/ViewAccounts
         [HttpPost]
@@ -757,17 +790,7 @@ namespace TextBooks.Controllers
         public ActionResult ViewAccounts(ViewAccounts model, string id)
         {
             var findUser = db.AspNetUsers.Find(id);
-            var findBook = db.Books.Where(x => x.Owner.Equals(findUser.UserName)).Select(x => x);
-
-            if (!findUser.UserName.Equals("ifb299books")) 
-            {
-                var deleteUser = db.AspNetUsers.Remove(findUser);
-                if (findBook != null) 
-                {
-                    var deleteBook = db.Books.RemoveRange(findBook);
-                }
-                db.SaveChanges();
-            }
+            Delete(findUser.UserName);
 
             model = new ViewAccounts
             {
