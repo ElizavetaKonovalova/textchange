@@ -342,7 +342,7 @@ namespace TextBooks.Controllers
                 if (email != null && email.Contains('@'))
                 {
                     string addressSuffix = email.Split('@')[1];
-                    if (!addressSuffix.Equals("connect.qut.edu.au") || email == "ifb299books@gmail.com")
+                    if (!addressSuffix.Equals("connect.qut.edu.au") && email != "ifb299books@gmail.com")
                     {
                         ModelState.AddModelError("", "Please use valid email (@connect.qut.edu.au)");
                         failed = true;
@@ -462,6 +462,9 @@ namespace TextBooks.Controllers
                 SmtpClient smtpClient = new SmtpClient("smtp.sendgrid.net", Convert.ToInt32(587));
                 NetworkCredential credentials = new NetworkCredential("ifb299", "IFB299Password");
                 smtpClient.Credentials = credentials;
+
+                string templatesJson = "{\"filters\": {\"templates\": {\"settings\": {\"enable\": 1, \"template_id\": \"1f7bf5b2-1ad2-4c63-b0b4-b9898905ea4d\"}}}}";
+                message.Headers.Add("X-SMTPAPI", templatesJson);
 
                 // Send the email
                 smtpClient.Send(message);
@@ -957,7 +960,7 @@ namespace TextBooks.Controllers
             if (mailMessage.message == null)
             {
                 // No email content to send, don't send it empty and let the view know it wasn't sent.
-                return RedirectToAction("PublicProfile", "Account", new { username = toUsername, emailsent = "error" });
+                return RedirectToAction("PublicProfile", "Account", new { username = toUsername, emailsent = "success", returnedborrower = false, bookID = 0 });
             }
 
             // Get the currently logged in user
@@ -1002,7 +1005,7 @@ namespace TextBooks.Controllers
                 bool result = shared.SendEmailMessage(mailMessage);
                 if (result)
                 {
-                    return RedirectToAction("PublicProfile", "Account", new { username = toUsername, emailsent = "success" });
+                    return RedirectToAction("PublicProfile", "Account", new { username = toUsername, emailsent = "success", returnedborrower = false, bookID = 0 });
                 }
             }
 

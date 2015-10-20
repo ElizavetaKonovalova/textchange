@@ -19,15 +19,18 @@ namespace TextBooks.Controllers
 
         public ActionResult Index()
         {
-            return View(db.Books.Where(x => x.BrwdBy.Equals(null)).OrderBy(x => x.Title).ToList());
+            List<Book> result = (from table in db.Books
+                                 select table).OrderBy(x => x.Title).ToList();
+            return View(result);
         }
 
         [HttpPost]
         public ActionResult Index(string searchQuery)
         {
+            var result = new List<Book>();
             if (searchQuery != "" && searchQuery != null)
             {
-                List<Book> result = (from table in db.Books
+                result = (from table in db.Books
                                      where ((
                                      table.ISBN.Contains(searchQuery) ||
                                      table.Title.Contains(searchQuery) ||
@@ -42,7 +45,9 @@ namespace TextBooks.Controllers
                     return View(result);
                 }
             }
-            return View(db.Books.Where(x=>x.BrwdBy.Equals(null)).OrderBy(x => x.Title).ToList());
+            result = (from table in db.Books
+                      select table).OrderBy(x => x.Title).ToList();
+            return View(result);
         }
 
         //Code that checks the validity of various fields relating to book adding/editing.
@@ -396,8 +401,7 @@ namespace TextBooks.Controllers
                             + bookDetails.Title + "<br/> <strong>Year:</strong> " + bookDetails.Year
                             + "<br/><strong> Author: </strong>" + bookDetails.Author + "<br/><br/> on Texchange:<br /><br /><em>"
                             + "Hi " + toUser.FirstName + ",<br/>" + mailMessage.message
-                            + "</em><br /><br />" + "You may Accept or Decline the request <a href =\"" + Url.Action("Accepted", "Manage",
-                            new { bookValue = bookDetails.B_ID, borrower = fromUsername, requestID = request.Id }, protocol: Request.Url.Scheme)
+                            + "</em><br /><br />" + "You may Accept or Decline the request <a href =\"" + Url.Action("RequestsToBorrow", "Manage", null, "http")
                             + "\">here</a>.<br/><b>You can reply to this email to contact "
                             + fromUser.FirstName + ".</b><br /><br />" + "Kind Regards,<br />The Texchange Team";
 
