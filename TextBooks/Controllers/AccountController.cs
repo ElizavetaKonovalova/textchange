@@ -937,7 +937,7 @@ namespace TextBooks.Controllers
             if (mailMessage.message == null)
             {
                 // No email content to send, don't send it empty and let the view know it wasn't sent.
-                return RedirectToAction("PublicProfile", "Account", new { username = toUsername, emailsent = "error" });
+                return RedirectToAction("PublicProfile", "Account", new { username = toUsername, emailsent = "success", returnedborrower = false, bookID = 0 });
             }
 
             // Get the currently logged in user
@@ -982,7 +982,7 @@ namespace TextBooks.Controllers
                 bool result = shared.SendEmailMessage(mailMessage);
                 if (result)
                 {
-                    return RedirectToAction("PublicProfile", "Account", new { username = toUsername, emailsent = "success" });
+                    return RedirectToAction("PublicProfile", "Account", new { username = toUsername, emailsent = "success", returnedborrower = false, bookID = 0 });
                 }
             }
 
