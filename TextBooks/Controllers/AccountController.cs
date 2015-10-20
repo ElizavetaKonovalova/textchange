@@ -767,7 +767,19 @@ namespace TextBooks.Controllers
                 {
                     if (findBorrowedBook.Count == 0)
                     {
-                        var deleteUser = db.AspNetUsers.Remove(findUser);
+                        var deleteComments = db.Comments.Where(x => x.Receiver.Equals(findUser.UserName)).Select(x=>x).ToList();
+                        foreach (var comment in deleteComments)
+                        {
+                            db.Comments.Remove(comment);
+                        }
+
+                        var deleteRequests = db.Requests.Where(x => x.UserID.Equals(findUser.UserName)).Select(x => x).ToList();
+                        foreach (var request in deleteRequests)
+                        {
+                            db.Requests.Remove(request);
+                        }
+
+                        db.AspNetUsers.Remove(findUser);
                         db.SaveChanges();
                         deleted = true;
                     }
