@@ -342,7 +342,7 @@ namespace TextBooks.Controllers
                 if (email != null && email.Contains('@'))
                 {
                     string addressSuffix = email.Split('@')[1];
-                    if (!addressSuffix.Equals("connect.qut.edu.au") || email == "ifb299books@gmail.com")
+                    if (!addressSuffix.Equals("connect.qut.edu.au") && email != "ifb299books@gmail.com")
                     {
                         ModelState.AddModelError("", "Please use valid email (@connect.qut.edu.au)");
                         failed = true;
