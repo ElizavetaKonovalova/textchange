@@ -48,8 +48,8 @@
                 @Html.DisplayFor(modelItem => item.Year)
             </td>
             <td>
-                @Html.ActionLink("Edit", "../Books/Edit", new { id = item.B_ID }, new { @class = "btn btn-default" })
-                @Html.ActionLink("Delete", "../Books/Delete", "Books", new { id = item.B_ID }, new { @class = "btn btn-default" })
+                @Html.ActionLink("Edit", "../Books/Edit", new { id = item.B_ID }, new { @class = "btn btn-default btn-transparent" })
+                @Html.ActionLink("Delete", "../Books/Delete", "Books", new { id = item.B_ID }, new { @class = "btn btn-default btn-transparent" })
             </td>
         </tr>
     }

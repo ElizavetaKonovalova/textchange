@@ -291,8 +291,12 @@ namespace TextBooks.Controllers
         public ActionResult DeleteConfirmed(int id)
         {
             Book book = db.Books.Find(id);
-            db.Books.Remove(book);
-            db.SaveChanges();
+            if (book.BrwdBy.Equals(null))
+            {
+                db.Books.Remove(book);
+                db.SaveChanges();
+            }
+            
             return RedirectToAction("../Manage/ViewMyBooks");
         }
 
