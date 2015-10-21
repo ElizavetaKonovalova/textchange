@@ -29,8 +29,8 @@
     {
         @Html.AntiForgeryToken()
         <div class="form-group">
-            <div class="panel panel-transparent col-xs-4" style="height:400px;">
-                <div class="panel-body" style="color:black;">
+            <div class="panel panel-transparent col-xs-4" style="height:400px; background-color:rgba(1,1,1,0)!important; overflow:auto!important">
+                <div class="panel-body" style="color:black; background-color:rgba(1,1,1,0)!important;">
                     @foreach (var comment in Model.AllComments)
                     {
                         <div class="jumbotron" style="background-color:rgba(100,100,100,0.5);">

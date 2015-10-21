@@ -963,7 +963,6 @@ namespace TextBooks.Controllers
         }
 
         [HttpPost]
-        [ValidateAntiForgeryToken]
         public ActionResult ContactUser(PublicProfileViewModel model, string toUsername)
         {
 
