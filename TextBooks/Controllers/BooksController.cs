@@ -19,8 +19,7 @@ namespace TextBooks.Controllers
 
         public ActionResult Index()
         {
-            List<Book> result = (from table in db.Books
-                                 select table).OrderBy(x => x.Title).ToList();
+            List<Book> result = db.Books.Where(x=>x.BrwdBy == null).OrderBy(x => x.Title).ToList();
             return View(result);
         }
 
@@ -37,7 +36,7 @@ namespace TextBooks.Controllers
                                      table.Author.Contains(searchQuery) ||
                                      table.Edition.Contains(searchQuery) ||
                                      table.Year.Contains(searchQuery)) && 
-                                     table.BrwdBy.Equals(null)
+                                     table.BrwdBy == null
                                      )
                                      select table).OrderBy(x => x.Title).ToList();
                 if (result != null)
@@ -45,8 +44,7 @@ namespace TextBooks.Controllers
                     return View(result);
                 }
             }
-            result = (from table in db.Books
-                      select table).OrderBy(x => x.Title).ToList();
+            result = db.Books.Where(x=>x.BrwdBy == null).OrderBy(x => x.Title).ToList();
             return View(result);
         }
 

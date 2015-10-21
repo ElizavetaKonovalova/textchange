@@ -726,7 +726,7 @@ namespace TextBooks.Controllers
             return View(model);
         }
 
-        public ActionResult LeaveAComment(PublicProfileViewModel model,string fromUser, string toUsername )
+        public ActionResult LeaveAComment(PublicProfileViewModel model,string fromUser, string toUsername, int bookID )
         {
             string senderFirstName = db.AspNetUsers.Where(x => x.UserName.Equals(fromUser)).Select(x => x.FirstName).FirstOrDefault();
             string senderLastName = db.AspNetUsers.Where(x => x.UserName.Equals(fromUser)).Select(x => x.LastName).FirstOrDefault();
@@ -738,7 +738,7 @@ namespace TextBooks.Controllers
             db.Comments.Add(userComment);
             db.SaveChanges();
 
-            return RedirectToAction("PublicProfile", "Account", new { username = toUsername, emailsent = "", returnedBorrower = true, bookId = 0 });
+            return RedirectToAction("PublicProfile", "Account", new { username = toUsername, emailsent = "", returnedBorrower = true, bookId = bookID });
         }
 
         //
@@ -963,7 +963,7 @@ namespace TextBooks.Controllers
         }
 
         [HttpPost]
-        //[ValidateAntiForgeryToken]
+        [ValidateAntiForgeryToken]
         public ActionResult ContactUser(PublicProfileViewModel model, string toUsername)
         {
 

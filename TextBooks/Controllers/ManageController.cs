@@ -399,7 +399,8 @@ namespace TextBooks.Controllers
 
             else
             {
-                int rid = RateLoaner(db.Books.Find(id));
+                var bookS = db.Books.Find(id);
+                int rid = RateLoaner(bookS);
                 setRequestID(rid);
                 ViewMyBooksBorrower(id, rated);
                 return Redirect("../ViewMyBooksBorrower");

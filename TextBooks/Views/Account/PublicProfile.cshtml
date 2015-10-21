@@ -25,10 +25,9 @@
         }
     }
 
-    @using (Html.BeginForm("PublicProfile", "Account", new { userId = Model.targetUser.Id, something = 0, bookId = Model.bookID }, FormMethod.Post))
+@using (Html.BeginForm("PublicProfile", "Account", new { userId = Model.targetUser.Id, something = 0, bookId = Model.bookID }, FormMethod.Post))
     {
-        @Html.AntiForgeryToken()
-
+    @Html.AntiForgeryToken()
         <div class="form-group">
             <div class="panel panel-transparent col-xs-4" style="height:400px;">
                 <div class="panel-body" style="color:black;">
@@ -100,7 +99,7 @@
                 <br />
 
                 <!-- Button trigger modal -->
-                <button type="button" class="btn btn-default btn-transparent" data-toggle="modal" data-target="#myModal">
+                <button type="button" class="btn btn-default btn-transparent" data-toggle="modal" data-target="#userModal">
                     Send Email
                 </button>
                 @Html.ActionLink("Back to books", "../Books", "Index", new { @class = "btn btn-default btn-transparent" })
@@ -166,7 +165,7 @@
 
 
     <!-- Modal -->
-    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal fade" id="userModal" tabindex="-1" role="dialog" aria-labelledby="userModalLabel">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
@@ -175,10 +174,11 @@
                     @{
                         string toUserFullName = Model.targetUser.FirstName + " " + Model.targetUser.LastName;
                     }
-                    <h4 class="modal-title modal-text" id="myModalLabel">Contact @toUserFullName</h4>
+                    <h4 class="modal-title modal-text" id="userModalLabel">Contact @toUserFullName</h4>
                 </div>
                 <div class="modal-body">
-                    @using (Html.BeginForm("ContactUser", "Account", new { toUsername = Model.targetUser.UserName }, FormMethod.Post, new { id = "modal-form" }))
+                    @using (Html.BeginForm("ContactUser", "Account", new { toUsername = Model.targetUser.UserName }, FormMethod.Post, 
+                        new { id = "modal-form" }))
                     {
                         <p class="modal-text">Hi @Model.targetUser.FirstName,</p>
                         <!--This is where the user types in their message-->
@@ -196,18 +196,19 @@
                     <!--Cancel and submit buttons. Not sure if it should be a button or just input-->
                     <div class="col-xs-12" style="padding-top:10px;">
                         <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-                        <input id="btn-submit" class="btn btn-primary" type="submit" value="Send Message" />
+                        <input id="btn-submit-user" class="btn btn-primary" type="submit" value="Send Message" />
                     </div>
-                        <script type="text/javascript">
-                            document.getElementById("btn-submit").onclick = function () {
-                                var form = document.getElementById("modal-form");
-                                form.submit();
-                            }
-                        </script>
-                    </div>
+                    <script type="text/javascript">
+                        document.getElementById("btn-submit-user").onclick = function () {
+                            var formUser = document.getElementById("modal-form");
+                            formUser.submit();
+                        }
+                    </script>
+                </div>
             </div>
         </div>
     </div>
+
     <br />
 
     <br />
@@ -218,10 +219,11 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                    <h4 class="modal-title modal-text" id="commentsModalLabel">Contact @toUserFullName</h4>
+                    <h4 class="modal-title modal-text" id="commentsModalLabel">Leave a comment to @toUserFullName</h4>
                 </div>
                 <div class="modal-body">
-                    @using (Html.BeginForm("LeaveAComment", "Account", new { fromUser = User.Identity.Name, toUsername = Model.targetUser.UserName }, FormMethod.Post, new { id = "form" }))
+                    @using (Html.BeginForm("LeaveAComment", "Account", new { fromUser = User.Identity.Name, toUsername = Model.targetUser.UserName, 
+                        bookID = Model.bookID }, FormMethod.Post, new { id = "form" }))
                     {
                         <p class="modal-text">Hi @Model.targetUser.FirstName,</p>
                         <!--This is where the user types in their message-->
