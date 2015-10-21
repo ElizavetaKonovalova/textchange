@@ -27,9 +27,13 @@
                 }
 
                 <li>
-                    @Html.ActionLink(
-     "Hi " + AccountController.GetFirstNameForUsername(User.Identity.GetUserName()) + "!",
-     "PublicProfile", "Account", routeValues: new { username = User.Identity.GetUserName()}, htmlAttributes: new { title = "Manage" })
+                    @{
+                         var greetingName = AccountController.GetFirstNameForUsername(User.Identity.GetUserName());
+                         var fullName = User.Identity.Name;
+                    }
+
+                    @Html.ActionLink("Hi " + greetingName + "!", "PublicProfile", "Account", new { username = fullName, emailsent = "", returnedBorrower = false, bookId = 0 }, null)
+                    
                 </li>
                 <li>
                     <a href="@Url.Action("RequestsToBorrow", "Manage")">

@@ -5008,23 +5008,19 @@ a.badge:focus {
   margin-left: 3px;
 }
 .jumbotron {
-  padding-top: 30px;
-  padding-bottom: 30px;
-  margin-bottom: 30px;
-  color: inherit;
-  background-color: #eee;
+  color: #337ab7;
+  background-color: #337ab7;
 }
 .jumbotron h1,
 .jumbotron .h1 {
   color: inherit;
 }
 .jumbotron p {
-  margin-bottom: 15px;
   font-size: 21px;
   font-weight: 200;
 }
 .jumbotron > hr {
-  border-top-color: #d5d5d5;
+  border-top-color: #337ab7;
 }
 .container .jumbotron,
 .container-fluid .jumbotron {
@@ -5499,7 +5495,7 @@ button.list-group-item-danger.active:focus {
 }
 .panel {
   margin-bottom: 20px;
-  background-color: #fff;
+  background: rgba(122, 130, 136, 0.2)!important;
   border: 1px solid transparent;
   border-radius: 4px;
   -webkit-box-shadow: 0 1px 1px rgba(0, 0, 0, .05);
@@ -5507,7 +5503,23 @@ button.list-group-item-danger.active:focus {
 }
 .panel-body {
   padding: 15px;
+  height:370px;
+  overflow-y:scroll;
+  background: rgba(122, 130, 136, 0.2)!important;
 }
+
+.panel-transparent {
+        background: none;
+    }
+
+ .panel-transparent .panel-heading{
+        background: rgba(122, 130, 136, 0.2)!important;
+    }
+
+    .panel-transparent .panel-body{
+        background: rgba(46, 51, 56, 0.2)!important;
+    }
+
 .panel-heading {
   padding: 10px 15px;
   border-bottom: 1px solid transparent;
@@ -5751,7 +5763,7 @@ button.list-group-item-danger.active:focus {
   border-bottom-color: #ddd;
 }
 .panel-primary {
-  border-color: #337ab7;
+  background: none;
 }
 .panel-primary > .panel-heading {
   color: #fff;

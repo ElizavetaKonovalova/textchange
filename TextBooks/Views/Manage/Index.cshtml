@@ -6,7 +6,7 @@
 <h2 style="text-align:center;">@ViewBag.Title</h2>
 
 <p class="text-success">@ViewBag.StatusMessage</p>
-<div>
+<div class="container">
     <h4 style="text-align:center;">Change your account settings</h4>
     <table class="table">
         <tr>
@@ -19,11 +19,14 @@
             <th style="text-align:center">
                 Phone
             </th>
+            <th style="text-align:center">
+                Delete
+            </th>
         </tr>
         <tr>
-            <td class="col-xs-3">
-            @if (Model.HasPassword)
-            {
+            <td class="col-xs-2">
+                @if (Model.HasPassword)
+                {
                     @Html.ActionLink("Change your password", "ChangePassword", null, new { @class = "btn btn-default btn-transparent" })
                 }
                 else
@@ -31,7 +34,7 @@
                     @Html.ActionLink("Create", "SetPassword", null, new { @class = "btn btn-default btn-transparent" })
                 }
             </td>
-            <td class="col-xs-4">
+            <td class="col-xs-5">
                 @Html.ActionLink("My books", "ViewMyBooks", null, new { @class = "btn btn-default btn-transparent" })
                 @Html.ActionLink("Borrowed from me", "ViewMyBooksBorrowed", null, new { @class = "btn btn-default btn-transparent" })
                 @Html.ActionLink("Borrowed by me", "ViewMyBooksBorrower", null, new { @class = "btn btn-default btn-transparent" })
@@ -47,48 +50,15 @@
                 }
                 else
                 {
-                    @Html.ActionLink("Add", "AddPhoneNumber", null, new { @class = "btn btn-default btn-transparent" })
+                    <div style="">
+                        @Html.ActionLink("Add", "AddPhoneNumber", null, new { @class = "btn btn-default btn-transparent" })
+                    </div>
                 }
             </td>
+            <td class="col-xs-1">
+                @Html.ActionLink("Delete Account", "DeleteAccount", "Account", new { userName = User.Identity.Name }, new { @class = "btn btn-default btn-transparent" })
+            </td>
         </tr>
-        @*
-            Phone Numbers can used as a second factor of verification in a two-factor authentication system.
-             
-             See <a href="http://go.microsoft.com/fwlink/?LinkId=403804">this article</a>
-                for details on setting up this ASP.NET application to support two-factor authentication using SMS.
-             
-             Uncomment the following block after you have set up two-factor authentication
-        *@
-        @*  
-            <dt>Phone Number:</dt>
-            <dd>
-               
-            </dd>
-        *@
-            @*<p>
-                There are no two-factor authentication providers configured. See <a href="http://go.microsoft.com/fwlink/?LinkId=403804">this article</a>
-                for details on setting up this ASP.NET application to support two-factor authentication.
-            </p>*@
-            @*@if (Model.TwoFactor)
-                {
-                    using (Html.BeginForm("DisableTwoFactorAuthentication", "Manage", FormMethod.Post, new { @class = "form-horizontal", role = "form" }))
-                    {
-                        @Html.AntiForgeryToken()
-                        <text>Enabled
-                        <input type="submit" value="Disable" class="btn btn-link" />
-                        </text>
-                    }
-                }
-                else
-                {
-                    using (Html.BeginForm("EnableTwoFactorAuthentication", "Manage", FormMethod.Post, new { @class = "form-horizontal", role = "form" }))
-                    {
-                        @Html.AntiForgeryToken()
-                        <text>Disabled
-                        <input type="submit" value="Enable" class="btn btn-link" />
-                        </text>
-                    }
-                }*@
     </table>
 </div>
 

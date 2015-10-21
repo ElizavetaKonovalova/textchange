@@ -21,7 +21,8 @@ namespace TextBooks.Controllers
         private IFB299Entities db = new IFB299Entities();
         private ApplicationSignInManager _signInManager;
         private ApplicationUserManager _userManager;
-        private SharedMethods shared;
+        private SharedMethods shared = new SharedMethods();
+        private static int requestID;
 
         public ManageController()
         {
@@ -370,8 +371,63 @@ namespace TextBooks.Controllers
             return View(model);
         }
 
+        private void setRequestID(int id)
+        {
+            requestID = id;
+        }
+
+        private int getRequestID()
+        {
+            return requestID;
+        }
+
+        public ActionResult RateBorrower(int id, bool rated)
+        {
+            if (id == 0)
+            {
+                var requests = db.Requests.Find(getRequestID());
+
+                if (requests != null)
+                {
+                    //Remove the found request from the database.
+                    db.Requests.Remove(requests);
+                    db.SaveChanges();
+                }
+
+                return Redirect("../RequestsToBorrow");
+            }
+
+            else
+            {
+                int rid = RateLoaner(db.Books.Find(id));
+                setRequestID(rid);
+                ViewMyBooksBorrower(id, rated);
+                return Redirect("../ViewMyBooksBorrower");
+            }
+        }
+
+        public int RateLoaner( Book book)
+        {
+            shared = new SharedMethods();
+            Request request = new Request();
+            //Get owner information of the book from the database.
+            AspNetUser owner = db.AspNetUsers.Where(x => x.UserName == book.Owner)
+                .Select(x => x).FirstOrDefault();
+
+            //Get borrower information of the book from the database.
+            AspNetUser borrow = db.AspNetUsers.Where(x => x.UserName == book.BrwdBy)
+                .Select(x => x).FirstOrDefault();
+
+            request = shared.SendRequest(borrow.UserName, owner.Id, "Please, rate "+borrow.FirstName+"!", 0);
+
+            int requestID = request.Id;
+
+            return requestID;
+        }
+
         //
         //GET: /Manage/ViewMyBooksBorrower/
+        [HttpGet]
         public ActionResult ViewMyBooksBorrower()
         {
             string currentLoggedInUser = null;
@@ -396,9 +452,12 @@ namespace TextBooks.Controllers
                              Borrower = book.BrwdBy
                          }).AsEnumerable();
 
+            AspNetUser target = db.AspNetUsers.Where(x=>x.UserName == user).Select(x=>x).FirstOrDefault();
+
             ViewMyBooks model = new ViewMyBooks
             {
-                BookDetails = books
+                BookDetails = books,
+                targetUser = target
             };
 
             return model;
@@ -408,13 +467,13 @@ namespace TextBooks.Controllers
         //POST: /Manage/ViewMyBooksBorrower/
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult ViewMyBooksBorrower(int returnBtn)
+        public ActionResult ViewMyBooksBorrower(int id, bool rated)
         {
             string currentLoggedInUser = null;
             if (ClaimsPrincipal.Current.Identity.IsAuthenticated)
                 currentLoggedInUser = ClaimsPrincipal.Current.Identity.Name;
 
-             var book = db.Books.Find(returnBtn);
+            var book = db.Books.Find(id);
 
             //Get owner information of the book from the database.
             AspNetUser owner = db.AspNetUsers.Where(x => x.UserName == book.Owner )
@@ -424,32 +483,41 @@ namespace TextBooks.Controllers
             AspNetUser borrow = db.AspNetUsers.Where(x => x.UserName == book.BrwdBy)
                 .Select(x => x).FirstOrDefault();
 
-            Email confirmation = new Email();
-            shared = new SharedMethods();
-            AccountController account = new AccountController();
-
-            confirmation.fromAddress = borrow.Email;
-            confirmation.fromName = borrow.FirstName;
-            confirmation.toAddress = owner.Email;
-            confirmation.toName = owner.FirstName;
-            confirmation.subject = "Texchange: Book returned";
-
-            if (book.BrwdBy.Equals(currentLoggedInUser))
+            if(rated == true)
             {
-                book.BrwdBy = null;
-                db.SaveChanges();
+                Email confirmation = new Email();
+                shared = new SharedMethods();
+                AccountController account = new AccountController();
+
+                confirmation.fromAddress = borrow.Email;
+                confirmation.fromName = borrow.FirstName;
+                confirmation.toAddress = owner.Email;
+                confirmation.toName = owner.FirstName;
+                confirmation.subject = "Texchange: Book returned";
+
+                if (book.BrwdBy.Equals(currentLoggedInUser))
+                {
+                    book.BrwdBy = null;
+                    db.SaveChanges();
+                }
+
+                confirmation.message = "Hello " + owner.FirstName + " " + owner.LastName
+                + ",<br /><br/> Your book has been returned by " + borrow.FirstName + " " + borrow.LastName
+                + "  :<br/><br/><b>Title:</b> " + book.Title + "<br/><b>Author</b>: "
+                + book.Author + "<br/><b>Year:</b> " + book.Year + "<br/><br/>Do you think there was a <b>mistake</b>??<br/>" +
+                "Contact admin ifb299books@gmail.com <br/><br/>Kind regards,<br/><b>Texchange</b>.";
+
+                //Send request reply to the borrower.
+                bool sent = shared.SendEmailMessage(confirmation);
+
+                if (sent)
+                {
+                    return RedirectToAction("ViewMyBooksBorrower");
+                }
             }
 
-            confirmation.message = "Hello " + owner.FirstName + " " + owner.LastName
-            + ",<br /><br/> Your book has been returned by " + borrow.FirstName + " " + borrow.LastName
-            + "  :<br/><br/><b>Title:</b> " + book.Title + "<br/><b>Author</b>: "
-            + book.Author + "<br/><b>Year:</b> " + book.Year +"<br/><br/>Do you think there was a <b>mistake</b>??<br/>"+
-            "Contact admin ifb299books@gmail.com <br/><br/>Kind regards,<br/><b>Texchange</b>.";
-
-            //Send request reply to the borrower.
-            bool sent = shared.SendEmailMessage(confirmation);
-
-            return View(getBorrowed(currentLoggedInUser));
+            return RedirectToAction("PublicProfile", "Account", new { 
+                username = owner.UserName, emailsent = "", returnedBorrower = true, bookId = book.B_ID });
         }
 
         //
@@ -502,21 +570,11 @@ namespace TextBooks.Controllers
                         bookID = x.BookId, 
                         borrower = x.RequestFrom,
                         requestID = x.Id
-                    });
-
-            if (newRequest.ToList().Count() < 1 )
-            {
-                newRequest = db.Requests.Select(
-                    x => new RequestsToBorrowView
-                    {
-                        message = "Currently, you have no requests.",
-                        sender = ""
-                    });
-            }
+                    }).ToList();
 
             request = new RequestsToBorrowView
             {
-                RequestsAll = newRequest.AsEnumerable()
+                RequestsAll = newRequest
             };
 
             return View(request);
@@ -527,78 +585,103 @@ namespace TextBooks.Controllers
         [HttpPost]
         public ActionResult RequestsToBorrow(string responce, int bookValue, string borrower, int requestID)
         {
-            Email confirmation = new Email();
-            shared = new SharedMethods();
-            AccountController account = new AccountController();
-
-            //Find requested book in the database.
-            var results = db.Books.Find(bookValue);
-
-            //Get owner information of the book from the database.
-            AspNetUser owner = db.AspNetUsers.Where(x => x.UserName == results.Owner)
-                .Select(x => x).FirstOrDefault();
-
             //Get borrower information of the book from the database.
             AspNetUser borrow = db.AspNetUsers.Where(x => x.UserName == borrower)
                 .Select(x => x).FirstOrDefault();
 
-            if (responce.Equals("Accept"))
+            if (true)
             {
-                //Assign book's borrower
-                results.BrwdBy = borrower;
-                db.SaveChanges();
 
-                //Create message body for request reply on a successful application.
-                confirmation.message = "Hello " + borrow.FirstName + " " + borrow.LastName+
-                    ",<br /><br/> You have recently sent a request to "+owner.FirstName+
-                    " "+owner.LastName+" to borrow this book:<br/><br/><b>Title</b>:"+results.Title+"<br/><b>Author</b>: "
-                    + results.Author + "<br/><b>Year:</b> " + results.Year + 
-                    "<br/><br/>Congratulations! Your request has been <b>accepted</b>"
-                    + "<br/><br/>Enjoy the book!<br/>Kind regards,<br/><b>Texchange</b>.";
-
-                //Increase number of tokens of the book's owner.
-                account.incrementTokens(owner.Id);
-
-                //Decrease number of tokens the book's borrower.
-                account.decrementTokens(borrow.Id);
-
-                if (owner.Notified >= 1)
+                if (responce.Equals("Rate"))
                 {
-                    //Decrease owner's number of notifications sent.
-                    owner.Notified -= 1;
+                    setRequestID(requestID);
+
+                    return RedirectToAction("PublicProfile", "Account", new
+                    {
+                        username = borrow.UserName,
+                        emailsent = "",
+                        returnedBorrower = true,
+                        bookID = 0
+                    });
+                }
+                else
+                {
+
+                    Email confirmation = new Email();
+                    shared = new SharedMethods();
+                    AccountController account = new AccountController();
+
+                    //Find requested book in the database.
+                    var results = db.Books.Find(bookValue);
+
+                    //Get owner information of the book from the database.
+                    AspNetUser owner = db.AspNetUsers.Where(x => x.UserName == results.Owner)
+                        .Select(x => x).FirstOrDefault();
+
+                    switch (responce)
+                    {
+                        case "Accept":
+                            //Assign book's borrower
+                            results.BrwdBy = borrower;
+                            db.SaveChanges();
+
+                            //Create message body for request reply on a successful application.
+                            confirmation.message = "Hello " + borrow.FirstName + " " + borrow.LastName +
+                                ",<br /><br/> You have recently sent a request to " + owner.FirstName +
+                                " " + owner.LastName + " to borrow this book:<br/><br/><b>Title</b>:" + results.Title + "<br/><b>Author</b>: "
+                                + results.Author + "<br/><b>Year:</b> " + results.Year +
+                                "<br/><br/>Congratulations! Your request has been <b>accepted</b>"
+                                + "<br/><br/>Enjoy the book!<br/>Kind regards,<br/><b>Texchange</b>.";
+
+                            //Increase number of tokens of the book's owner.
+                            account.incrementTokens(owner.Id);
+
+                            //Decrease number of tokens the book's borrower.
+                            account.decrementTokens(borrow.Id);
+
+                            if (owner.Notified >= 1)
+                            {
+                                //Decrease owner's number of notifications sent.
+                                owner.Notified -= 1;
+                            }
+                            break;
+                        case "Decline":
+                            //Create message body for request reply on an unsuccessful application.
+                            confirmation.message = "Hello " + borrow.FirstName + " " + borrow.LastName
+                                + ",<br /><br/> You have recently sent a request to " + owner.FirstName + " " + owner.LastName
+                                + " to borrow this book:<br/><br/><b>Title</b>:" + results.Title + "<br/><b>Author</b>: "
+                                + results.Author + "<br/><b>Year:</b> " + results.Year +
+                                "<br/><br/>We are sorry, but your request was <b>regected</b><br/><br/>Good luck!<br/>Kind regards,<br/>"
+                                + "<b>Texchange</b>.";
+                            break;
+                    }
+
+                    confirmation.fromAddress = owner.Email;
+                    confirmation.fromName = owner.FirstName;
+                    confirmation.toAddress = borrow.Email;
+                    confirmation.toName = borrow.FirstName;
+                    confirmation.subject = "Texchange: Book request confirmation";
+
+                    //Send request reply to the borrower.
+                    shared.SendEmailMessage(confirmation);
+
+                    //Find this request in the database.
+                    var requests = db.Requests.Find(requestID);
+
+                    if (requests != null)
+                    {
+                        //Remove the found request from the database.
+                        db.Requests.Remove(requests);
+                        db.SaveChanges();
+                    }
+
+                    return Redirect("../Manage/RequestsToBorrow");
                 }
             }
-            else
+            else 
             {
-                //Create message body for request reply on an unsuccessful application.
-                confirmation.message = "Hello " + borrow.FirstName + " " + borrow.LastName 
-                    + ",<br /><br/> You have recently sent a request to " + owner.FirstName +" " + owner.LastName 
-                    + " to borrow this book:<br/><br/><b>Title</b>:" + results.Title + "<br/><b>Author</b>: "
-                    + results.Author + "<br/><b>Year:</b> " + results.Year +
-                    "<br/><br/>We are sorry, but your request was <b>rejected</b><br/><br/>Good luck!<br/>Kind regards,<br/>"
-                    + "<b>Texchange</b>.";
+                return Redirect("../Manage/RequestsToBorrow");
             }
-
-            confirmation.fromAddress = owner.Email;
-            confirmation.fromName = owner.FirstName;
-            confirmation.toAddress = borrow.Email;
-            confirmation.toName = borrow.FirstName;
-            confirmation.subject = "Texchange: Book request confirmation";
-
-            //Send request reply to the borrower.
-            shared.SendEmailMessage(confirmation);
-
-            //Find this request in the database.
-            var requests = db.Requests.Find(requestID);
-            
-            if(requests != null)
-            {
-                //Remove the found request from the database.
-                db.Requests.Remove(requests);
-                db.SaveChanges();
-            }
-
-            return Redirect("../Manage/RequestsToBorrow");
         }
 
         public ActionResult Accepted(int bookValue, string borrower, int requestID)

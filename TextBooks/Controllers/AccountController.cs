@@ -127,7 +127,7 @@ namespace TextBooks.Controllers
         // GET: /Account/PublicProfile
         [HttpGet]
         [AllowAnonymous]
-        public ActionResult PublicProfile(string username, string emailsent)
+        public ActionResult PublicProfile(string username, string emailsent, bool returnedBorrower, int bookID)
         {
             // Check user is logged in. If not, send them to the Register page.
             var loggedIn = ClaimsPrincipal.Current.Identity.IsAuthenticated;
@@ -139,49 +139,71 @@ namespace TextBooks.Controllers
             // Create emtpy model
             PublicProfileViewModel result = new PublicProfileViewModel();
 
-            // Get the target user
-            result.targetUser = (from table in db.AspNetUsers
-                        where table.UserName == username
-                        select table).FirstOrDefault();
+                // Get the target user
+                result.targetUser = (from table in db.AspNetUsers
+                                     where table.UserName == username
+                                     select table).FirstOrDefault();
 
-            // Check the user was found
-            if (result.targetUser != null)
-            {
-                // List all the books owned by the target user
-                result.booksOwned = (from table in db.Books
-                              where table.Owner == username
-                              select table).ToList();
-                if (result.booksOwned.Count == 0) result.booksOwned = null;
-
-                // List all the books being borrowed by the target user
-                result.booksBorrowed = (from table in db.Books
-                                         where table.BrwdBy == username
-                                         select table).ToList();
-                if (result.booksBorrowed.Count == 0) result.booksBorrowed = null;
-
-                // If we've already tried to send a contact email, save this into 
-                // the model so the view can display an appropriate message
-                switch (emailsent)
+                if (returnedBorrower == true)
                 {
-                    case "success":
-                        result.contactEmail = new Email();
-                        result.contactEmail.success = true;
-                        break;
-                    case "error":
-                        result.contactEmail = new Email();
-                        result.contactEmail.success = false;
-                        break;
-                    case "youself":
-                        result.contactEmail = new Email();
-                        result.contactEmail.success = false;
-                        ModelState.AddModelError("", "Test Success!");
-                        break;
-                    default:
-                        break;
+                    result.returned = true;
+                    result.bookID = bookID;
                 }
-                
-                // Done
-                return View(result);
+
+                // Check the user was found
+                if (result.targetUser != null)
+                {
+                    // List all the books owned by the target user
+                    result.booksOwned = (from table in db.Books
+                                         where table.Owner == username
+                                         select table).ToList();
+                    if (result.booksOwned.Count == 0) result.booksOwned = null;
+
+                    // List all the books being borrowed by the target user
+                    result.booksBorrowed = (from table in db.Books
+                                            where table.BrwdBy == username
+                                            select table).ToList();
+                    if (result.booksBorrowed.Count == 0) result.booksBorrowed = null;
+
+                    var allComments = db.Comments.Where(x => x.Receiver.Equals(result.targetUser.UserName)).Select(x =>
+                        new Commenting { Comment = x.CommentText, Date = x.Date.ToString(), Sender = x.Sender }).ToList();
+
+                    if (allComments.Count == 0)
+                    {
+                        Commenting comments = new Commenting
+                        {
+                            Comment = "There are currently no comments....",
+                            Date = "",
+                            Sender=""
+                        };
+
+                        allComments.Add(comments);
+                    }
+
+                    result.AllComments = allComments;
+                    // If we've already tried to send a contact email, save this into 
+                    // the model so the view can display an appropriate message
+                    switch (emailsent)
+                    {
+                        case "success":
+                            result.contactEmail = new Email();
+                            result.contactEmail.success = true;
+                            break;
+                        case "error":
+                            result.contactEmail = new Email();
+                            result.contactEmail.success = false;
+                            break;
+                        case "youself":
+                            result.contactEmail = new Email();
+                            result.contactEmail.success = false;
+                            ModelState.AddModelError("", "Test Success!");
+                            break;
+                        default:
+                            break;
+                    }
+
+                    // Done
+                    return View(result);
             }
             // There should be no links to users that don't exist!
             // If for some reason there is one, error so that we fix it.
@@ -190,23 +212,38 @@ namespace TextBooks.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult PublicProfile(string userId, string thumbs, int something)
+        public ActionResult PublicProfile(string userId, string thumbs, int bookId)
         {
-            AspNetUser user = db.AspNetUsers.Find(userId);
+            bool ratedBook = false;
 
-            switch(thumbs)
+            AspNetUser user = db.AspNetUsers.Find(userId);
+            if (!User.Identity.Name.Equals(user.UserName))
             {
-                case "ThumbsUp":
-                    user.ThumbsUp += 1;
-                    break;
-                case "ThumbsDown":
-                    user.ThumbsDown += 1;
-                    break;
+                switch (thumbs)
+                {
+                    case "ThumbsUp":
+                        user.ThumbsUp += 1;
+                        break;
+                    case "ThumbsDown":
+                        user.ThumbsDown += 1;
+                        break;
+                    default:
+                        break;
+                }
+
+                ratedBook = true;
+                db.SaveChanges();
             }
 
-            db.SaveChanges();
-
-            return RedirectToAction("PublicProfile", "Account", new { username = user.UserName, emailsent = ""});
+            if (ratedBook == true)
+            {
+                return RedirectToAction("RateBorrower", "Manage", new { id = bookId, rated = ratedBook });
+            }
+            else
+            {
+                return RedirectToAction("PublicProfile", "Account", new { username = user.UserName, emailsent = "", 
+                    returnedBorrower = true, bookID = bookId });
+            }
         }
 
         //
@@ -305,7 +342,7 @@ namespace TextBooks.Controllers
                 if (email != null && email.Contains('@'))
                 {
                     string addressSuffix = email.Split('@')[1];
-                    if (!addressSuffix.Equals("connect.qut.edu.au") || email == "ifb299books@gmail.com")
+                    if (!addressSuffix.Equals("connect.qut.edu.au") && email != "ifb299books@gmail.com")
                     {
                         ModelState.AddModelError("", "Please use valid email (@connect.qut.edu.au)");
                         failed = true;
@@ -416,7 +453,7 @@ namespace TextBooks.Controllers
                 // Setup MailMessage ready for sending verification email
                 MailMessage message = new MailMessage();
                 message.To.Add(new MailAddress(email, firstName)); 
-                message.From = new MailAddress("ifb299books@gmail.com", "noreply");
+                message.From = new MailAddress("lachlan.gepp@connect.qut.edu.au", "Texchange");
                 message.Subject = "Verify Texchange Account";
                 message.Body = string.Format(body);
                 message.IsBodyHtml = true;
@@ -425,6 +462,9 @@ namespace TextBooks.Controllers
                 SmtpClient smtpClient = new SmtpClient("smtp.sendgrid.net", Convert.ToInt32(587));
                 NetworkCredential credentials = new NetworkCredential("ifb299", "IFB299Password");
                 smtpClient.Credentials = credentials;
+
+                string templatesJson = "{\"filters\": {\"templates\": {\"settings\": {\"enable\": 1, \"template_id\": \"1f7bf5b2-1ad2-4c63-b0b4-b9898905ea4d\"}}}}";
+                message.Headers.Add("X-SMTPAPI", templatesJson);
 
                 // Send the email
                 smtpClient.Send(message);
@@ -686,6 +726,21 @@ namespace TextBooks.Controllers
             return View(model);
         }
 
+        public ActionResult LeaveAComment(PublicProfileViewModel model,string fromUser, string toUsername )
+        {
+            string senderFirstName = db.AspNetUsers.Where(x => x.UserName.Equals(fromUser)).Select(x => x.FirstName).FirstOrDefault();
+            string senderLastName = db.AspNetUsers.Where(x => x.UserName.Equals(fromUser)).Select(x => x.LastName).FirstOrDefault();
+            Comment userComment = new Comment();
+            userComment.CommentText = model.comment;
+            userComment.Date = DateTime.Now;
+            userComment.Sender = senderFirstName + " "+senderLastName;
+            userComment.Receiver = toUsername;
+            db.Comments.Add(userComment);
+            db.SaveChanges();
+
+            return RedirectToAction("PublicProfile", "Account", new { username = toUsername, emailsent = "", returnedBorrower = true, bookId = 0 });
+        }
+
         //
         //GET: /Account/ViewAccounts
         public ActionResult ViewAccounts()
@@ -698,6 +753,51 @@ namespace TextBooks.Controllers
             return View(returnView);
         }
 
+        private bool Delete(string userName)
+        {
+            bool deleted = false;
+
+            var findUser = db.AspNetUsers.Where(x=>x.UserName.Equals(userName)).Select(x=>x).FirstOrDefault();
+            var findUploadedBook = db.Books.Where(x => x.Owner.Equals(userName)).Select(x => x).ToList();
+            var findBorrowedBook = db.Books.Where(x => x.BrwdBy.Equals(userName)).Select(x => x).ToList();
+
+            if (!findUser.UserName.Equals("ifb299books"))
+            {
+                if (findUploadedBook.Count == 0)
+                {
+                    if (findBorrowedBook.Count == 0)
+                    {
+                        var deleteComments = db.Comments.Where(x => x.Receiver.Equals(findUser.UserName)).Select(x=>x).ToList();
+                        foreach (var comment in deleteComments)
+                        {
+                            db.Comments.Remove(comment);
+                        }
+
+                        var deleteRequests = db.Requests.Where(x => x.UserID.Equals(findUser.UserName)).Select(x => x).ToList();
+                        foreach (var request in deleteRequests)
+                        {
+                            db.Requests.Remove(request);
+                        }
+
+                        db.AspNetUsers.Remove(findUser);
+                        db.SaveChanges();
+                        deleted = true;
+                    }
+                }
+            }
+            return deleted;
+        }
+
+        public ActionResult DeleteAccount(string userName)
+        {
+            if (Delete(userName))
+            {
+                LogOff();
+            }
+            
+            return Redirect("../Home/Index");
+        }
+
         //
         //POST: /Account/ViewAccounts
         [HttpPost]
@@ -705,17 +805,7 @@ namespace TextBooks.Controllers
         public ActionResult ViewAccounts(ViewAccounts model, string id)
         {
             var findUser = db.AspNetUsers.Find(id);
-            var findBook = db.Books.Where(x => x.Owner.Equals(findUser.UserName)).Select(x => x);
-
-            if (!findUser.UserName.Equals("ifb299books")) 
-            {
-                var deleteUser = db.AspNetUsers.Remove(findUser);
-                if (findBook != null) 
-                {
-                    var deleteBook = db.Books.RemoveRange(findBook);
-                }
-                db.SaveChanges();
-            }
+            Delete(findUser.UserName);
 
             model = new ViewAccounts
             {
@@ -882,7 +972,7 @@ namespace TextBooks.Controllers
             if (mailMessage.message == null)
             {
                 // No email content to send, don't send it empty and let the view know it wasn't sent.
-                return RedirectToAction("PublicProfile", "Account", new { username = toUsername, emailsent = "error" });
+                return RedirectToAction("PublicProfile", "Account", new { username = toUsername, emailsent = "success", returnedborrower = false, bookID = 0 });
             }
 
             // Get the currently logged in user
@@ -927,7 +1017,7 @@ namespace TextBooks.Controllers
                 bool result = shared.SendEmailMessage(mailMessage);
                 if (result)
                 {
-                    return RedirectToAction("PublicProfile", "Account", new { username = toUsername, emailsent = "success" });
+                    return RedirectToAction("PublicProfile", "Account", new { username = toUsername, emailsent = "success", returnedborrower = false, bookID = 0 });
                 }
             }
 

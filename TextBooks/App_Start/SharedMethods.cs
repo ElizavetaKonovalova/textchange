@@ -11,6 +11,8 @@ namespace TextBooks.App_Start
 {
     public class SharedMethods : Controller
     {
+        private IFB299Entities db = new IFB299Entities();
+
         // GET: SharedMethods
         public ActionResult Index()
         {
@@ -56,6 +58,19 @@ namespace TextBooks.App_Start
         public void AddErrors(string customError)
         {
             ModelState.AddModelError("", customError);
+        }
+
+        public Request SendRequest(string fromUser, string toUserID, string text, int bookID)
+        {
+            Request request = new Request();
+            request.RequestFrom = fromUser;
+            request.UserID = toUserID;
+            request.RequestText = text;
+            request.BookId = bookID;
+            db.Requests.Add(request);
+            db.SaveChanges();
+
+            return request;
         }
     }
 }

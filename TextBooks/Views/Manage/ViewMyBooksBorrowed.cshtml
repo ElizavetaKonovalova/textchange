@@ -48,7 +48,11 @@
                 @Html.DisplayFor(modelItem => item.Year)
             </td>
             <td>
-                @Html.ActionLink(item.Borrower, "../Account/PublicProfile", new { username = item.Borrower })
+                @Html.ActionLink(item.Borrower, "../Account/PublicProfile", new { username = item.Borrower,
+                                                                                  emailsent = "",
+                                                                                  returnedBorrower = false,
+                                                                                  bookId = item.B_ID
+           })
             </td>
         </tr>
     }

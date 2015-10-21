@@ -1,5 +1,5 @@
 ﻿@model TextBooks.Models.ViewMyBooks
-
+@using Microsoft.AspNet.Identity
 
 
 @{
@@ -10,7 +10,6 @@
 {
 @Html.AntiForgeryToken()
 
-<h2>Book Details</h2>
 <div class="container">
 
     @if (Model.contactEmail != null)
@@ -30,9 +29,14 @@
             </div>
         }
     }
-    <hr />
     @Html.ValidationSummary("", new { @class = "text-danger" })
+
     <div>
+        <h1 style="padding-top:10%">Book Details</h1>
+        <hr />
+    </div>
+
+    <div class="col-xs-offset-4">
     @foreach (var book in Model.BookDetails)
     {
         <dl class="dl-horizontal">
@@ -84,19 +88,33 @@
             </dt>
             <!-- This will link to the user's public profile page when done -->
             <dd>
-                @Html.ActionLink(book.Owner, "PublicProfile", "Account", new { username = book.Owner }, null)
+                @Html.ActionLink(book.Owner, "PublicProfile", "Account", new { username = book.Owner, emailsent = "", returnedBorrower = false, bookId = 0 }, null)
             </dd>
    
         </dl>
     }
         </div>
 
-    <div style="margin-left:20px;">
-        <button type="button" class="btn btn-default btn-transparent" data-toggle="modal" data-target="#myModal">
-            Borrow this book
-        </button>
+    <div style="margin-left:40%; padding-bottom:15px;">
+        @{
+            if (User.Identity.Name != Model.targetUser.UserName) { 
+                <button type="button" class="btn btn-default btn-transparent" data-toggle="modal" data-target="#myModal">
+                    Borrow this book
+                </button>
+        } else {
+                <button type="button" class="btn btn-default btn-transparent" data-toggle="modal" data-target="#myModalNoBorrow">
+                    Borrow this book
+                </button>
+            }
+        }
+
         @Html.ActionLink("Back to List", "Index", null, new { @class = "btn btn-default btn-transparent" })
     </div>
+
+    <!--Get the user's name so that it can show up the top of the modal-->
+    @{
+    string toUserFullName = Model.targetUser.FirstName + " " + Model.targetUser.LastName;
+    }
 
     <!-- Modal -->
     <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
@@ -104,10 +122,7 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                    <!--Get the user's name so that it can show up the top of the modal-->
-                    @{
-                        string toUserFullName = Model.targetUser.FirstName + " " + Model.targetUser.LastName;
-                    }
+                    
                     <h4 class="modal-title modal-text" id="myModalLabel">Send request to @toUserFullName</h4>
                 </div>
                 <div class="modal-body">
@@ -117,21 +132,43 @@
                             new
                             {
                                 @class = "form-control col-md-12",
-                                @style = "min-width: 100%",
+                                @style = "min-width: 100%; resize:none;",
                                 @placeholder = "Type your message for " + Model.targetUser.FirstName + " here.",
                                 @rows = "8"
                             })
                 </div>
                 <div class="modal-footer modal-text">
                     <!--Cancel and submit buttons. Not sure if it should be a button or just input-->
+                    <div class="col-xs-12" style="padding-top:10px;">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                        <input id="btn-submit" class="btn btn-primary" type="submit" value="Send Message" />
+                    </div>
+                        <script type="text/javascript">
+                            document.getElementById("btn-submit").onclick = function () {
+                                var form = document.getElementById("modal-form");
+                                form.submit();
+                            }
+                        </script>
+                    </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="myModalNoBorrow" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+
+                    <h4 class="modal-title modal-text" id="myModalLabel">ERROR</h4>
+                </div>
+                <div class="modal-body">
+                    <p class="modal-text">You may not borrow this book as you are the owner.</p>
+                    <!--This is where the user types in their message-->
+                </div>
+                <div class="modal-footer modal-text">
+                    <!--Cancel and submit buttons. Not sure if it should be a button or just input-->
                     <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-                    <input id="btn-submit" class="btn btn-primary" type="submit" value="Send Message" />
-                    <script type="text/javascript">
-                        document.getElementById("btn-submit").onclick = function () {
-                            var form = document.getElementById("modal-form");
-                            form.submit();
-                        }
-                    </script>
                 </div>
             </div>
         </div>

@@ -87,7 +87,7 @@
                 @{ 
                     var ownerName = TextBooks.Controllers.AccountController.GetNameForUsername(item.Owner);
                 }
-                @Html.ActionLink(ownerName, "PublicProfile", "Account", new { username = item.Owner }, null)
+                @Html.ActionLink(ownerName, "PublicProfile", "Account", new { username = item.Owner, emailsent = "", returnedBorrower=false, bookId = 0 }, null)
 
             </td>
             @*<td>

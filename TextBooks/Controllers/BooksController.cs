@@ -4,10 +4,8 @@ using System.Data;
 using System.Data.Entity;
 using System.Linq;
 using System.Net;
-using System.Web;
 using System.Web.Mvc;
 using TextBooks.App_Start;
-using TextBooks;
 using TextBooks.Models;
 using System.Security.Claims;
 
@@ -21,15 +19,18 @@ namespace TextBooks.Controllers
 
         public ActionResult Index()
         {
-            return View(db.Books.OrderBy(x=>x.Title).ToList());
+            List<Book> result = (from table in db.Books
+                                 select table).OrderBy(x => x.Title).ToList();
+            return View(result);
         }
 
         [HttpPost]
         public ActionResult Index(string searchQuery)
         {
+            var result = new List<Book>();
             if (searchQuery != "" && searchQuery != null)
             {
-                List<Book> result = (from table in db.Books
+                result = (from table in db.Books
                                      where ((
                                      table.ISBN.Contains(searchQuery) ||
                                      table.Title.Contains(searchQuery) ||
@@ -44,7 +45,9 @@ namespace TextBooks.Controllers
                     return View(result);
                 }
             }
-            return View(db.Books.Where(x=>x.BrwdBy.Equals(null)).OrderBy(x => x.Title).ToList());
+            result = (from table in db.Books
+                      select table).OrderBy(x => x.Title).ToList();
+            return View(result);
         }
 
         //Code that checks the validity of various fields relating to book adding/editing.
@@ -98,56 +101,100 @@ namespace TextBooks.Controllers
             return View();
         }
 
-        // Query the GoogleBooksAPI for 
-        public ActionResult GoogleBooksQuery(string term)
+        // ActionResult GetAutocompleteList(string term)
+        // This method gets the list of books for Autocomplete of the
+        // "Create Books" form. It includes lists of titles, authors, ISBNs,
+        // and Years of books. This data is attained by querying the Google
+        // Books API with the private GoogleBooksQuery() method.
+        public ActionResult GetAutocompleteList(string term)
         {
+            // Check search term exists
             if (term == "" || term == " ") return null;
+            // Query the Google Books API for possible matches
+            var queryResult = GoogleBooksQuery(term);
+            // Get relevant data from query result
+            var dataLists = ExtractBookData(queryResult);
+            // Format data as Json object and return
+            return Json(dataLists, JsonRequestBehavior.AllowGet);
+        }
 
-            var booksService = new Google.Apis.Books.v1.BooksService();
-            
-            var query = booksService.Volumes.List(term);
-            query.LangRestrict = "en";
-            query.MaxResults = 10;
-            var results = query.Execute();
+        // List<string>[] ExtraBookData(Volumes volumes)
+        // This method extracts the required data from Google Books API Volumes
+        // data structure, for use in the Create view. In the case that this method
+        // fails, it will return a list array of empty lists.
+        List<string>[] ExtractBookData(Google.Apis.Books.v1.Data.Volumes volumes)
+        {
+            // Check volumes object is valid
+            if (volumes == null || volumes.Items.Count == 0) return null;
 
-            // TODO Check for errors (here?)
-            // if results == null or results.Items == null
-
-            // Get required details
+            // Setup lists (we're going to package data into a Json object)
             var titlesList = new List<string>();
             var authorsList = new List<string>();
             var isbnList = new List<string>();
             var yearList = new List<string>();
 
+            // For each book in the query result, add details to the data lists
             int i = 0;
-            while(i < results.Items.Count && titlesList.Count < 5)
+            while (i < volumes.Items.Count && titlesList.Count < 5)
             {
-                if ((results.Items[i].VolumeInfo.Title != null)
-                    && (results.Items[i].VolumeInfo.Authors != null)
-                    && (results.Items[i].VolumeInfo.IndustryIdentifiers != null)
-                    && (results.Items[i].VolumeInfo.PublishedDate != null))
+                // Check required fields are included in record
+                if ((volumes.Items[i].VolumeInfo.Title != null)
+                    && (volumes.Items[i].VolumeInfo.Authors != null)
+                    && (volumes.Items[i].VolumeInfo.IndustryIdentifiers != null)
+                    && (volumes.Items[i].VolumeInfo.PublishedDate != null)
+                    // and that we this isn't a duplicate record
+                    && (!titlesList.Contains(volumes.Items[i].VolumeInfo.Title)))
                 {
-                    if (!titlesList.Contains(results.Items[i].VolumeInfo.Title))
+                    // Add the data to the prepared lists
+                    titlesList.Add(volumes.Items[i].VolumeInfo.Title);
+                    isbnList.Add(volumes.Items[i].VolumeInfo.IndustryIdentifiers.FirstOrDefault().Identifier);
+                    yearList.Add(volumes.Items[i].VolumeInfo.PublishedDate.Substring(0, 4));
+                    authorsList.Add(volumes.Items[i].VolumeInfo.Authors[0]);
+                    
+                    // Handle 2 or 3 authors
+                    if (volumes.Items[i].VolumeInfo.Authors.Count > 1)
                     {
-                        titlesList.Add(results.Items[i].VolumeInfo.Title);
-                        authorsList.Add(results.Items[i].VolumeInfo.Authors[0]);
-                        if (results.Items[i].VolumeInfo.Authors.Count > 1)
-                        {
-                            authorsList[authorsList.Count-1] += (", " + (results.Items[i].VolumeInfo.Authors[1]));
-                        }
-                        if (results.Items[i].VolumeInfo.Authors.Count > 2)
-                        {
-                            authorsList[authorsList.Count - 1] += (", " + (results.Items[i].VolumeInfo.Authors[2]));
-                        }
-                        isbnList.Add(results.Items[i].VolumeInfo.IndustryIdentifiers.FirstOrDefault().Identifier);
-                        yearList.Add(results.Items[i].VolumeInfo.PublishedDate.Substring(0, 4));
+                        authorsList[authorsList.Count - 1] += (", " + (volumes.Items[i].VolumeInfo.Authors[1]));
+                    }
+                    if (volumes.Items[i].VolumeInfo.Authors.Count > 2)
+                    {
+                        authorsList[authorsList.Count - 1] += (", " + (volumes.Items[i].VolumeInfo.Authors[2]));
                     }
                 }
                 i++;
             }
 
+            // Group the lists into another list for Json encoding
             List<string>[] resultsObj = { titlesList, authorsList, isbnList, yearList };
-            return Json(resultsObj, JsonRequestBehavior.AllowGet);
+            return resultsObj;
+        }
+
+        // Volumes GoogleBooksQuery(string searchTerm)
+        // This method queries the GoogleBooksAPI for volumes relating to searchTerm,
+        // and returns the resulting Volumes object. In the case that the query fails,
+        // this method will return null.
+        Google.Apis.Books.v1.Data.Volumes GoogleBooksQuery(string searchTerm)
+        {
+            // Create a service object for the Google Books API
+            var booksService = new Google.Apis.Books.v1.BooksService();
+
+            // Create a query object (API auth has been provided from the Google apps side. 
+            // Server set up for 2000 queries per day. If we want to exceed that, we need to
+            // implement OAuth2.0 here.)
+            var query = booksService.Volumes.List(searchTerm);
+
+            // Restric to books in English
+            query.LangRestrict = "en";
+
+            // We don't need more than 10 results per query, this speeds up response time.
+            query.MaxResults = 10;
+
+            // Execute the query and record the results for user later. Also check for failure.
+            var results = query.Execute();
+            if (results == null || results.Items == null) return null;
+
+            // Return results
+            return results;
         }
 
 
@@ -295,9 +342,9 @@ namespace TextBooks.Controllers
         public ActionResult Details(ViewMyBooks model, string toUsername, int bookID)
         {
             bool failed = false;
-            var request = new Request();
-
             var bookDetails = db.Books.Find(bookID);
+
+
 
             // Check that the model has been passed in with a valid mail message
             Email mailMessage = model.contactEmail;
@@ -310,7 +357,8 @@ namespace TextBooks.Controllers
             if (mailMessage.message == null)
             {
                 // No email content to send, don't send it empty and let the view know it wasn't sent.
-                return RedirectToAction("PublicProfile", "Account", new { username = toUsername, emailsent = "error" });
+                return RedirectToAction("PublicProfile", "Account", new { username = toUsername, emailsent = "error", 
+                    returnedBorrower = false, bookId = 0 });
             }
 
             // Get the currently logged in user
@@ -332,59 +380,70 @@ namespace TextBooks.Controllers
                         return View("Error");
                     }
 
-                    // Setup the Email with all the required info
-                    mailMessage.fromName = fromUser.FirstName + " " + fromUser.LastName;
-                    mailMessage.fromAddress = fromUser.Email;
-                    mailMessage.toName = toUser.FirstName + " " + toUser.LastName;
-                    mailMessage.toAddress = toUser.Email;
-                    mailMessage.subject = "Contact from Texchange";
-
-                    // Swap out our new lines chars for html line breaks in order to preserve formatting.
-                    mailMessage.message = mailMessage.message.Replace(System.Environment.NewLine, "<br />");
-
-                    // Wrap the message in a default template
-                    mailMessage.message = "Hi " + toUser.FirstName + ",<br /><br />You've received a request from "
-                        + fromUser.FirstName + " " + fromUser.LastName + " to borrow your book: <br/><br/> <strong>Title:</strong> "
-                        + bookDetails.Title + "<br/> <strong>Year:</strong> " + bookDetails.Year
-                        + "<br/><strong> Author: </strong>" + bookDetails.Author + "<br/><br/> on Texchange:<br /><br /><em>"
-                        + "Hi " + toUser.FirstName + ",<br/>" + mailMessage.message
-                        + "</em><br /><br />" + "You may Accept or Decline the request <a href =\"" + Url.Action("Accepted", "Manage",
-                        new { bookValue = bookDetails.B_ID, borrower = fromUsername, requestID = request.Id }, protocol: Request.Url.Scheme)
-                        + "\">here</a>.<br/><b>You can reply to this email to contact "
-                        + fromUser.FirstName + ".</b><br /><br />" + "Kind Regards,<br />The Texchange Team";
-
-                    // Send the email
-                    bool result = shared.SendEmailMessage(mailMessage);
-                    if (result)
+                    if (db.Requests.Where(x => x.RequestFrom.Equals(fromUser.UserName) && x.BookId == bookDetails.B_ID).Count() == 0)
                     {
-                        toUser.Notified += 1;
-                        
-                        request.RequestFrom = fromUser.UserName;
-                        request.UserID = toUser.Id;
-                        request.RequestText = "Request to borrow " + bookDetails.Title + ", " + bookDetails.Author + ", " + bookDetails.Year + ".";
-                        request.BookId = bookDetails.B_ID;
-                        db.Requests.Add(request);
-                        db.SaveChanges();
-                        return RedirectToAction("PublicProfile", "Account", new { username = toUsername, emailsent = "success" });
+                        var request = shared.SendRequest(fromUser.UserName, toUser.Id, "Request to borrow "
+                                + bookDetails.Title + ", " + bookDetails.Author + ", " + bookDetails.Year + ".", bookDetails.B_ID);
+
+                        // Setup the Email with all the required info
+                        mailMessage.fromName = fromUser.FirstName + " " + fromUser.LastName;
+                        mailMessage.fromAddress = fromUser.Email;
+                        mailMessage.toName = toUser.FirstName + " " + toUser.LastName;
+                        mailMessage.toAddress = toUser.Email;
+                        mailMessage.subject = "Contact from Texchange";
+
+                        // Swap out our new lines chars for html line breaks in order to preserve formatting.
+                        mailMessage.message = mailMessage.message.Replace(System.Environment.NewLine, "<br />");
+
+                        // Wrap the message in a default template
+                        mailMessage.message = "Hi " + toUser.FirstName + ",<br /><br />You've received a request from "
+                            + fromUser.FirstName + " " + fromUser.LastName + " to borrow your book: <br/><br/> <strong>Title:</strong> "
+                            + bookDetails.Title + "<br/> <strong>Year:</strong> " + bookDetails.Year
+                            + "<br/><strong> Author: </strong>" + bookDetails.Author + "<br/><br/> on Texchange:<br /><br /><em>"
+                            + "Hi " + toUser.FirstName + ",<br/>" + mailMessage.message
+                            + "</em><br /><br />" + "You may Accept or Decline the request <a href =\"" + Url.Action("RequestsToBorrow", "Manage", null, "http")
+                            + "\">here</a>.<br/><b>You can reply to this email to contact "
+                            + fromUser.FirstName + ".</b><br /><br />" + "Kind Regards,<br />The Texchange Team";
+
+                        // Send the email
+                        bool result = shared.SendEmailMessage(mailMessage);
+                        if (result)
+                        {
+                            toUser.Notified += 1;
+                            return RedirectToAction("PublicProfile", "Account", new
+                            {
+                                username = toUsername,
+                                emailsent = "success",
+                                returnedBorrower = false,
+                                bookId = 0
+                            });
+                        }
                     }
-                }
-                else
-                {
-                    ModelState.AddModelError("", "Test Success!");
-                    return RedirectToAction("Details", "Books", new { id = bookDetails.B_ID, username = toUser.UserName });
                 }
             }
             // One of the user accounts wasn't able to be received, or something else went wrong
             // Perhaps a user account was deleted while an message was being written?
             // Let's go to the home page and start again.
-            return RedirectToAction("PublicProfile", "Account", new { username = toUsername, emailsent = "yourself" });
+            return RedirectToAction("PublicProfile", "Account", new
+            {
+                username = toUsername,
+                emailsent = "",
+                returnedBorrower = false,
+                bookId = 0
+            });
         }
 
+        // Action result to list all the book titles currently in the database
         public ActionResult ListAllBookTitles(int quantity)
         {
+            // Query the database for a list of book titles
             List<string> titles = (from table in db.Books
                                    select table.Title).ToList();
+
+            // Only send back the requested number of books
             if (quantity != 0) titles.RemoveRange(quantity, titles.Count - quantity);
+
+            // Return the list of titles as a JSON object
             return Json(titles.ToArray());
         }
 
