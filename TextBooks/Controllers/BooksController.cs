@@ -403,7 +403,7 @@ namespace TextBooks.Controllers
                             + bookDetails.Title + "<br/> <strong>Year:</strong> " + bookDetails.Year
                             + "<br/><strong> Author: </strong>" + bookDetails.Author + "<br/><br/> on Texchange:<br /><br /><em>"
                             + "Hi " + toUser.FirstName + ",<br/>" + mailMessage.message
-                            + "</em><br /><br />" + "You may Accept or Decline the request <a href =\"" + Url.Action("RequestsToBorrow", "Manage", null, "http")
+                            + "</em><br /><br />" + "You may Accept or Decline the request <a href =\"" + "http://texchange.xyz/Manage/RequestsToBorrow"
                             + "\">here</a>.<br/><b>You can reply to this email to contact "
                             + fromUser.FirstName + ".</b><br /><br />" + "Kind Regards,<br />The Texchange Team";
 

@@ -7,7 +7,7 @@
     ViewBag.Title = "Details";
 }
 
-@using (Html.BeginForm("Details", "Books", new { toUsername = Model.targetUser.UserName, bookID = Model.B_ID }, FormMethod.Post, new { id = "modal-form" }))
+@using (Html.BeginForm("Details", "Books", new { toUsername = Model.targetUser.UserName, bookID = Model.B_ID }, FormMethod.Post, new { id = "modal-form-request" }))
 {
 @Html.AntiForgeryToken()
 
@@ -100,7 +100,7 @@
         @{
     if ((User.Identity.Name != Model.targetUser.UserName) && (Int32.Parse(@AccountController.getTokens(User.Identity.GetUserId())) > 0))
     { 
-                <button type="button" class="btn btn-default btn-transparent" data-toggle="modal" data-target="#myModal">
+                <button type="button" class="btn btn-default btn-transparent" data-toggle="modal" data-target="#myRequestModal">
                     Borrow this book
                 </button>
         } else {
@@ -119,13 +119,13 @@
     }
 
     <!-- Modal -->
-    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal fade" id="myRequestModal" tabindex="-1" role="dialog" aria-labelledby="myRequestModalLabel">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                     
-                    <h4 class="modal-title modal-text" id="myModalLabel">Send request to @toUserFullName</h4>
+                    <h4 class="modal-title modal-text" id="myRequestModalLabel">Send request to @toUserFullName</h4>
                 </div>
                 <div class="modal-body">
                         <p class="modal-text">Hi @Model.targetUser.FirstName,</p>
@@ -143,11 +143,11 @@
                     <!--Cancel and submit buttons. Not sure if it should be a button or just input-->
                     <div class="col-xs-12" style="padding-top:10px;">
                         <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-                        <input id="btn-submit" class="btn btn-primary" type="submit" value="Send Message" />
+                        <input id="btn-submit-request" class="btn btn-primary" type="submit" value="Send Message" />
                     </div>
                         <script type="text/javascript">
-                            document.getElementById("btn-submit").onclick = function () {
-                                var form = document.getElementById("modal-form");
+                            document.getElementById("btn-submit-request").onclick = function () {
+                                var form = document.getElementById("modal-form-request");
                                 form.submit();
                             }
                         </script>
