@@ -453,7 +453,7 @@ namespace TextBooks.Controllers
                 // Setup MailMessage ready for sending verification email
                 MailMessage message = new MailMessage();
                 message.To.Add(new MailAddress(email, firstName)); 
-                message.From = new MailAddress("ifb299books@gmail.com", "noreply");
+                message.From = new MailAddress("lachlan.gepp@connect.qut.edu.au", "Texchange");
                 message.Subject = "Verify Texchange Account";
                 message.Body = string.Format(body);
                 message.IsBodyHtml = true;

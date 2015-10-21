@@ -25,21 +25,21 @@
         }
     }
 
-@using (Html.BeginForm("PublicProfile", "Account", new { userId = Model.targetUser.Id, something = 0, bookId = Model.bookID }, FormMethod.Post))
+    @using (Html.BeginForm("PublicProfile", "Account", new { userId = Model.targetUser.Id, something = 0, bookId = Model.bookID }, FormMethod.Post))
     {
-    @Html.AntiForgeryToken()
+        @Html.AntiForgeryToken()
         <div class="form-group">
-            <div class="panel panel-transparent col-xs-4" style="height:400px;">
-                <div class="panel-body" style="color:black;">
+            <div class="col-xs-4" style="height:400px;">
+                <div class="" style="">
                     @foreach (var comment in Model.AllComments)
                     {
-                        <div class="jumbotron" style="background-color:#55b259;">
+                        <div class="jumbotron" style="background-color:rgba(100,100,100,0.5);">
 
-                            <div style="font:bold 14px arial;">
+                            <div style="font:bold 14px arial; opacity:1;">
                                 @Html.DisplayFor(model => comment.Comment)
                             </div>
                             <hr/>
-                            <div style="font:bold 12px arial;">
+                            <div style="font: 12px arial; opacity:1;">
                                 Date: @Html.DisplayFor(model => comment.Date)
                                 <br/>
                                 From: @Html.DisplayFor(model => comment.Sender)
@@ -198,13 +198,13 @@
                         <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
                         <input id="btn-submit-user" class="btn btn-primary" type="submit" value="Send Message" />
                     </div>
-                    <script type="text/javascript">
-                        document.getElementById("btn-submit-user").onclick = function () {
-                            var formUser = document.getElementById("modal-form");
-                            formUser.submit();
-                        }
-                    </script>
-                </div>
+                        <script type="text/javascript">
+                            document.getElementById("btn-submit-user").onclick = function () {
+                                var form = document.getElementById("modal-form");
+                                form.submit();
+                            }
+                        </script>
+                    </div>
             </div>
         </div>
     </div>
