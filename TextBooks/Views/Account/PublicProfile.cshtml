@@ -29,19 +29,19 @@
     {
         @Html.AntiForgeryToken()
         <div class="form-group">
-            <div class="col-xs-4" style="height:400px;">
-                <div class="" style="">
+            <div class="panel panel-transparent col-xs-4" style="height:400px;">
+                <div class="panel-body" style="color:black;">
                     @foreach (var comment in Model.AllComments)
                     {
-                        <div class="jumbotron" style="background-color:rgba(100,100,100,0.5);">
+                        <div class="jumbotron" style="background-color:#55b259;">
 
-                            <div style="font:bold 14px arial; opacity:1;">
+                            <div style="font:bold 14px arial;">
                                 @Html.DisplayFor(model => comment.Comment)
                             </div>
-                            <hr/>
-                            <div style="font: 12px arial; opacity:1;">
+                            <hr />
+                            <div style="font:bold 12px arial;">
                                 Date: @Html.DisplayFor(model => comment.Date)
-                                <br/>
+                                <br />
                                 From: @Html.DisplayFor(model => comment.Sender)
                             </div>
                         </div>
