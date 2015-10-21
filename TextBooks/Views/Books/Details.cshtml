@@ -1,5 +1,6 @@
 ﻿@model TextBooks.Models.ViewMyBooks
 @using Microsoft.AspNet.Identity
+@using TextBooks.Controllers
 
 
 @{
@@ -97,7 +98,8 @@
 
     <div style="margin-left:40%; padding-bottom:15px;">
         @{
-            if (User.Identity.Name != Model.targetUser.UserName) { 
+    if ((User.Identity.Name != Model.targetUser.UserName) && (Int32.Parse(@AccountController.getTokens(User.Identity.GetUserId())) > 0))
+    { 
                 <button type="button" class="btn btn-default btn-transparent" data-toggle="modal" data-target="#myModal">
                     Borrow this book
                 </button>
@@ -163,7 +165,8 @@
                     <h4 class="modal-title modal-text" id="myModalLabel">ERROR</h4>
                 </div>
                 <div class="modal-body">
-                    <p class="modal-text">You may not borrow this book as you are the owner.</p>
+                    <p class="modal-text">You may not borrow this book.</p>
+                    <p class="modal-text">This could be because you do not have sufficient tokens or because you are the owner.</p>
                     <!--This is where the user types in their message-->
                 </div>
                 <div class="modal-footer modal-text">
