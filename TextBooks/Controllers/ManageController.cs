@@ -575,7 +575,7 @@ namespace TextBooks.Controllers
                     + ",<br /><br/> You have recently sent a request to " + owner.FirstName +" " + owner.LastName 
                     + " to borrow this book:<br/><br/><b>Title</b>:" + results.Title + "<br/><b>Author</b>: "
                     + results.Author + "<br/><b>Year:</b> " + results.Year +
-                    "<br/><br/>We are sorry, but your request was <b>regected</b><br/><br/>Good luck!<br/>Kind regards,<br/>"
+                    "<br/><br/>We are sorry, but your request was <b>rejected</b><br/><br/>Good luck!<br/>Kind regards,<br/>"
                     + "<b>Texchange</b>.";
             }
 
